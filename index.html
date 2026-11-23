@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yasmine Boucharib — Portfolio</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- EXTRA: quote + scroll-animaties -->
+  <style>
+    /* dun wit balkje bovenaan dat meeloopt met scrollen */
+    .scroll-bar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: 2px;
+      background: #fff;
+      transform-origin: left;
+      transform: scaleX(0);
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    /* quote */
+    .quote {
+      min-height: 100vh;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 6rem clamp(1.25rem, 6vw, 6rem);
+      text-align: center;
+    }
+    .quote blockquote { max-width: 1100px; margin: 0; }
+    .quote__text {
+      font-size: clamp(2rem, 5.4vw, 5rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    .quote__text .w { display: inline-block; white-space: pre; }
+    .quote__by {
+      display: inline-block;
+      margin-top: 2.2rem;
+      font-style: normal;
+      font-size: 0.85rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.6;
+    }
+    .quote__by::before {
+      content: "";
+      display: inline-block;
+      width: 40px;
+      height: 1px;
+      background: currentColor;
+      vertical-align: middle;
+      margin-right: 0.8rem;
+    }
+    /* projecten: geen foto's, wel uitleg bij hover */
+    .preview, .project__thumb { display: none !important; }
+    .projects__list .project { flex-wrap: wrap; }
+    .project__desc {
+      display: block;
+      grid-column: 1 / -1;
+      flex-basis: 100%;
+      max-width: 44rem;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      transition: max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s, margin 0.4s;
+    }
+    .project:hover .project__desc,
+    .project:focus-visible .project__desc { max-height: 8em; opacity: 0.8; margin-top: 0.6rem; }
+    @media (hover: none) { .project__desc { max-height: none; opacity: 0.8; margin-top: 0.5rem; } }
+    /* taal: Engels standaard, Nederlands als de site op NL staat */
+    .project__desc .d-nl { display: none; }
+    html[lang^="nl"] .project__desc .d-nl { display: inline; }
+    html[lang^="nl"] .project__desc .d-en { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="nav" id="nav">
+    <a href="#home" class="nav__name">Yasmine Boucharib</a>
+    <div class="nav__right">
+      <ul class="nav__links" id="navLinks">
+        <li><a href="#about" data-i18n="nav.about">About</a></li>
+        <li><a href="#skills" data-i18n="nav.skills">Skills</a></li>
+        <li><a href="#projects" data-i18n="nav.projects">Projects</a></li>
+        <li><a href="#contact" class="nav__cta" data-i18n="nav.contact">Contact</a></li>
+      </ul>
+      <div data-lang-switcher></div>
+      <button class="nav__toggle" id="navToggle" aria-expanded="false" data-i18n="nav.menu">Menu</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero" id="home">
+    <video class="hero__video" autoplay muted loop playsinline>
+      <source src="bg_loop_clean.mp4" type="video/mp4" />
+    </video>
+    <div class="hero__fade"></div>
+
+    <div class="hero__content">
+      <p class="hero__kicker" data-i18n="hero.kicker">Portfolio</p>
+      <h1 class="hero__title">
+        <span class="line"><span>Yasmine</span></span>
+        <span class="line"><span>Boucharib</span></span>
+      </h1>
+      <a href="#about" class="hero__arrow" aria-label="Scroll">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M12 6v12M6.5 12.5 12 18l5.5-5.5" />
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ABOUT -->
+    <section class="about" id="about">
+      <figure class="about__photo">
+        <!-- PLACEHOLDER: vervang door je eigen foto (bijv. assets/yasmine.jpg) -->
+        <img src="https://picsum.photos/seed/yasmine-portrait/700/900" alt="Yasmine Boucharib" />
+      </figure>
+
+      <div class="about__text">
+        <h2 class="heading"><span class="mask"><span class="mask__in" data-i18n="about.heading">About me</span></span></h2>
+        <p class="about__intro" data-i18n="about.intro">Hi, I'm Yasmine! I'm a Communication &amp; Multimedia Design student with a background in software development.</p>
+        <p data-i18n="about.p1">I originally started in tech, but along the way I discovered that I'm more interested in the creative and strategic side of things. I enjoy understanding people, exploring ideas and figuring out how to turn research into meaningful designs.</p>
+        <p data-i18n="about.p2">My main interests are branding, strategy and research, but I also have experience in UI/UX design and a growing interest in AI.</p>
+        <p data-i18n="about.p3">I'm naturally curious, always looking to learn something new and open to exploring different creative directions.</p>
+      </div>
+
+      <figure class="about__photo about__photo--small">
+        <!-- PLACEHOLDER: tweede foto -->
+        <img src="https://picsum.photos/seed/yasmine-detail/500/500" alt="" />
+      </figure>
+    </section>
+
+    <!-- SKILLS -->
+    <section class="skills" id="skills">
+      <h2 class="heading"><span class="mask"><span class="mask__in" data-i18n="skills.heading">Skills</span></span></h2>
+      <div class="skills__cols">
+        <div class="skills__group">
+          <h3 data-i18n="skills.focus">Focus</h3>
+          <ul>
+            <li data-i18n="skills.branding">Branding</li>
+            <li data-i18n="skills.strategy">Strategy</li>
+            <li data-i18n="skills.research">Research</li>
+            <li data-i18n="skills.uiux">UI/UX design</li>
+          </ul>
+        </div>
+        <div class="skills__group">
+          <h3 data-i18n="skills.tools">Tools</h3>
+          <ul>
+            <li>Figma</li>
+            <li>Photoshop</li>
+            <li>Illustrator</li>
+            <li>InDesign</li>
+          </ul>
+        </div>
+        <div class="skills__group">
+          <h3 data-i18n="skills.also">Also</h3>
+          <ul>
+            <li data-i18n="skills.ai">AI in design</li>
+            <li data-i18n="skills.dev">Software development</li>
+            <li data-i18n="skills.interaction">Interaction design</li>
+            <li data-i18n="skills.prototyping">Prototyping</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUOTE -->
+    <section class="quote" id="quote">
+      <blockquote>
+        <p class="quote__text" id="quoteText">Design creates culture. Culture shapes values. Values determine the future.</p>
+        <cite class="quote__by">Robert L. Peters, graphic designer</cite>
+      </blockquote>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="projects" id="projects">
+      <h2 class="heading"><span class="mask"><span class="mask__in" data-i18n="projects.heading">Projects</span></span></h2>
+
+      <ul class="projects__list">
+        <li>
+          <a href="projects/sensai.html" class="project">
+            <span class="project__name">Sensai Technologies</span>
+            <span class="project__type" data-i18n="type.brandingweb">Branding &amp; web</span>
+            <span class="project__desc"><span class="d-nl" lang="nl">Documentatie, research, design en front-end programmeren.</span><span class="d-en" lang="en">Documentation, research, design and front-end development.</span></span>
+          </a>
+        </li>
+        <li>
+          <a href="projects/chill-in.html" class="project">
+            <span class="project__name">Chill-in</span>
+            <span class="project__type" data-i18n="type.app">App design</span>
+            <span class="project__desc"><span class="d-nl" lang="nl">Een project van Paul Zautsen. Ik vernieuwde de stijl en maakte een UI/UX-ontwerp van hoe de app eruit kan zien.</span><span class="d-en" lang="en">A project by Paul Zautsen. I restyled the app and designed the UI/UX of how it could look.</span></span>
+          </a>
+        </li>
+        <li>
+          <a href="projects/yamelo.html" class="project">
+            <span class="project__name">Yamelo</span>
+            <span class="project__type" data-i18n="type.identity">Visual identity</span>
+            <span class="project__desc"><span class="d-nl" lang="nl">Mijn eigen app, gemaakt binnen mijn opleiding. UX en software met hulp van AI, hulp bij de stijl van Muhammad Wasim.</span><span class="d-en" lang="en">My own app, made during my studies. UX and software with help from AI, style help from Muhammad Wasim.</span></span>
+          </a>
+        </li>
+        <li>
+          <a href="projects/tdp-artikel.html" class="project">
+            <span class="project__name">TDP</span>
+            <span class="project__type" data-i18n="type.ai">AI design</span>
+            <span class="project__desc"><span class="d-nl" lang="nl">Opdracht binnen Multimedia Design: een artikel-website ontwerpen.</span><span class="d-en" lang="en">Multimedia Design assignment: designing an article website.</span></span>
+          </a>
+        </li>
+        <li>
+          <a href="projects/unseen.html" class="project">
+            <span class="project__name">Unseen</span>
+            <span class="project__type" data-i18n="type.interaction">Interaction design</span>
+            <span class="project__desc"><span class="d-nl" lang="nl">Als team helemaal zelf gemaakt: van research tot design, en de filmpjes.</span><span class="d-en" lang="en">Made as a team from start to finish: from research to design, and the videos.</span></span>
+          </a>
+        </li>
+        <li>
+          <a href="projects/crossover.html" class="project">
+            <span class="project__name">Crossover</span>
+            <span class="project__type" data-i18n="type.event">Event concept</span>
+            <span class="project__desc"><span class="d-nl" lang="nl">Eigen project met Maryam Laasiri, een international business student. Nog bezig.</span><span class="d-en" lang="en">Own project with Maryam Laasiri, an international business student. Ongoing.</span></span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="preview" id="preview" aria-hidden="true">
+        <img id="previewImg" src="" alt="" />
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="contact" id="contact">
+      <h2 class="contact__title"><span class="mask"><span class="mask__in" data-i18n="contact.title">Let's work together!</span></span></h2>
+      <p class="contact__sub" data-i18n="contact.sub">Internship, collaboration or just want to chat? Send me an email.</p>
+      <a href="mailto:jasmine3461@hotmail.com" class="contact__mail">jasmine3461@hotmail.com</a>
+      <ul class="contact__socials">
+        <li><a href="https://www.linkedin.com/in/yasmine-boucharib-72169b391/" target="_blank" rel="noopener">LinkedIn</a></li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span>© 2026 Yasmine Boucharib</span>
+    <a href="#home" data-i18n="footer.top">Back to top</a>
+  </footer>
+
+  <!-- GSAP = animatie-library (werkt als een After Effects tijdlijn) -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="lang.js"></script>
+  <script src="script.js"></script>
+
+  <!-- EXTRA: scroll-animaties (los van script.js) -->
+  <div class="scroll-bar" id="scrollBar" aria-hidden="true"></div>
+  <script>
+    (() => {
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!window.gsap || !window.ScrollTrigger || reduce) return;
+      gsap.registerPlugin(ScrollTrigger);
+
+      // balkje bovenaan
+      gsap.to("#scrollBar", {
+        scaleX: 1, ease: "none",
+        scrollTrigger: { trigger: document.body, start: "top top", end: "bottom bottom", scrub: 0.3 },
+      });
+
+      // hero: naam zakt weg en vervaagt bij wegscrollen
+      gsap.to(".hero__content", {
+        y: 120, opacity: 0, ease: "none",
+        scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
+      });
+      gsap.to(".hero__video", {
+        scale: 1.15, ease: "none",
+        scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
+      });
+
+      // about: foto's openen als een gordijn en bewegen mee (parallax)
+      gsap.utils.toArray(".about__photo").forEach((fig, i) => {
+        gsap.fromTo(fig, { clipPath: "inset(100% 0 0 0)" }, {
+          clipPath: "inset(0% 0 0 0)", duration: 1.4, ease: "expo.out",
+          scrollTrigger: { trigger: fig, start: "top 85%" },
+        });
+        const img = fig.querySelector("img");
+        if (img) {
+          gsap.fromTo(img, { yPercent: -8, scale: 1.15 }, {
+            yPercent: 8, ease: "none",
+            scrollTrigger: { trigger: fig, start: "top bottom", end: "bottom top", scrub: true },
+          });
+        }
+        gsap.to(fig, {
+          y: i ? -80 : -30, ease: "none",
+          scrollTrigger: { trigger: ".about", start: "top bottom", end: "bottom top", scrub: true },
+        });
+      });
+      gsap.from(".about__text p", {
+        y: 40, opacity: 0, duration: 1, stagger: 0.12, ease: "expo.out",
+        scrollTrigger: { trigger: ".about__text", start: "top 75%" },
+      });
+
+      // skills: kolommen en items komen één voor één binnen
+      gsap.utils.toArray(".skills__group").forEach((g, i) => {
+        gsap.from(g.querySelector("h3"), {
+          y: 30, opacity: 0, duration: 0.9, delay: i * 0.12, ease: "expo.out",
+          scrollTrigger: { trigger: ".skills__cols", start: "top 80%" },
+        });
+        gsap.from(g.querySelectorAll("li"), {
+          x: -30, opacity: 0, duration: 0.8, stagger: 0.07, delay: 0.2 + i * 0.12, ease: "power3.out",
+          scrollTrigger: { trigger: ".skills__cols", start: "top 80%" },
+        });
+      });
+
+      // quote: woorden lichten één voor één op terwijl je scrollt
+      const q = document.getElementById("quoteText");
+      if (q) {
+        q.innerHTML = q.textContent.split(" ").map((w) => `<span class="w">${w} </span>`).join("");
+        gsap.fromTo(q.querySelectorAll(".w"), { opacity: 0.12, y: 20 }, {
+          opacity: 1, y: 0, stagger: 0.3, ease: "none",
+          scrollTrigger: { trigger: ".quote", start: "top 70%", end: "center 45%", scrub: 0.6 },
+        });
+        gsap.from(".quote__by", {
+          opacity: 0, y: 20, duration: 1, ease: "expo.out",
+          scrollTrigger: { trigger: ".quote__by", start: "top 90%" },
+        });
+      }
+
+      // projecten: lijst schuift omhoog, rij voor rij
+      gsap.from(".projects__list > li", {
+        y: 60, opacity: 0, duration: 1, stagger: 0.09, ease: "expo.out",
+        scrollTrigger: { trigger: ".projects__list", start: "top 85%" },
+      });
+
+      // contact
+      gsap.from(".contact__sub, .contact__mail, .contact__socials", {
+        y: 40, opacity: 0, duration: 1, stagger: 0.12, ease: "expo.out",
+        scrollTrigger: { trigger: ".contact", start: "top 75%" },
+      });
+    })();
+  </script>
+</body>
+</html>

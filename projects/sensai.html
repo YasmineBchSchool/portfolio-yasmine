@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="nl" data-i18n-fixed>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sensai Technologies — branding &amp; app</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================
+       TOKENS — Sensai: roze, zand, leisteen
+       ========================================= */
+    :root {
+      --rose: #b06f65;
+      --clay: #b48870;
+      --sand: #cdb199;
+      --slate: #4e5d78;
+      --stone: #696a65;
+      --night: #1d1c1f;
+      --white: #fbf8f4;
+      --muted: rgba(251, 248, 244, 0.72);
+      --line: rgba(251, 248, 244, 0.22);
+      --glass: rgba(251, 248, 244, 0.12);
+
+      --display: "Marcellus", Georgia, serif;
+      --body: "Inter", "Helvetica Neue", Arial, sans-serif;
+      --pad-x: clamp(1.25rem, 5vw, 5rem);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; overflow-x: clip; }
+    body {
+      background: var(--night);
+      color: var(--white);
+      font-family: var(--body);
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    :focus-visible { outline: 1px solid var(--white); outline-offset: 4px; }
+    .wrap { max-width: 1200px; margin: 0 auto; }
+
+    h1, h2, h3 { font-family: var(--display); font-weight: 400; letter-spacing: 0.04em; line-height: 1.1; }
+    .kicker { font-size: 0.75rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.2rem; }
+    .h2 { font-size: clamp(2.2rem, 4.6vw, 4rem); text-transform: uppercase; }
+    .lead { color: var(--muted); font-size: 1.05rem; max-width: 36rem; }
+
+    /* glazen kaartjes, zoals in de app */
+    .glass {
+      background: var(--glass);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    /* =========================================
+       ACHTERGROND — zachte, bewegende gradient
+       ========================================= */
+    .sky {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(160deg, var(--rose), var(--clay) 45%, var(--sand) 70%, var(--slate));
+      background-size: 200% 200%;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    .sky::after { /* wordt donkerder naar beneden, zoals het coach-scherm */
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(transparent 0%, rgba(29, 28, 31, 0.15) 40%, rgba(29, 28, 31, 0.85) 100%);
+      opacity: var(--dark, 0);
+      transition: opacity 0.2s linear;
+    }
+    @keyframes drift { to { background-position: 100% 100%; } }
+
+    /* =========================================
+       TERUG-KNOP
+       ========================================= */
+    .float { position: fixed; left: 1rem; bottom: 1rem; z-index: 100; }
+    .float a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.1rem;
+      background: rgba(29, 28, 31, 0.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 0.78rem;
+      transition: background 0.3s;
+    }
+    .float a:hover { background: rgba(29, 28, 31, 0.9); }
+    .float svg { width: 15px; height: 15px; }
+
+    /* =========================================
+       NAV
+       ========================================= */
+    .nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 90;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem var(--pad-x);
+      transition: background 0.4s, backdrop-filter 0.4s;
+    }
+    .nav.is-scrolled { background: rgba(29, 28, 31, 0.35); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    .nav__logo { font-family: var(--display); font-size: 1.25rem; letter-spacing: 0.12em; }
+    .nav__links { display: flex; gap: clamp(1rem, 3vw, 2.4rem); font-size: 0.8rem; letter-spacing: 0.16em; text-transform: uppercase; }
+    .nav__links a { opacity: 0.75; transition: opacity 0.2s; }
+    .nav__links a:hover { opacity: 1; }
+
+    /* =========================================
+       HERO — zoals het splash screen
+       ========================================= */
+    .hero {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 7rem var(--pad-x) 4rem;
+      position: relative;
+    }
+    .hero__mark { width: clamp(70px, 9vw, 110px); margin: 0 auto 1.6rem; }
+    .hero__mark path { fill: none; stroke: var(--white); stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw 2.2s var(--ease) 0.2s forwards; }
+    .hero__mark .fill { fill: var(--white); stroke: none; opacity: 0; animation: fade 1s ease 1.6s forwards; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    @keyframes fade { to { opacity: 1; } }
+    .hero h1 { font-size: clamp(3.4rem, 11vw, 9.5rem); letter-spacing: 0.08em; line-height: 0.95; }
+    .hero__sub { margin-top: 0.8rem; font-size: clamp(0.8rem, 1.4vw, 1rem); letter-spacing: 0.5em; text-transform: uppercase; color: var(--muted); }
+    .hero__intro { margin: 2.2rem auto 0; max-width: 32rem; color: var(--white); font-size: 1.05rem; }
+    .hero__scroll {
+      position: absolute;
+      left: 50%;
+      bottom: 2rem;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .hero__scroll::after { content: ""; display: block; width: 1px; height: 40px; margin: 0.6rem auto 0; background: var(--white); transform-origin: top; animation: line 2s ease-in-out infinite; }
+    @keyframes line { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+    .hero > div > * { opacity: 0; transform: translateY(20px); animation: up 1.2s var(--ease) forwards; }
+    .hero > div > *:nth-child(2) { animation-delay: 0.5s; }
+    .hero > div > *:nth-child(3) { animation-delay: 0.7s; }
+    .hero > div > *:nth-child(4) { animation-delay: 0.9s; }
+    .hero > div > .hero__mark { opacity: 1; transform: none; animation: none; }
+    @keyframes up { to { opacity: 1; transform: none; } }
+
+    /* =========================================
+       SECTIES
+       ========================================= */
+    .section { padding: clamp(5rem, 11vw, 9rem) var(--pad-x) 0; }
+
+    /* ---------- over het project ---------- */
+    .about { display: grid; grid-template-columns: 1.3fr 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+    .about .lead { margin-top: 1.6rem; }
+    .facts { padding: 0.4rem 1.6rem; }
+    .facts li { padding: 1rem 0; border-bottom: 1px solid var(--line); }
+    .facts li:last-child { border-bottom: 0; }
+    .facts b { display: block; font-weight: 400; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.15rem; }
+
+    /* ---------- merk ---------- */
+    .brand { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1rem; margin-top: 3rem; }
+    .brand__logo { overflow: hidden; border-radius: 22px; }
+    .brand__logo img { width: 100%; height: 100%; object-fit: cover; }
+    .brand__side { display: grid; gap: 1rem; }
+    .swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; padding: 1.2rem; }
+    .swatch { aspect-ratio: 3 / 4; border-radius: 14px; border: 1px solid var(--line); display: flex; align-items: flex-end; padding: 0.5rem; font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; transition: transform 0.4s var(--ease); }
+    .swatch:hover { transform: translateY(-6px); }
+    .type { padding: 1.4rem 1.6rem; display: grid; grid-template-columns: auto 1fr; gap: 1.4rem; align-items: center; }
+    .type__aa { font-family: var(--display); font-size: clamp(3.4rem, 6vw, 5rem); line-height: 1; }
+    .type p { color: var(--muted); font-size: 0.92rem; }
+    .type strong { display: block; color: var(--white); font-weight: 400; font-size: 1rem; }
+
+    /* ---------- de app ---------- */
+    .mock { margin-top: 3rem; border-radius: 28px; overflow: hidden; box-shadow: 0 40px 80px rgba(29, 28, 31, 0.35); }
+    .mock img { width: 100%; transition: transform 1.4s var(--ease); }
+    .mock:hover img { transform: scale(1.02); }
+
+    .sides { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+    .side { padding: clamp(1.6rem, 3vw, 2.4rem); }
+    .side--dark { background: rgba(29, 28, 31, 0.6); }
+    .side h3 { font-size: clamp(1.6rem, 2.6vw, 2.2rem); text-transform: uppercase; }
+    .side .lead { margin-top: 0.6rem; font-size: 0.98rem; }
+    .side ul { margin-top: 1.4rem; display: grid; gap: 0.55rem; }
+    .side li { display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 1rem; border-radius: 14px; background: var(--glass); border: 1px solid var(--line); font-size: 0.92rem; transition: transform 0.35s var(--ease), background 0.35s; }
+    .side li:hover { transform: translateX(6px); background: rgba(251, 248, 244, 0.2); }
+    .side li svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* ---------- credits ---------- */
+    .credits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; padding-top: 2rem; border-top: 1px solid var(--line); }
+    .credits h3 { font-family: var(--body); font-weight: 400; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+    .footer { padding: clamp(5rem, 10vw, 8rem) var(--pad-x) 6rem; text-align: center; }
+    .footer p { margin-top: 1rem; font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }
+    .footer .footer__name { margin-top: 0; font-family: var(--display); font-size: clamp(2.6rem, 9vw, 8rem); letter-spacing: 0.1em; text-transform: none; line-height: 1; color: var(--white); opacity: 0.9; }
+    .footer .btn {
+      display: inline-flex;
+      margin-top: 2.4rem;
+      padding: 0.8rem 1.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--white);
+      font-size: 0.8rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      transition: background 0.3s, color 0.3s;
+    }
+    .footer .btn:hover { background: var(--white); color: var(--night); }
+
+    /* =========================================
+       ANIMATIES
+       ========================================= */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 1.1s var(--ease), transform 1.1s var(--ease); }
+    .reveal.is-in { opacity: 1; transform: none; }
+    .stagger > * { opacity: 0; transform: translateY(20px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+    .stagger.is-in > * { opacity: 1; transform: none; }
+    .stagger.is-in > *:nth-child(2) { transition-delay: 0.08s; }
+    .stagger.is-in > *:nth-child(3) { transition-delay: 0.16s; }
+    .stagger.is-in > *:nth-child(4) { transition-delay: 0.24s; }
+    .stagger.is-in > *:nth-child(5) { transition-delay: 0.32s; }
+
+    /* =========================================
+       RESPONSIVE
+       ========================================= */
+    @media (max-width: 900px) {
+      .about, .brand, .sides, .credits { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .nav__links { display: none; }
+      .swatches { grid-template-columns: repeat(5, 1fr); gap: 0.35rem; padding: 0.8rem; }
+      .swatch { font-size: 0; }
+      .float a span { display: none; }
+      .float a { padding: 0.6rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
+      .hero > div > *, .reveal, .stagger > * { opacity: 1; transform: none; }
+      .hero__mark path { stroke-dashoffset: 0; }
+      .hero__mark .fill { opacity: 1; }
+    }
+    /* =========================================
+       MIJN ROL / MY ROLE — NL + EN
+       ========================================= */
+    .myrole { position: relative; z-index: 2; padding: clamp(4rem, 9vw, 7rem) var(--pad-x, 5vw) 0; }
+    .myrole__in { max-width: 1100px; margin: 0 auto; padding-top: 2rem; border-top: 1px solid var(--role-line, currentColor); }
+    .myrole__kick { font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; margin-bottom: 0.8rem; }
+    .myrole__title { font-family: var(--role-head, inherit); font-weight: var(--role-weight, 400); font-size: clamp(1.8rem, 3.6vw, 3rem); line-height: 1.1; margin-bottom: 2rem; }
+    .myrole__cols { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 4vw, 3.5rem); }
+    .myrole__lang { display: inline-block; margin-bottom: 0.8rem; padding: 0.15rem 0.5rem; border: 1px solid currentColor; border-radius: var(--role-r, 999px); font-size: 0.7rem; letter-spacing: 0.14em; opacity: 0.75; }
+    .myrole__cols p + p { margin-top: 0.8rem; }
+    .myrole__list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1.1rem; list-style: none; padding: 0; }
+    .myrole__list li { padding: 0.3rem 0.75rem; border: 1px solid var(--role-line, currentColor); border-radius: var(--role-r, 999px); font-size: 0.82rem; }
+    .myrole__note { margin-top: 1.1rem; font-size: 0.88rem; font-style: italic; opacity: 0.75; }
+    @media (max-width: 760px) { .myrole__cols { grid-template-columns: 1fr; } }
+    .myrole { --role-line: var(--line); --role-head: var(--display); }
+    .myrole__title { text-transform: uppercase; letter-spacing: 0.04em; }
+    /* taalknop NL / EN */
+    .pl-switch { --pl-bg: rgba(29, 28, 31, 0.55); --pl-on: #1d1c1f; }
+  </style>
+</head>
+<body>
+  <div class="sky" id="sky" aria-hidden="true"></div>
+
+  <div class="float">
+    <a href="../index.html#projects" aria-label="Terug naar portfolio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      <span data-i18n="float.back">Terug naar portfolio</span>
+    </a>
+  </div>
+
+  <nav class="nav" id="nav">
+    <a href="#top" class="nav__logo">SENSAI</a>
+    <ul class="nav__links">
+      <li><a href="#project">Project</a></li>
+      <li><a href="#merk">Merk</a></li>
+      <li><a href="#app">App</a></li>
+    </ul>
+  </nav>
+
+  <!-- =========================================
+       HERO
+       ========================================= -->
+  <header class="hero" id="top">
+    <div>
+      <!-- S-teken, getekend met een lijn -->
+      <svg class="hero__mark" viewBox="0 0 60 100" aria-hidden="true">
+        <path d="M46 10C30 6 10 12 12 26c2 12 26 16 30 30 4 16-14 30-34 34"/>
+        <path class="fill" d="M46 10C30 6 10 12 12 26c2 12 26 16 30 30 4 16-14 30-34 34 18-8 26-18 22-30-4-12-28-18-30-32C8 14 28 6 46 10z"/>
+      </svg>
+      <h1>SENSAI</h1>
+      <p class="hero__sub">Technologies</p>
+      <p class="hero__intro">Een rustige, premium uitstraling voor een app die sporters en coaches samenbrengt.</p>
+    </div>
+    <span class="hero__scroll">Scroll</span>
+  </header>
+
+  <main>
+
+    <!-- =========================================
+         PROJECT
+         ========================================= -->
+    <section class="section" id="project">
+      <div class="wrap about">
+        <div class="reveal">
+          <p class="kicker">Het project</p>
+          <h2 class="h2">Branding &amp; app</h2>
+          <!-- PAS AAN: vertel hier in je eigen woorden wat Sensai is en wat de opdracht was -->
+          <p class="lead">Sensai Technologies is een app waarin sporters hun lessen, voortgang en profiel beheren, en waarin coaches hun lessen plannen en feedback krijgen. Voor Sensai deed ik de documentatie, het research, het design en het front-end programmeren.</p>
+          <p class="lead" style="margin-top:1rem">Het doel: een merk dat rust en focus uitstraalt. Zachte kleuren die in elkaar overlopen, een elegante letter en glazen vlakken die licht en modern voelen.</p>
+        </div>
+        <ul class="facts glass reveal">
+          <li><b>Type</b>Branding &amp; app design</li>
+          <li><b>Mijn rol</b>Documentatie, research, design &amp; front-end</li>
+          <li><b>Voor wie</b>Sporters en coaches</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- =========================================
+         MERK
+         ========================================= -->
+    <section class="section" id="merk">
+      <div class="wrap">
+        <div class="reveal">
+          <p class="kicker">Het merk</p>
+          <h2 class="h2">Rust in beweging</h2>
+          <p class="lead" style="margin-top:1.2rem">Het logo is één vloeiende S, als een beweging in één lijn. De kleuren lopen van warm roze en zand naar koel leisteen, net als de overgang van inspanning naar rust.</p>
+        </div>
+
+        <div class="brand">
+          <div class="brand__logo reveal"><img src="../assets/images/sensai/logo.png" alt="Logo van Sensai Technologies" loading="lazy" /></div>
+          <div class="brand__side">
+            <div class="swatches glass stagger" id="swatches">
+              <div class="swatch" style="background:#b06f65">Rose</div>
+              <div class="swatch" style="background:#b48870">Clay</div>
+              <div class="swatch" style="background:#cdb199;color:#1d1c1f">Sand</div>
+              <div class="swatch" style="background:#4e5d78">Slate</div>
+              <div class="swatch" style="background:#1d1c1f">Night</div>
+            </div>
+            <div class="type glass reveal">
+              <span class="type__aa">Aa</span>
+              <p><strong>Elegante, open letter</strong>Een smalle, rustige letter voor het logo en de koppen. Daarnaast een simpele sans-serif voor alles wat je in de app leest.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================
+         DE APP
+         ========================================= -->
+    <section class="section" id="app">
+      <div class="wrap">
+        <div class="reveal">
+          <p class="kicker">De app</p>
+          <h2 class="h2">Twee kanten, één app</h2>
+          <p class="lead" style="margin-top:1.2rem">Van het splash screen naar het profiel van een sporter en het dashboard van een coach. Licht en glazig voor sporters, donker en overzichtelijk voor coaches.</p>
+        </div>
+
+        <div class="mock reveal"><img src="../assets/images/sensai/mockups.png" alt="Drie schermen van de Sensai app: splash screen, profiel en coach dashboard" loading="lazy" /></div>
+
+        <div class="sides">
+          <div class="side glass reveal">
+            <p class="kicker">Voor sporters</p>
+            <h3>Profiel</h3>
+            <p class="lead">Alles over jezelf op één plek, met je gegevens, je abonnement en je lessen.</p>
+            <ul class="stagger">
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg>Update details</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 10h16"/></svg>Manage premium</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9h14l-3-3M20 15H6l3 3"/></svg>Quick transfer</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20h4"/></svg>Notifications</li>
+            </ul>
+          </div>
+          <div class="side side--dark glass reveal">
+            <p class="kicker">Voor coaches</p>
+            <h3>Dashboard</h3>
+            <p class="lead">Een overzicht van je rating, snelle acties en je komende lessen.</p>
+            <ul class="stagger">
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.6 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>Rating &amp; reviews</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Create class</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 17l5-5 4 4 7-8"/></svg>Add progress</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5h14v10H9l-4 4z"/></svg>Feedback</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================
+         MIJN ROL / MY ROLE (NL + EN)
+         ========================================= -->
+    <section class="myrole wrap" id="mijn-rol">
+      <div class="myrole__in">
+        <p class="myrole__kick" data-en="My role">Mijn rol</p>
+        <h2 class="myrole__title" data-en="What I did">Wat ik deed</h2>
+        <div class="myrole__cols">
+          <div lang="nl">
+            <span class="myrole__lang">NL</span>
+            <p>Voor Sensai Technologies werkte ik aan het hele traject: ik deed de documentatie en het research, maakte het design en programmeerde de front-end.</p>
+            <ul class="myrole__list"><li>Documentatie</li><li>Research</li><li>Design</li><li>Front-end</li></ul>
+            <p class="myrole__note">Deze pagina is gemaakt in de stijl van het design van het project.</p>
+          </div>
+          <div lang="en">
+            <span class="myrole__lang">EN</span>
+            <p>For Sensai Technologies I worked on the whole process: I did the documentation and research, created the design and built the front-end.</p>
+            <ul class="myrole__list"><li>Documentation</li><li>Research</li><li>Design</li><li>Front-end</li></ul>
+            <p class="myrole__note">This page is built in the style of the project's own design.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================
+         CREDITS
+         ========================================= -->
+    <section class="section">
+      <div class="wrap">
+        <p class="kicker">Credits</p>
+        <!-- PAS AAN: klopt dit? -->
+        <div class="credits">
+          <div><h3>Documentatie, research, design &amp; front-end</h3><p>Yasmine Boucharib</p></div>
+          <div><h3>Project</h3><p>Sensai Technologies</p></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p class="footer__name reveal">SENSAI</p>
+    <p>Technologies</p>
+    <a href="../index.html#projects" class="btn">← Terug naar portfolio</a>
+  </footer>
+
+  <script>
+    /* Engelse teksten voor de taalknop (Nederlands → Engels) */
+    window.PL_EN = {
+  "Terug naar portfolio": "Back to portfolio",
+  "Project": "Project",
+  "Merk": "Brand",
+  "Een rustige, premium uitstraling voor een app die sporters en coaches samenbrengt.": "A calm, premium look for an app that brings athletes and coaches together.",
+  "Het project": "The project",
+  "Branding & app": "Branding &amp; app",
+  "Sensai Technologies is een app waarin sporters hun lessen, voortgang en profiel beheren, en waarin coaches hun lessen plannen en feedback krijgen. Voor Sensai deed ik de documentatie, het research, het design en het front-end programmeren.": "Sensai Technologies is an app where athletes manage their classes, progress and profile, and where coaches plan their classes and receive feedback. For Sensai I handled the documentation, research, design and front-end development.",
+  "Het doel: een merk dat rust en focus uitstraalt. Zachte kleuren die in elkaar overlopen, een elegante letter en glazen vlakken die licht en modern voelen.": "The goal: a brand that feels calm and focused. Soft colours that blend into each other, an elegant typeface and glassy surfaces that feel light and modern.",
+  "TypeBranding & app design": "<b>Type<\/b>Branding &amp; app design",
+  "Mijn rolDocumentatie, research, design & front-end": "<b>My role<\/b>Documentation, research, design &amp; front-end",
+  "Voor wieSporters en coaches": "<b>For<\/b>Athletes and coaches",
+  "Het merk": "The brand",
+  "Rust in beweging": "Calm in motion",
+  "Het logo is één vloeiende S, als een beweging in één lijn. De kleuren lopen van warm roze en zand naar koel leisteen, net als de overgang van inspanning naar rust.": "The logo is one flowing S, like a movement drawn in a single line. The colours go from warm pink and sand to cool slate, like the shift from effort to rest.",
+  "Elegante, open letterEen smalle, rustige letter voor het logo en de koppen. Daarnaast een simpele sans-serif voor alles wat je in de app leest.": "<strong>Elegant, open typeface<\/strong>A narrow, calm typeface for the logo and headings. Next to it, a simple sans-serif for everything you read in the app.",
+  "De app": "The app",
+  "Twee kanten, één app": "Two sides, one app",
+  "Van het splash screen naar het profiel van een sporter en het dashboard van een coach. Licht en glazig voor sporters, donker en overzichtelijk voor coaches.": "From the splash screen to an athlete's profile and a coach's dashboard. Light and glassy for athletes, dark and clear for coaches.",
+  "Voor sporters": "For athletes",
+  "Profiel": "Profile",
+  "Alles over jezelf op één plek, met je gegevens, je abonnement en je lessen.": "Everything about you in one place: your details, your subscription and your classes.",
+  "Voor coaches": "For coaches",
+  "Een overzicht van je rating, snelle acties en je komende lessen.": "An overview of your rating, quick actions and your upcoming classes.",
+  "Documentatie, research, design & front-end": "Documentation, research, design &amp; front-end",
+  "← Terug naar portfolio": "← Back to portfolio"
+};
+  </script>
+  <script src="page-lang.js"></script>
+  <script src="../lang.js"></script>
+  <script>
+    /* ---------- nav ---------- */
+    const nav = document.getElementById("nav");
+    const sky = document.getElementById("sky");
+    const onScroll = () => {
+      nav.classList.toggle("is-scrolled", scrollY > 40);
+      // achtergrond wordt langzaam donkerder als je naar beneden scrollt
+      const max = document.documentElement.scrollHeight - innerHeight;
+      sky.style.setProperty("--dark", Math.min(1, scrollY / Math.max(1, max) * 1.4).toFixed(3));
+    };
+    addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    /* ---------- blokken komen zacht binnen ---------- */
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add("is-in");
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll(".reveal, .stagger").forEach((el) => io.observe(el));
+  </script>
+</body>
+</html>

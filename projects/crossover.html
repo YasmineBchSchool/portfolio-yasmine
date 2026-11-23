@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="nl" data-i18n-fixed>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CROSSOVER — find your match</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================
+       TOKENS
+       ========================================= */
+    :root {
+      --black: #0d0d11;
+      --black-2: #16161c;
+      --blue: #2230ff;
+      --cream: #f3efe6;
+      --orange: #ff5a36;
+      --grey: #a3a3ad;
+      --line: rgba(243, 239, 230, 0.16);
+
+      --font: "Archivo", "Helvetica Neue", Arial, sans-serif;
+      --mono: "Space Mono", "Courier New", monospace;
+      --pad-x: clamp(1.25rem, 5vw, 5rem);
+      --max: 1200px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0; }
+    html { scroll-behavior: smooth; overflow-x: clip; }
+    body {
+      background: var(--black);
+      color: var(--cream);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    :focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+    .wrap { max-width: var(--max); margin: 0 auto; }
+
+    /* brede, zware koppen */
+    .wide {
+      font-weight: 900;
+      font-stretch: 125%;
+      font-variation-settings: "wdth" 125;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      line-height: 0.95;
+    }
+    .label {
+      font-size: 0.9rem;
+      color: var(--orange);
+      font-weight: 900;
+      font-stretch: 125%;
+      font-variation-settings: "wdth" 125;
+      text-transform: uppercase;
+    }
+
+    /* tekstballon: vierkant met een puntje (maar twee op de pagina) */
+    .bubble {
+      position: absolute;
+      padding: 0.8rem 1rem 1.5rem;
+      background: var(--orange);
+      color: var(--black);
+      font-weight: 900;
+      font-style: italic;
+      font-size: clamp(0.85rem, 1.2vw, 1rem);
+      line-height: 1.1;
+      text-transform: uppercase;
+      white-space: nowrap;
+      clip-path: polygon(0 0, 100% 0, 100% 78%, 34% 78%, 18% 100%, 20% 78%, 0 78%);
+      z-index: 3;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.25rem 0.55rem;
+      background: var(--orange);
+      color: var(--black);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+    }
+    .tag--blue { background: var(--blue); color: var(--cream); }
+
+    .link-arrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 800;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      border-bottom: 2px solid currentColor;
+      padding-bottom: 2px;
+      transition: gap 0.3s var(--ease);
+    }
+    .link-arrow:hover { gap: 0.9rem; }
+
+    /* =========================================
+       ZWEVENDE KNOP
+       ========================================= */
+    .float { position: fixed; left: 1rem; bottom: 1rem; z-index: 100; }
+    .float a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 0.9rem;
+      background: var(--black);
+      border: 1px solid var(--line);
+      font-size: 0.75rem;
+      transition: background 0.25s, color 0.25s;
+    }
+    .float a:hover { background: var(--cream); color: var(--black); }
+    .float svg { width: 15px; height: 15px; }
+
+    /* =========================================
+       NAV
+       ========================================= */
+    .nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      padding: 0 var(--pad-x);
+      background: var(--black);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav__logo { font-size: 1.05rem; }
+    .nav__logo span { color: var(--orange); }
+    .nav__links { display: flex; gap: clamp(1rem, 3vw, 2.4rem); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+    .nav__links a { opacity: 0.75; transition: opacity 0.2s, color 0.2s; }
+    .nav__links a:hover { opacity: 1; color: var(--orange); }
+
+    /* =========================================
+       HERO — Design en Business komen samen
+       ========================================= */
+    .hero {
+      position: relative;
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      padding: 7rem var(--pad-x) 4rem;
+      overflow: hidden;
+    }
+    .rows {
+      position: absolute;
+      inset: -15% -25%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.08em;
+      transform: rotate(-10deg);
+      font-size: clamp(3.4rem, 9vw, 8.5rem);
+      color: var(--blue);
+      pointer-events: none;
+      user-select: none;
+    }
+    .rows span { display: block; white-space: nowrap; }
+    .rows span:nth-child(even) { color: transparent; -webkit-text-stroke: 2px var(--blue); }
+    /* links blijft het rustig, zodat je de tekst goed leest */
+    .hero .rows {
+      -webkit-mask-image: linear-gradient(100deg, transparent 58%, #000 88%);
+      mask-image: linear-gradient(100deg, transparent 58%, #000 88%);
+    }
+
+    .hero__in { position: relative; z-index: 2; width: 100%; max-width: var(--max); margin: 0 auto; }
+    .hero__title { position: relative; font-size: clamp(3.6rem, 12vw, 11.5rem); line-height: 0.86; margin-top: 1.4rem; }
+    .hero__title .ln { display: block; white-space: nowrap; }
+    .hw { display: inline-block; }
+    .hw--x { color: var(--orange); margin-right: 0.12em; }
+    .hero .bubble { left: 62%; top: -0.4rem; }
+
+    .hero__bottom {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr;
+      gap: clamp(1.5rem, 4vw, 3.5rem);
+      margin-top: clamp(2.5rem, 6vw, 4rem);
+      padding-top: 1.4rem;
+      border-top: 1px solid var(--line);
+      max-width: 980px;
+    }
+    .hero__bottom p { color: #d6d3cb; font-size: 0.98rem; }
+    .hero__bottom .intro { font-size: 1.1rem; color: var(--cream); }
+    .hero__bottom .label { margin-bottom: 0.3rem; }
+
+    /* =========================================
+       HOE WERKT HET — horizontaal scrollen
+       ========================================= */
+    .how { position: relative; overflow: hidden; }
+    .how__pin { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding: 6rem 0 4rem; }
+    .how__head { padding: 0 var(--pad-x); display: flex; justify-content: space-between; align-items: end; gap: 2rem; flex-wrap: wrap; }
+    .how__head h2 { font-size: clamp(2.4rem, 5.4vw, 4.8rem); }
+    .how__head p { color: var(--grey); max-width: 22rem; font-family: var(--mono); font-size: 0.8rem; }
+    .track { display: flex; gap: clamp(2rem, 5vw, 5rem); padding: clamp(2.5rem, 6vw, 4rem) var(--pad-x) 0; width: max-content; }
+    .slide { width: min(78vw, 760px); display: grid; grid-template-columns: auto 1fr; gap: 0 clamp(1.2rem, 3vw, 2.4rem); align-items: start; }
+    .slide__num {
+      grid-row: span 3;
+      font-size: clamp(6rem, 15vw, 13rem);
+      line-height: 0.8;
+      color: transparent;
+      -webkit-text-stroke: 2px var(--cream);
+    }
+    .slide:nth-child(2) .slide__num { -webkit-text-stroke-color: var(--orange); }
+    .slide:nth-child(3) .slide__num { -webkit-text-stroke-color: var(--blue); }
+    .slide h3 { font-size: clamp(1.8rem, 3.6vw, 3rem); padding-top: 0.4rem; }
+    .slide p { margin-top: 0.8rem; color: #d6d3cb; max-width: 26rem; }
+    .slide .bar { display: block; height: 2px; background: var(--line); margin-top: 1.4rem; position: relative; overflow: hidden; }
+    .slide .bar i { position: absolute; inset: 0; background: var(--orange); transform-origin: left; transform: scaleX(0); }
+    .slide .photo { grid-column: 2; margin-top: 1.4rem; aspect-ratio: 16 / 9; }
+
+    /* =========================================
+       FOTO'S — zwart-wit, met een blauwe wipe
+       ========================================= */
+    .photo { position: relative; overflow: hidden; background: var(--black-2); }
+    .photo img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.1); transition: filter 0.6s, transform 1.2s var(--ease); }
+    .photo:hover img { filter: grayscale(0.2); transform: scale(1.04); }
+    .photo .wipe { position: absolute; inset: 0; background: var(--blue); transform-origin: right; z-index: 2; pointer-events: none; }
+    .photo__fallback {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: end start;
+      padding: 1rem;
+      background: var(--black-2);
+      border: 1px solid var(--line);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--grey);
+    }
+
+    /* =========================================
+       BLAUW VLAK — gescheurde randen
+       ========================================= */
+    .blue {
+      position: relative;
+      background: var(--blue);
+      padding: clamp(6rem, 12vw, 9rem) var(--pad-x);
+      clip-path: polygon(0 3%, 6% 1.5%, 14% 3.5%, 22% 1%, 31% 2.8%, 40% 0.5%, 49% 2.4%, 58% 0.8%, 66% 3%, 75% 1.2%, 84% 3.2%, 92% 1%, 100% 2.6%, 100% 97%, 93% 99%, 85% 96.8%, 76% 99.2%, 67% 97.2%, 58% 99.5%, 49% 97.4%, 40% 99.2%, 31% 96.9%, 22% 99%, 13% 97%, 6% 99.3%, 0 97.5%);
+    }
+    .blue__title { position: relative; font-size: clamp(2.6rem, 6.6vw, 6.2rem); color: var(--cream); text-shadow: 5px 5px 0 var(--black); max-width: 14ch; }
+    .blue__title .w { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 0.04em 0.08em 0; margin-right: 0.2em; }
+    .blue__title .w > span { display: inline-block; }
+    .blue .bubble { left: 58%; top: -3.6rem; background: var(--black); color: var(--cream); }
+    .blue__cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(2rem, 5vw, 4rem);
+      margin-top: clamp(3rem, 6vw, 4.5rem);
+      padding-top: 1.6rem;
+      border-top: 2px solid var(--black);
+      max-width: 900px;
+    }
+    .blue__cols .label { color: var(--black); font-size: 1.05rem; margin-bottom: 0.5rem; }
+    .blue__cols p { color: var(--cream); }
+
+    /* =========================================
+       GEEN BEURS — tekst + twee foto's
+       ========================================= */
+    .story { padding: clamp(5rem, 10vw, 8rem) var(--pad-x); }
+    .story__title { font-size: clamp(1.8rem, 3.8vw, 3.2rem); max-width: 20ch; }
+    .story__sub { margin-top: 0.6rem; font-style: italic; font-weight: 600; color: var(--grey); }
+    .story__in { display: grid; grid-template-columns: 0.9fr 1.6fr; gap: clamp(2rem, 5vw, 4rem); margin-top: 3rem; align-items: start; }
+    .story__text { font-size: 0.98rem; color: #d6d3cb; padding-left: 1.2rem; border-left: 2px solid var(--orange); }
+    .story__text p + p { margin-top: 1rem; }
+    .story__text .label { margin-top: 1.6rem; }
+    .story__photos { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 2.5vw, 2rem); }
+    .story__photos .photo { aspect-ratio: 3 / 4; }
+    .story__photos .photo:nth-child(2) { margin-top: clamp(2rem, 8vw, 6rem); }
+
+    /* =========================================
+       TEAM
+       ========================================= */
+    .team { position: relative; padding: clamp(5rem, 10vw, 8rem) var(--pad-x); overflow: hidden; border-top: 1px solid var(--line); }
+    .team .rows { inset: auto -25%; top: 2rem; transform: rotate(-4deg); font-size: clamp(3rem, 8vw, 7rem); justify-content: flex-start; }
+    .team__in { position: relative; z-index: 2; }
+    .team__head { display: flex; justify-content: space-between; align-items: end; gap: 2rem; flex-wrap: wrap; margin-bottom: 3rem; padding-top: clamp(8rem, 16vw, 13rem); }
+    .team__head h2 { font-size: clamp(2.4rem, 5vw, 4.2rem); }
+    .team__head p { color: var(--grey); max-width: 24rem; }
+    .people { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); max-width: 900px; }
+    .person .photo { aspect-ratio: 4 / 5; box-shadow: 10px 10px 0 var(--orange); transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease); }
+    .person:nth-child(2) .photo { box-shadow: 10px 10px 0 var(--blue); }
+    .person:hover .photo { transform: translate(-4px, -4px); box-shadow: 14px 14px 0 var(--orange); }
+    .person:nth-child(2):hover .photo { box-shadow: 14px 14px 0 var(--blue); }
+    .person h3 { margin-top: 1.6rem; font-size: clamp(1.3rem, 2.2vw, 1.7rem); }
+    .person .tag { margin-top: 0.5rem; }
+    .person p { margin-top: 0.8rem; color: var(--grey); font-size: 0.92rem; }
+
+    /* =========================================
+       FOOTER
+       ========================================= */
+    .footer { padding: clamp(4rem, 8vw, 6rem) var(--pad-x) 5.5rem; border-top: 1px solid var(--line); overflow: hidden; }
+    .footer__logo { font-size: clamp(3rem, 12vw, 11rem); line-height: 0.85; white-space: nowrap; }
+    .footer__logo .ch { display: inline-block; }
+    .footer__logo .o { color: var(--blue); }
+    .footer__row { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 2rem; font-family: var(--mono); font-size: 0.75rem; color: var(--grey); }
+
+    /* =========================================
+       RESPONSIVE
+       ========================================= */
+    @media (max-width: 900px) {
+      .hero__bottom { grid-template-columns: 1fr; }
+      .hero .rows { display: none; }
+      .desk { display: none; }
+      /* geen horizontaal scrollen op tablet/mobiel: stappen onder elkaar */
+      .track { flex-direction: column; width: auto; }
+      .slide { width: 100%; }
+      .blue__cols, .story__in { grid-template-columns: 1fr; }
+      .bubble, .hero .bubble, .blue .bubble { position: static; display: inline-block; margin-bottom: 1.2rem; }
+    }
+    @media (max-width: 640px) {
+      .nav__links { display: none; }
+      .slide { grid-template-columns: 1fr; }
+      .slide__num { grid-row: auto; font-size: 5.5rem; }
+      .slide .photo { grid-column: 1; }
+      .people { grid-template-columns: 1fr; max-width: 360px; }
+      .story__photos .photo:nth-child(2) { margin-top: 2rem; }
+      .float a span { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
+      .photo .wipe { display: none; }
+      .slide .bar i { transform: none; }
+    }
+    /* =========================================
+       MIJN ROL / MY ROLE — NL + EN
+       ========================================= */
+    .myrole { position: relative; z-index: 2; padding: clamp(4rem, 9vw, 7rem) var(--pad-x, 5vw) 0; }
+    .myrole__in { max-width: 1100px; margin: 0 auto; padding-top: 2rem; border-top: 1px solid var(--role-line, currentColor); }
+    .myrole__kick { font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; margin-bottom: 0.8rem; }
+    .myrole__title { font-family: var(--role-head, inherit); font-weight: var(--role-weight, 400); font-size: clamp(1.8rem, 3.6vw, 3rem); line-height: 1.1; margin-bottom: 2rem; }
+    .myrole__cols { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 4vw, 3.5rem); }
+    .myrole__lang { display: inline-block; margin-bottom: 0.8rem; padding: 0.15rem 0.5rem; border: 1px solid currentColor; border-radius: var(--role-r, 999px); font-size: 0.7rem; letter-spacing: 0.14em; opacity: 0.75; }
+    .myrole__cols p + p { margin-top: 0.8rem; }
+    .myrole__list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1.1rem; list-style: none; padding: 0; }
+    .myrole__list li { padding: 0.3rem 0.75rem; border: 1px solid var(--role-line, currentColor); border-radius: var(--role-r, 999px); font-size: 0.82rem; }
+    .myrole__note { margin-top: 1.1rem; font-size: 0.88rem; font-style: italic; opacity: 0.75; }
+    @media (max-width: 760px) { .myrole__cols { grid-template-columns: 1fr; } }
+    .myrole { --role-line: var(--line); --role-r: 0; }
+    .myrole__lang { color: var(--orange); }
+    /* taalknop NL / EN */
+    .pl-switch { --pl-r: 0; --pl-bg: #0d0d11; --pl-on: #0d0d11; }
+  </style>
+</head>
+<body>
+
+  <div class="float">
+    <a href="../index.html#projects" aria-label="Terug naar portfolio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      <span data-i18n="float.back">Terug naar portfolio</span>
+    </a>
+  </div>
+
+  <nav class="nav">
+    <a href="#top" class="nav__logo wide">Cross<span>over</span></a>
+    <ul class="nav__links">
+      <li><a href="#hoe">Hoe werkt het</a></li>
+      <li><a href="#waarom">Waarom</a></li>
+      <li><a href="#team">Team</a></li>
+    </ul>
+  </nav>
+
+  <!-- =========================================
+       HERO
+       ========================================= -->
+  <header class="hero" id="top">
+    <div class="rows wide" aria-hidden="true">
+      <span class="row" data-dir="1">Find your match find your match find your match</span>
+      <span class="row" data-dir="-1">Find your match find your match find your match</span>
+      <span class="row" data-dir="1">Find your match find your match find your match</span>
+      <span class="row" data-dir="-1">Find your match find your match find your match</span>
+      <span class="row" data-dir="1">Find your match find your match find your match</span>
+      <span class="row" data-dir="-1">Find your match find your match find your match</span>
+    </div>
+
+    <div class="hero__in">
+      <span class="tag" id="heroTag">Work in progress</span>
+      <h1 class="hero__title wide" aria-label="Design × Business">
+        <span class="bubble" id="heroBubble">= Find your match</span>
+        <span class="ln"><span class="hw hw--a">Design</span></span>
+        <span class="ln"><span class="hw hw--x">×</span><span class="hw hw--b">Business</span></span>
+      </h1>
+
+      <div class="hero__bottom" id="heroBottom">
+        <p class="intro">CROSSOVER is een netwerkevent waar design- en businessstudenten gematcht worden met bedrijven die echt bij ze passen.</p>
+        <div><p class="label">Geen beurs</p><p>Geen rijen en geen gesprekken met het verkeerde bedrijf.</p></div>
+        <div><p class="label">Wel een match</p><p>Je weet vooraf met wie je praat, en waarom.</p></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================
+       HOE WERKT HET (scrolt opzij op desktop)
+       ========================================= -->
+  <section class="how" id="hoe">
+    <div class="how__pin">
+      <div class="how__head">
+        <h2 class="wide reveal">Hoe werkt het?</h2>
+        <p class="reveal">Drie stappen.<span class="desk"> Scroll verder →</span></p>
+      </div>
+
+      <div class="track" id="track">
+        <article class="slide">
+          <span class="slide__num wide">01</span>
+          <h3 class="wide">Vragenlijst</h3>
+          <p>Studenten en bedrijven vullen vooraf in wat ze zoeken, wat ze kunnen en wat ze belangrijk vinden.</p>
+          <span class="bar"><i></i></span>
+          <!-- PLACEHOLDER-FOTO (Unsplash, gratis). Vervang door je eigen foto. -->
+          <div class="photo"><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80" alt="Laptop met grafieken" loading="lazy" data-label="Foto: laptop" /></div>
+        </article>
+        <article class="slide">
+          <span class="slide__num wide">02</span>
+          <h3 class="wide">Matchen</h3>
+          <p>Op basis van de antwoorden koppelen we studenten aan bedrijven die bij ze passen.</p>
+          <span class="bar"><i></i></span>
+          <!-- PLACEHOLDER-FOTO (Unsplash, gratis). -->
+          <div class="photo"><img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80" alt="Lege moderne werkruimte" loading="lazy" data-label="Foto: werkruimte" /></div>
+        </article>
+        <article class="slide">
+          <span class="slide__num wide">03</span>
+          <h3 class="wide">Speeddaten</h3>
+          <p>Op het event korte gesprekken met je matches. Je laat je werk zien en maakt echt kennis.</p>
+          <span class="bar"><i></i></span>
+          <!-- PLACEHOLDER-FOTO (Unsplash, gratis). -->
+          <div class="photo"><img src="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80" alt="Zaal met publiek bij een event" loading="lazy" data-label="Foto: event" /></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       BLAUW VLAK
+       ========================================= -->
+  <section class="blue" id="waarom">
+    <div class="wrap">
+      <h2 class="blue__title wide" id="blueTitle">
+        <span class="bubble">Voor studenten én bedrijven</span>
+        Klaar om de juiste mensen te ontmoeten?
+      </h2>
+
+      <div class="blue__cols">
+        <div class="reveal">
+          <p class="label">Als student</p>
+          <p>Gesprekken met bedrijven die bij je passen. Je laat je werk zien aan de juiste mensen, voor een stage, een opdracht of gewoon een goed contact.</p>
+        </div>
+        <div class="reveal">
+          <p class="label">Als bedrijf</p>
+          <p>Talent dat al bij jouw vraag past. Geen stapel cv's, maar echte gesprekken, met design en business op één plek.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================
+       GEEN BEURS
+       ========================================= -->
+  <section class="story">
+    <div class="wrap">
+      <h2 class="story__title wide reveal">Moe van beurzen waar je met niemand echt praat?</h2>
+      <p class="story__sub reveal">(Want eerlijk, wie heeft daar tijd voor?)</p>
+
+      <div class="story__in">
+        <div class="story__text reveal">
+          <p>Studenten hebben talent en bedrijven zoeken talent. Toch lopen ze elkaar vaak mis.</p>
+          <p>Je portfolio staat online, maar niemand kijkt. Op een beurs sta je in de rij en praat je met het verkeerde bedrijf. En bedrijven zien honderden cv's, maar weten pas of iemand past als ze met diegene praten.</p>
+          <p class="label">Daarom CROSSOVER</p>
+          <p>Een avond waar je vooraf weet met wie je praat. Design en business samen, omdat ze elkaar nodig hebben.</p>
+        </div>
+
+        <!-- PLACEHOLDER-FOTO'S (Unsplash, gratis). Vervang door eigen foto's van het event. -->
+        <div class="story__photos">
+          <div class="photo"><img src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=900&q=80" alt="Conferentiezaal" loading="lazy" data-label="Foto: zaal" /></div>
+          <div class="photo"><img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=900&q=80" alt="Handen en laptops op een tafel tijdens een gesprek" loading="lazy" data-label="Foto: gesprek" /></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+    <!-- =========================================
+         MIJN ROL / MY ROLE (NL + EN)
+         ========================================= -->
+    <section class="myrole wrap" id="mijn-rol">
+      <div class="myrole__in">
+        <p class="myrole__kick" data-en="My role">Mijn rol</p>
+        <h2 class="myrole__title wide" data-en="What I did">Wat ik deed</h2>
+        <div class="myrole__cols">
+          <div lang="nl">
+            <span class="myrole__lang">NL</span>
+            <p>CROSSOVER is mijn eigen project, dat ik samen met Maryam Laasiri doe, een international business student. Ik werk aan het concept, de branding en het design. Het project loopt nog.</p>
+            <ul class="myrole__list"><li>Eigen project</li><li>Concept</li><li>Branding</li><li>Design</li><li>Nog bezig</li></ul>
+            <p class="myrole__note">Deze pagina is gemaakt in de stijl van het design van het project.</p>
+          </div>
+          <div lang="en">
+            <span class="myrole__lang">EN</span>
+            <p>CROSSOVER is my own project, which I'm doing together with Maryam Laasiri, an international business student. I work on the concept, branding and design. The project is still ongoing.</p>
+            <ul class="myrole__list"><li>Own project</li><li>Concept</li><li>Branding</li><li>Design</li><li>Ongoing</li></ul>
+            <p class="myrole__note">This page is built in the style of the project's own design.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  <!-- =========================================
+       TEAM
+       ========================================= -->
+  <section class="team" id="team">
+    <div class="rows wide" aria-hidden="true">
+      <span class="row" data-dir="-1">Meet the team meet the team meet the team</span>
+      <span class="row" data-dir="1">Meet the team meet the team meet the team</span>
+    </div>
+
+    <div class="wrap team__in">
+      <div class="team__head">
+        <h2 class="wide reveal">De mensen<br />erachter</h2>
+        <p class="reveal">Eén vanuit design, één vanuit business. Precies waar CROSSOVER over gaat.</p>
+      </div>
+
+      <div class="people">
+        <!-- PLACEHOLDER: zet je foto in assets/images/crossover/yasmine.jpg -->
+        <article class="person reveal">
+          <div class="photo"><img src="../assets/images/crossover/yasmine.jpg" alt="Yasmine Boucharib" data-label="Foto Yasmine" /></div>
+          <h3 class="wide">Yasmine Boucharib</h3>
+          <span class="tag">Concept &amp; design</span>
+          <!-- PAS AAN: je eigen tekst -->
+          <p>Bedacht CROSSOVER en zorgt voor het concept, de branding en het ontwerp.</p>
+        </article>
+
+        <!-- PLACEHOLDER: zet Maryams foto in assets/images/crossover/maryam.jpg -->
+        <article class="person reveal">
+          <div class="photo"><img src="../assets/images/crossover/maryam.jpg" alt="Maryam Laasiri" data-label="Foto Maryam" /></div>
+          <h3 class="wide">Maryam Laasiri</h3>
+          <span class="tag tag--blue">Business</span>
+          <!-- PAS AAN: Maryams eigen tekst -->
+          <p>Houdt zich bezig met de business-kant: bedrijven, partners en de organisatie.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer__logo wide" id="footLogo" aria-label="Crossover">CROSSOVER</div>
+      <div class="footer__row">
+        <span>Een concept van Yasmine Boucharib &amp; Maryam Laasiri</span>
+        <span>Work in progress</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* Engelse teksten voor de taalknop (Nederlands → Engels) */
+    window.PL_EN = {
+  "Terug naar portfolio": "Back to portfolio",
+  "Hoe werkt het": "How it works",
+  "Waarom": "Why",
+  "CROSSOVER is een netwerkevent waar design- en businessstudenten gematcht worden met bedrijven die echt bij ze passen.": "CROSSOVER is a networking event where design and business students are matched with companies that truly fit them.",
+  "Geen beurs": "No career fair",
+  "Geen rijen en geen gesprekken met het verkeerde bedrijf.": "No queues and no conversations with the wrong company.",
+  "Wel een match": "A real match",
+  "Je weet vooraf met wie je praat, en waarom.": "You know beforehand who you'll talk to, and why.",
+  "Hoe werkt het?": "How does it work?",
+  "Drie stappen. Scroll verder →": "Three steps.<span class=\"desk\"> Keep scrolling →<\/span>",
+  "Vragenlijst": "Questionnaire",
+  "Studenten en bedrijven vullen vooraf in wat ze zoeken, wat ze kunnen en wat ze belangrijk vinden.": "Students and companies fill in beforehand what they're looking for, what they can do and what matters to them.",
+  "Matchen": "Matching",
+  "Op basis van de antwoorden koppelen we studenten aan bedrijven die bij ze passen.": "Based on the answers, we match students with companies that fit them.",
+  "Speeddaten": "Speed dating",
+  "Op het event korte gesprekken met je matches. Je laat je werk zien en maakt echt kennis.": "At the event: short conversations with your matches. You show your work and really get to know each other.",
+  "Voor studenten én bedrijven Klaar om de juiste mensen te ontmoeten?": "<span class=\"bubble\">For students and companies<\/span> Ready to meet the right people?",
+  "Als student": "As a student",
+  "Gesprekken met bedrijven die bij je passen. Je laat je werk zien aan de juiste mensen, voor een stage, een opdracht of gewoon een goed contact.": "Conversations with companies that fit you. You show your work to the right people, for an internship, a project or just a good contact.",
+  "Als bedrijf": "As a company",
+  "Talent dat al bij jouw vraag past. Geen stapel cv's, maar echte gesprekken, met design en business op één plek.": "Talent that already fits your needs. No pile of CVs, but real conversations, with design and business in one place.",
+  "Moe van beurzen waar je met niemand echt praat?": "Tired of career fairs where you don't really talk to anyone?",
+  "(Want eerlijk, wie heeft daar tijd voor?)": "(Because honestly, who has time for that?)",
+  "Studenten hebben talent en bedrijven zoeken talent. Toch lopen ze elkaar vaak mis.": "Students have talent and companies are looking for talent. Yet they often miss each other.",
+  "Je portfolio staat online, maar niemand kijkt. Op een beurs sta je in de rij en praat je met het verkeerde bedrijf. En bedrijven zien honderden cv's, maar weten pas of iemand past als ze met diegene praten.": "Your portfolio is online, but nobody looks at it. At a fair you stand in line and end up talking to the wrong company. And companies see hundreds of CVs, but only know if someone fits once they talk to them.",
+  "Daarom CROSSOVER": "That's why CROSSOVER",
+  "Een avond waar je vooraf weet met wie je praat. Design en business samen, omdat ze elkaar nodig hebben.": "An evening where you know beforehand who you'll talk to. Design and business together, because they need each other.",
+  "De mensenerachter": "The people<br>behind it",
+  "Eén vanuit design, één vanuit business. Precies waar CROSSOVER over gaat.": "One from design, one from business. Exactly what CROSSOVER is about.",
+  "Bedacht CROSSOVER en zorgt voor het concept, de branding en het ontwerp.": "Came up with CROSSOVER and takes care of the concept, the branding and the design.",
+  "Houdt zich bezig met de business-kant: bedrijven, partners en de organisatie.": "Takes care of the business side: companies, partners and the organisation.",
+  "Een concept van Yasmine Boucharib & Maryam Laasiri": "A concept by Yasmine Boucharib &amp; Maryam Laasiri"
+};
+  </script>
+  <script src="page-lang.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="../lang.js"></script>
+  <script>
+    /* =========================================
+       FOTO ONTBREEKT? Dan een donker vlak met een label.
+       ========================================= */
+    document.querySelectorAll(".photo img").forEach((img) => {
+      const fail = () => {
+        img.style.display = "none";
+        if (img.parentNode.querySelector(".photo__fallback")) return;
+        const f = document.createElement("div");
+        f.className = "photo__fallback";
+        f.textContent = img.dataset.label || "Foto";
+        img.parentNode.appendChild(f);
+      };
+      img.addEventListener("error", fail, { once: true });
+      if (img.complete && img.naturalWidth === 0) fail();
+    });
+
+    /* ---------- footer-logo: OVER in blauw ---------- */
+    (() => {
+      const el = document.getElementById("footLogo");
+      el.innerHTML = [...el.textContent].map((c, i) => `<span class="ch${i >= 5 ? " o" : ""}">${c}</span>`).join("");
+    })();
+
+    /* =========================================
+       ANIMATIES
+       ========================================= */
+    (() => {
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!window.gsap || !window.ScrollTrigger || reduce) return;
+      gsap.registerPlugin(ScrollTrigger);
+
+      /* ---------- hero: Design en Business schuiven naar elkaar toe ---------- */
+      const intro = gsap.timeline({ delay: 0.15 });
+      intro
+        .from(".hero .rows", { opacity: 0, duration: 1.2, ease: "power2.out" }, 0)
+        .from(".hw--a", { xPercent: -120, opacity: 0, duration: 1.1, ease: "expo.out" }, 0.1)
+        .from(".hw--b", { xPercent: 80, opacity: 0, duration: 1.1, ease: "expo.out" }, 0.2)
+        .from(".hw--x", { scale: 0, rotate: -180, duration: 0.8, ease: "back.out(2.2)" }, 0.75)
+        .from("#heroTag", { y: -12, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.6)
+        .from("#heroBubble", { scale: 0.4, opacity: 0, duration: 0.6, ease: "back.out(2.4)", transformOrigin: "20% 100%" }, 1.1)
+        .from("#heroBottom > *", { y: 24, opacity: 0, duration: 0.8, stagger: 0.1, ease: "power3.out" }, 1.0);
+
+      // bij wegscrollen: woorden schuiven weer uit elkaar
+      gsap.to(".hw--a", { xPercent: -18, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+      gsap.to(".hw--b", { xPercent: 12, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+
+      /* ---------- schuine rijen bewegen mee ---------- */
+      gsap.utils.toArray(".rows").forEach((rows) => {
+        const sec = rows.parentElement;
+        rows.querySelectorAll(".row").forEach((row) => {
+          const dir = Number(row.dataset.dir);
+          gsap.fromTo(row, { xPercent: dir * -5 }, {
+            xPercent: dir * 5, ease: "none",
+            scrollTrigger: { trigger: sec, start: "top bottom", end: "bottom top", scrub: true },
+          });
+        });
+      });
+
+      /* ---------- foto's: blauwe wipe schuift weg ---------- */
+      document.querySelectorAll(".photo").forEach((ph) => {
+        const w = document.createElement("span");
+        w.className = "wipe";
+        ph.appendChild(w);
+      });
+      const wipeIn = (ph, extra = {}) =>
+        gsap.timeline({ scrollTrigger: { trigger: ph, start: "top 85%", ...extra } })
+          .fromTo(ph.querySelector(".wipe"), { scaleX: 1 }, { scaleX: 0, duration: 0.9, ease: "expo.inOut" })
+          .from(ph.querySelector("img"), { scale: 1.25, duration: 1.4, ease: "expo.out" }, 0.2);
+
+      /* ---------- hoe werkt het: opzij scrollen op desktop ---------- */
+      const mm = gsap.matchMedia();
+      mm.add("(min-width: 901px)", () => {
+        const track = document.getElementById("track");
+        const dist = () => track.scrollWidth - window.innerWidth;
+        const tween = gsap.to(track, {
+          x: () => -dist(),
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".how",
+            start: "top top",
+            end: () => "+=" + dist(),
+            pin: ".how__pin",
+            scrub: 0.6,
+            invalidateOnRefresh: true,
+          },
+        });
+        track.querySelectorAll(".slide").forEach((slide, i) => {
+          // de eerste stap staat al in beeld: die start als de sectie binnenkomt
+          const st = i === 0
+            ? { trigger: ".how", start: "top 55%" }
+            : { trigger: slide, containerAnimation: tween, start: "left 85%" };
+          gsap.from(slide.querySelector(".slide__num"), { yPercent: 40, opacity: 0, duration: 0.8, ease: "power3.out", scrollTrigger: st });
+          gsap.to(slide.querySelector(".bar i"), { scaleX: 1, duration: 1.2, ease: "power3.out", scrollTrigger: st });
+          wipeIn(slide.querySelector(".photo"), st);
+        });
+      });
+      mm.add("(max-width: 900px)", () => {
+        document.querySelectorAll(".slide").forEach((slide) => {
+          gsap.from(slide, { y: 30, opacity: 0, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: slide, start: "top 85%" } });
+          gsap.to(slide.querySelector(".bar i"), { scaleX: 1, duration: 1, ease: "power3.out", scrollTrigger: { trigger: slide, start: "top 70%" } });
+          wipeIn(slide.querySelector(".photo"));
+        });
+      });
+
+      // overige foto's
+      document.querySelectorAll(".story .photo, .person .photo").forEach((ph) => wipeIn(ph));
+
+      /* ---------- blauwe kop: woord voor woord omhoog ---------- */
+      const bt = document.getElementById("blueTitle");
+      const bubble = bt.querySelector(".bubble");
+      const text = bt.textContent.replace(bubble.textContent, "").trim();
+      bt.innerHTML = "";
+      bt.appendChild(bubble);
+      text.split(/\s+/).forEach((word) => {
+        const w = document.createElement("span");
+        w.className = "w";
+        w.innerHTML = `<span>${word}</span>`;
+        bt.appendChild(w);
+      });
+      gsap.timeline({ scrollTrigger: { trigger: bt, start: "top 80%" } })
+        .from(bt.querySelectorAll(".w > span"), { yPercent: 110, duration: 0.8, stagger: 0.06, ease: "expo.out" })
+        .from(bubble, { scale: 0.4, opacity: 0, duration: 0.5, ease: "back.out(2.4)", transformOrigin: "20% 100%" }, "-=0.3");
+
+      /* ---------- overige blokken: klein stukje omhoog ---------- */
+      gsap.utils.toArray(".reveal").forEach((el) => {
+        gsap.from(el, { opacity: 0, y: 24, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 88%" } });
+      });
+
+      /* ---------- footer: letters springen omhoog ---------- */
+      gsap.from("#footLogo .ch", {
+        yPercent: 100, opacity: 0, duration: 0.7, stagger: 0.04, ease: "back.out(1.8)",
+        scrollTrigger: { trigger: ".footer", start: "top 90%" },
+      });
+    })();
+  </script>
+</body>
+</html>

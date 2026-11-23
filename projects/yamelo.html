@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="nl" data-i18n-fixed>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yamelo — track your dhikr with ease</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================
+       TOKENS — simpel en speels
+       ========================================= */
+    :root {
+      --ink: #111111;
+      --cream: #ebe6da;
+      --c1: #ebe6da;  /* yamelo crème */
+      --c2: #f6f3ec;  /* licht */
+      --c3: #efefed;  /* lichtgrijs */
+      --c4: #dcdbd6;  /* grijs */
+      --c5: #111111;  /* zwart */
+      --white: #ffffff;
+
+      --big: "Bebas Neue", "Arial Narrow", Impact, sans-serif;
+      --mono: "Courier Prime", "Courier New", monospace;
+      --nav-h: 64px;
+      --tab: 64px;
+      --ease: cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: #2f3236;
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+    img, svg { display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    :focus-visible { outline: 2px dashed var(--ink); outline-offset: 3px; }
+
+    /* knop met verschoven rand, zoals in het voorbeeld */
+    .btn {
+      position: relative;
+      display: inline-block;
+      padding: 0.85rem 1.6rem;
+      background: var(--white);
+      border: 1.5px solid var(--ink);
+      font-family: var(--big);
+      font-size: 1.15rem;
+      letter-spacing: 0.06em;
+      box-shadow: 5px 5px 0 -1.5px var(--white), 5px 5px 0 0 var(--ink);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover { transform: translate(3px, 3px); box-shadow: 2px 2px 0 -1.5px var(--white), 2px 2px 0 0 var(--ink); }
+    .btn--dark { background: var(--ink); color: var(--white); box-shadow: 5px 5px 0 -1.5px var(--cream), 5px 5px 0 0 var(--white); border-color: var(--white); }
+    .btn--dark:hover { box-shadow: 2px 2px 0 -1.5px var(--cream), 2px 2px 0 0 var(--white); }
+
+    /* =========================================
+       APP-FRAME
+       ========================================= */
+    .app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--white);
+    }
+
+    /* NAV */
+    .nav {
+      flex: 0 0 var(--nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0 clamp(1rem, 4vw, 3rem);
+      border-bottom: 1.5px solid var(--ink);
+      background: var(--white);
+      z-index: 5;
+    }
+    .logo { display: flex; align-items: center; gap: 0.6rem; }
+    .logo__mark {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--cream);
+      border: 1.5px solid var(--ink);
+      display: grid;
+      place-items: center;
+    }
+    .logo__mark svg { width: 22px; height: 22px; }
+    .logo__txt { font-family: var(--big); font-size: 1.15rem; line-height: 0.9; letter-spacing: 0.04em; }
+    .nav__links { display: flex; gap: clamp(1rem, 3vw, 2.6rem); font-family: var(--big); font-size: 1.15rem; letter-spacing: 0.06em; }
+    .nav__links button { position: relative; padding: 0.2rem 0; }
+    .nav__links button::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+    .nav__links button:hover::after, .nav__links button.is-active::after { transform: scaleX(1); }
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--big);
+      font-size: 1.05rem;
+      letter-spacing: 0.06em;
+      padding: 0.35rem 0.8rem;
+      border: 1.5px solid var(--ink);
+      transition: background 0.2s, color 0.2s;
+    }
+    .back:hover { background: var(--ink); color: var(--white); }
+    .back svg { width: 16px; height: 16px; }
+
+    /* =========================================
+       DECK — panelen van links naar rechts
+       ========================================= */
+    .deck { flex: 1; display: flex; min-height: 0; }
+    .panel {
+      position: relative;
+      flex: 0 0 var(--tab);
+      min-width: 0;
+      overflow: hidden;
+      border-left: 1.5px solid rgba(17, 17, 17, 0.12);
+      transition: flex-basis 0.8s var(--ease);
+    }
+    .panel:first-child { border-left: 0; }
+    .panel.is-active { flex-basis: calc(100% - (var(--n) - 1) * var(--tab)); cursor: default; }
+    .panel:nth-child(1) { background: var(--c1); }
+    .panel:nth-child(2) { background: var(--c2); }
+    .panel:nth-child(3) { background: var(--c3); }
+    .panel:nth-child(4) { background: var(--c4); }
+    .panel:nth-child(5) { background: var(--c5); color: var(--white); }
+
+    /* het tabje met verticale tekst */
+    .tab {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: var(--tab);
+      display: grid;
+      place-items: center;
+      z-index: 2;
+      transition: background 0.3s;
+    }
+    .panel:not(.is-active) .tab:hover { background: rgba(17, 17, 17, 0.06); }
+    .panel:nth-child(5):not(.is-active) .tab:hover { background: rgba(255, 255, 255, 0.08); }
+    .tab span {
+      writing-mode: vertical-rl;
+      font-family: var(--big);
+      font-size: 1.05rem;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
+    .tab b { position: absolute; top: 1rem; left: 0; right: 0; text-align: center; font-family: var(--mono); font-weight: 400; font-size: 0.75rem; }
+
+    /* inhoud van een paneel */
+    .content {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: var(--tab);
+      width: calc(100vw - var(--n) * var(--tab));
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: clamp(1.5rem, 4vw, 4rem);
+      padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 5vw, 5rem);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s, visibility 0s 0.35s;
+    }
+    .panel.is-active .content { opacity: 1; visibility: visible; transition: opacity 0.6s 0.45s, visibility 0s; }
+    .panel.is-active .tab { pointer-events: none; }
+
+    .content > * { transform: translateY(18px); opacity: 0; transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s; }
+    .panel.is-active .content > * { transform: none; opacity: 1; transition-delay: 0.55s; }
+    .panel.is-active .content > *:nth-child(2) { transition-delay: 0.7s; }
+
+    .kicker { font-size: 0.85rem; margin-bottom: 0.6rem; }
+    .title { font-family: var(--big); font-weight: 400; font-size: clamp(3.6rem, 8vw, 7.5rem); line-height: 0.88; letter-spacing: 0.005em; }
+    .title--md { font-size: clamp(2.8rem, 5.6vw, 5.2rem); }
+    .text p { margin-top: 1rem; max-width: 34rem; font-size: 0.98rem; }
+    .text p:first-of-type { margin-top: 1.4rem; }
+    .text .btn { margin-top: 2rem; }
+    .hl { background: var(--white); padding: 0 0.2em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+    .panel:nth-child(5) .hl { background: var(--cream); color: var(--ink); }
+    .note { font-style: italic; font-size: 0.85rem !important; opacity: 0.7; }
+
+    .art { display: grid; place-items: center; }
+    .art svg { width: min(100%, 460px); height: auto; overflow: visible; }
+    .art svg * { vector-effect: non-scaling-stroke; }
+
+    /* kleine onderbalk: teller + pijlen */
+    .nav__right { display: flex; align-items: center; gap: 1.2rem; }
+    .pager {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      z-index: 3;
+      font-size: 0.85rem;
+    }
+    .pager button {
+      width: 38px; height: 38px;
+      border: 1.5px solid var(--ink);
+      background: var(--white);
+      display: grid;
+      place-items: center;
+      transition: background 0.2s, color 0.2s;
+    }
+    .pager button:hover:not(:disabled) { background: var(--ink); color: var(--white); }
+    .pager button:disabled { opacity: 0.3; cursor: default; }
+    .pager svg { width: 16px; height: 16px; }
+
+    /* telefoons in paneel 3 */
+    .phones { display: flex; gap: 0.8rem; align-items: flex-end; justify-content: center; }
+    .phones figure { flex: 1; max-width: 190px; transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+    .phones figure:nth-child(2) { transform: translateY(-1.4rem); }
+    .phones figure:hover { transform: translateY(-2.2rem) rotate(-2deg); }
+    .phones img { width: 100%; border: 1.5px solid var(--ink); border-radius: 14px; }
+    .phones figcaption { margin-top: 0.5rem; font-family: var(--big); font-size: 1.05rem; letter-spacing: 0.05em; text-align: center; }
+
+    .list { margin-top: 1.4rem; display: grid; gap: 0.7rem; max-width: 34rem; }
+    .list li { list-style: none; display: grid; grid-template-columns: 1.8rem 1fr; gap: 0.6rem; font-size: 0.95rem; }
+    .list li b { font-family: var(--big); font-weight: 400; font-size: 1.3rem; line-height: 1.1; }
+
+    .bi { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; margin-top: 1.4rem; max-width: 46rem; }
+    .bi p { margin-top: 0.6rem !important; font-size: 0.92rem !important; }
+    .bi__lang { display: inline-block; padding: 0.05rem 0.45rem; border: 1.5px solid currentColor; font-family: var(--big); letter-spacing: 0.08em; }
+    @media (max-width: 1000px) { .bi { grid-template-columns: 1fr; gap: 1rem; } }
+    .credits { margin-top: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 34rem; border-top: 1.5px solid currentColor; padding-top: 1rem; }
+    .credits span { display: block; font-size: 0.75rem; opacity: 0.7; }
+    .credits strong { font-family: var(--big); font-weight: 400; font-size: 1.4rem; letter-spacing: 0.04em; }
+
+    /* animaties in de tekeningen */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+    @keyframes flicker { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(0.94, 1.06); } }
+    @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes blink { 50% { opacity: 0; } }
+    .beads { transform-origin: 200px 200px; animation: spin 40s linear infinite; }
+    .lantern { transform-origin: 380px 0; animation: sway 4s ease-in-out infinite alternate; }
+    .flame { transform-origin: 230px 330px; animation: flicker 1.4s ease-in-out infinite; }
+    .bob { animation: bob 3s ease-in-out infinite; }
+    .caret { animation: blink 1s steps(1) infinite; }
+
+    /* =========================================
+       MOBIEL — tabbladen boven elkaar
+       ========================================= */
+    @media (max-width: 760px) {
+      body { overflow: auto; }
+      .app { height: auto; min-height: 100%; }
+      .nav__links { display: none; }
+      .deck { flex-direction: column; }
+      .panel { flex: none; border-left: 0; border-top: 1.5px solid rgba(17, 17, 17, 0.12); transition: none; }
+      .tab { position: relative; inset: auto; width: 100%; height: 56px; display: flex; justify-content: space-between; align-items: center; padding: 0 1.2rem; }
+      .tab span { writing-mode: horizontal-tb; font-size: 1.3rem; }
+      .tab b { position: static; }
+      .content { position: static; width: auto; display: none; grid-template-columns: 1fr; padding: 1rem 1.2rem 5rem; opacity: 1; visibility: visible; overflow: visible; }
+      .panel.is-active .content { display: grid; }
+      .panel.is-active .tab { pointer-events: auto; }
+      .art { order: -1; }
+      .art svg { width: min(80%, 300px); }
+      .pager { display: none; }
+      .back span { display: none; }
+      .phones figure:nth-child(2) { transform: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; }
+    }
+    /* taalknop NL / EN */
+    .pl-switch { --pl-r: 0; --pl-bg: #111; --pl-line: #111; --pl-on: #111; }
+    @media (max-width: 760px) { .pl-switch { bottom: 0.8rem; right: 0.8rem; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <a href="#" class="logo" data-go="0" aria-label="Yamelo">
+        <span class="logo__mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round"><path d="M16.5 4.5a8 8 0 1 0 3 11 6.5 6.5 0 1 1-3-11Z"/></svg>
+        </span>
+        <span class="logo__txt">YAMELO<br />APP</span>
+      </a>
+      <div class="nav__links" id="navLinks">
+        <button data-go="1">Waarom</button>
+        <button data-go="2">De app</button>
+        <button data-go="3">Gamification</button>
+        <button data-go="4">Mijn rol</button>
+      </div>
+      <div class="nav__right">
+      <div class="pager" id="pager">
+        <span id="count">01 / 05</span>
+        <button id="prev" aria-label="Vorige"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button id="next" aria-label="Volgende"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
+      <a href="../index.html#projects" class="back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+        <span data-i18n="float.back">Terug naar portfolio</span>
+      </a>
+      </div>
+    </nav>
+
+    <!-- DECK -->
+    <main class="deck" id="deck" style="--n:5">
+
+      <!-- 01 YAMELO -->
+      <section class="panel is-active" aria-label="Yamelo">
+        <button class="tab" aria-label="Open: Yamelo"><b>01</b><span>YAMELO</span></button>
+        <div class="content">
+          <div class="text">
+            <p class="kicker">Eigen app · UX &amp; software</p>
+            <h1 class="title">Yamelo</h1>
+            <p>Track your dhikr with ease.<span class="caret">_</span></p>
+            <p>Een simpele app die je helpt om je dhikr bij te houden, vaste gewoontes op te bouwen en je zakat te berekenen.</p>
+            <button class="btn" data-go="1">Waarom ik dit maakte →</button>
+          </div>
+          <div class="art" aria-hidden="true">
+            <!-- tasbih (gebedskralen) + lantaarn, lijntekening -->
+            <svg viewBox="0 0 460 420" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <g class="beads" id="beads"></g>
+              <path d="M200 331v26M192 357h16l6 30h-28z" fill="#fff"/>
+              <path d="M196 367v16M204 367v16"/>
+              <g class="lantern">
+                <path d="M380 0v70"/>
+                <path d="M366 70h28l8 14h-44z" fill="#fff"/>
+                <path d="M358 84c-6 14-8 30-8 44s2 30 8 44h44c6-14 8-30 8-44s-2-30-8-44z" fill="#fff"/>
+                <path d="M370 96v64M380 92v72M390 96v64"/>
+                <path d="M358 172h44l-8 14h-28z" fill="#fff"/>
+                <path d="M380 186v18"/>
+              </g>
+              <path d="M40 40a26 26 0 1 0 10 34 20 20 0 1 1-10-34Z" fill="#111" class="bob"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 WAAROM -->
+      <section class="panel" aria-label="Waarom">
+        <button class="tab" aria-label="Open: Waarom"><b>02</b><span>WAAROM</span></button>
+        <div class="content">
+          <div class="text">
+            <p class="kicker">Het begin</p>
+            <h2 class="title title--md">Eerst voor mezelf</h2>
+            <!-- PAS AAN: maak dit nog meer jouw verhaal -->
+            <p>Dhikr doe ik elke dag. Ik wilde een makkelijke manier om dat bij te houden en <span class="hl">te zien hoe ik groei</span>. Wat ik zocht, bestond niet zoals ik het wilde.</p>
+            <p>Dus maakte ik mijn eigen app. Eerst gewoon voor mezelf.</p>
+            <p>Tijdens het gebruiken merkte ik iets: een score, een streak en je voortgang zien maken het leuker om vol te houden. Toen dacht ik: <span class="hl">als dit mij helpt, kan het anderen ook helpen.</span></p>
+            <button class="btn" data-go="2">Bekijk de app →</button>
+          </div>
+          <div class="art" aria-hidden="true">
+            <!-- telefoon met afvinklijstje -->
+            <svg viewBox="0 0 460 420" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <g class="bob">
+                <rect x="150" y="20" width="170" height="340" rx="26" fill="#fff"/>
+                <path d="M205 38h60"/>
+                <rect x="172" y="80" width="126" height="44" rx="8" fill="#ebe6da"/>
+                <path d="M184 102l8 8 14-16"/><path d="M220 96h60M220 110h40"/>
+                <rect x="172" y="136" width="126" height="44" rx="8" fill="#ebe6da"/>
+                <path d="M184 158l8 8 14-16"/><path d="M220 152h60M220 166h30"/>
+                <rect x="172" y="192" width="126" height="44" rx="8" fill="#fff"/>
+                <rect x="182" y="204" width="20" height="20" rx="3"/><path d="M220 208h60M220 222h44"/>
+                <path d="M172 268h126"/><path d="M172 268h70" stroke-width="6"/>
+                <text x="172" y="300" font-family="Courier Prime, monospace" font-size="14" fill="#111" stroke="none">66% vandaag</text>
+              </g>
+              <path d="M80 280c-20-30 0-60 30-50-10 10-12 30 0 40-10 10-20 14-30 10z" fill="#ebe6da"/>
+              <path d="M340 70l6 12 12 6-12 6-6 12-6-12-12-6 12-6z" fill="#fff"/>
+              <path d="M370 300l4 8 8 4-8 4-4 8-4-8-8-4 8-4z" fill="#fff"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 DE APP -->
+      <section class="panel" aria-label="De app">
+        <button class="tab" aria-label="Open: De app"><b>03</b><span>DE APP</span></button>
+        <div class="content">
+          <div class="text">
+            <p class="kicker">Wat het doet</p>
+            <h2 class="title title--md">Drie dingen, simpel gehouden</h2>
+            <ul class="list">
+              <li><b>1</b><span><strong>Habit tracker.</strong> Zet je eigen doelen neer, zoals Quran lezen of Fajr op tijd bidden, en vink ze elke dag af.</span></li>
+              <li><b>2</b><span><strong>Progress.</strong> Je streak, je totale dhikr, actieve dagen en je activiteit per week, maand of jaar.</span></li>
+              <li><b>3</b><span><strong>Zakat calculator.</strong> In vier stappen: valuta, bezittingen, schulden en resultaat.</span></li>
+            </ul>
+            <button class="btn" data-go="3">Waarom gamification →</button>
+          </div>
+          <div class="phones">
+            <figure><img src="../assets/images/yamelo/habit-tracker.png" alt="Habit tracker scherm" loading="lazy" /><figcaption>Habits</figcaption></figure>
+            <figure><img src="../assets/images/yamelo/progress.png" alt="Progress analytics scherm" loading="lazy" /><figcaption>Progress</figcaption></figure>
+            <figure><img src="../assets/images/yamelo/zakat.png" alt="Zakat calculator scherm" loading="lazy" /><figcaption>Zakat</figcaption></figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 GAMIFICATION -->
+      <section class="panel" aria-label="Gamification">
+        <button class="tab" aria-label="Open: Gamification"><b>04</b><span>GAMIFICATION</span></button>
+        <div class="content">
+          <div class="text">
+            <p class="kicker">Het idee erachter</p>
+            <h2 class="title title--md">Volhouden mag leuk zijn</h2>
+            <p>Een goede gewoonte begint makkelijk, maar volhouden is lastig. Daarom zitten er kleine game-elementen in Yamelo:</p>
+            <ul class="list">
+              <li><b>🔥</b><span><strong>Streak.</strong> Hoeveel dagen op rij je het volhoudt.</span></li>
+              <li><b>★</b><span><strong>Score.</strong> Elke dhikr telt mee, zodat je ziet dat het optelt.</span></li>
+              <li><b>☺</b><span><strong>Friends.</strong> Samen motiveren werkt beter dan alleen.</span></li>
+            </ul>
+            <p class="note">Kleine stappen, grote beloning.</p>
+            <button class="btn" data-go="4">Mijn rol →</button>
+          </div>
+          <div class="art" aria-hidden="true">
+            <!-- vlammetje + score -->
+            <svg viewBox="0 0 460 420" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <g class="flame">
+                <path d="M230 60c30 50 90 90 90 170a90 90 0 0 1-180 0c0-50 30-70 40-110 10 30 30 40 40 40-10-40 0-70 10-100z" fill="#fff"/>
+                <path d="M230 330a44 44 0 0 1-44-44c0-30 24-46 30-70 14 26 58 40 58 70a44 44 0 0 1-44 44z" fill="#ebe6da"/>
+              </g>
+              <g class="bob">
+                <rect x="40" y="70" width="110" height="56" rx="28" fill="#fff"/>
+                <text x="95" y="106" text-anchor="middle" font-family="Bebas Neue, Impact, sans-serif" font-size="30" fill="#111" stroke="none">102</text>
+              </g>
+              <rect x="320" y="300" width="110" height="56" rx="10" fill="#111"/>
+              <text x="375" y="336" text-anchor="middle" font-family="Bebas Neue, Impact, sans-serif" font-size="24" fill="#fff" stroke="none">2 DAGEN</text>
+              <path d="M70 330l6 12 12 6-12 6-6 12-6-12-12-6 12-6z" fill="#fff"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 MIJN ROL -->
+      <section class="panel" aria-label="Mijn rol">
+        <button class="tab" aria-label="Open: Mijn rol"><b>05</b><span>MIJN ROL</span></button>
+        <div class="content">
+          <div class="text">
+            <p class="kicker" data-en="What I did">Wat ik deed</p>
+            <h2 class="title title--md">Mijn eigen app</h2>
+            <div class="bi">
+              <div lang="nl">
+                <span class="bi__lang">NL</span>
+                <p>Yamelo is <span class="hl">mijn eigen app</span>, die ik binnen mijn opleiding wilde maken. Ik werkte aan de user experience en bouwde de app zelf, met behulp van AI.</p>
+                <p>Voor de stijl kreeg ik hulp van Muhammad Wasim.</p>
+              </div>
+              <div lang="en">
+                <span class="bi__lang">EN</span>
+                <p>Yamelo is <span class="hl">my own app</span>, which I wanted to build during my studies. I worked on the user experience and built the app myself, with the help of AI.</p>
+                <p>Muhammad Wasim helped me with the visual style.</p>
+              </div>
+            </div>
+            <p class="note" data-en="This page is built in the style of the Yamelo design.">Deze pagina is gemaakt in de stijl van het Yamelo-design.</p>
+            <div class="credits">
+              <div><span data-en="UX &amp;amp; software · own project">UX &amp; software · eigen project</span><strong>Yasmine Boucharib</strong></div>
+              <div><span data-en="Style help">Hulp bij de stijl</span><strong>Muhammad Wasim</strong></div>
+            </div>
+            <a href="../index.html#projects" class="btn btn--dark" style="margin-top:2rem">← Terug naar portfolio</a>
+          </div>
+          <div class="art" aria-hidden="true">
+            <!-- laptop met code + AI-sterretjes -->
+            <svg viewBox="0 0 460 420" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <g class="bob">
+                <rect x="90" y="90" width="280" height="180" rx="10" fill="#111"/>
+                <path d="M60 290h340l-20 24H80z" fill="#111"/>
+                <path d="M150 150l-24 24 24 24M310 150l24 24-24 24M250 140l-40 70"/>
+              </g>
+              <path d="M380 60l8 16 16 8-16 8-8 16-8-16-16-8 16-8z" fill="#ebe6da" stroke="#ebe6da"/>
+              <path d="M70 80l5 10 10 5-10 5-5 10-5-10-10-5 10-5z"/>
+              <path d="M400 340l5 10 10 5-10 5-5 10-5-10-10-5 10-5z"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+
+  <script>
+    /* Engelse teksten voor de taalknop (Nederlands → Engels) */
+    window.PL_EN = {
+  "Waarom": "Why",
+  "De app": "The app",
+  "Mijn rol": "My role",
+  "Terug naar portfolio": "Back to portfolio",
+  "WAAROM": "WHY",
+  "DE APP": "THE APP",
+  "MIJN ROL": "MY ROLE",
+  "Eigen app · UX & software": "Own app · UX &amp; software",
+  "Een simpele app die je helpt om je dhikr bij te houden, vaste gewoontes op te bouwen en je zakat te berekenen.": "A simple app that helps you keep track of your dhikr, build steady habits and calculate your zakat.",
+  "Waarom ik dit maakte →": "Why I made this →",
+  "Het begin": "How it started",
+  "Eerst voor mezelf": "First for myself",
+  "Dhikr doe ik elke dag. Ik wilde een makkelijke manier om dat bij te houden en te zien hoe ik groei. Wat ik zocht, bestond niet zoals ik het wilde.": "I do dhikr every day. I wanted an easy way to keep track of it and <span class=\"hl\">see myself grow<\/span>. What I was looking for didn't exist the way I wanted it.",
+  "Dus maakte ik mijn eigen app. Eerst gewoon voor mezelf.": "So I made my own app. At first just for myself.",
+  "Tijdens het gebruiken merkte ik iets: een score, een streak en je voortgang zien maken het leuker om vol te houden. Toen dacht ik: als dit mij helpt, kan het anderen ook helpen.": "While using it, I noticed something: a score, a streak and seeing your progress make it more fun to keep going. Then I thought: <span class=\"hl\">if this helps me, it can help others too.<\/span>",
+  "Bekijk de app →": "See the app →",
+  "66% vandaag": "66% today",
+  "Wat het doet": "What it does",
+  "Drie dingen, simpel gehouden": "Three things, kept simple",
+  "Habit tracker. Zet je eigen doelen neer, zoals Quran lezen of Fajr op tijd bidden, en vink ze elke dag af.": "<strong>Habit tracker.<\/strong> Set your own goals, like reading Quran or praying Fajr on time, and tick them off every day.",
+  "Progress. Je streak, je totale dhikr, actieve dagen en je activiteit per week, maand of jaar.": "<strong>Progress.<\/strong> Your streak, your total dhikr, active days and your activity per week, month or year.",
+  "Zakat calculator. In vier stappen: valuta, bezittingen, schulden en resultaat.": "<strong>Zakat calculator.<\/strong> In four steps: currency, assets, liabilities and result.",
+  "Waarom gamification →": "Why gamification →",
+  "Het idee erachter": "The idea behind it",
+  "Volhouden mag leuk zijn": "Keeping it up can be fun",
+  "Een goede gewoonte begint makkelijk, maar volhouden is lastig. Daarom zitten er kleine game-elementen in Yamelo:": "A good habit is easy to start, but hard to keep up. That's why Yamelo has small game elements:",
+  "Streak. Hoeveel dagen op rij je het volhoudt.": "<strong>Streak.<\/strong> How many days in a row you keep it up.",
+  "Score. Elke dhikr telt mee, zodat je ziet dat het optelt.": "<strong>Score.<\/strong> Every dhikr counts, so you see it adding up.",
+  "Friends. Samen motiveren werkt beter dan alleen.": "<strong>Friends.<\/strong> Motivating each other works better than doing it alone.",
+  "Kleine stappen, grote beloning.": "Small steps, big rewards.",
+  "Mijn rol →": "My role →",
+  "2 DAGEN": "2 DAYS",
+  "Mijn eigen app": "My own app",
+  "← Terug naar portfolio": "← Back to portfolio"
+};
+  </script>
+  <script src="page-lang.js"></script>
+  <script src="../lang.js"></script>
+  <script>
+    /* ---------- gebedskralen in een cirkel tekenen ---------- */
+    (() => {
+      const g = document.getElementById("beads");
+      const cx = 200, cy = 200, r = 118, n = 33;
+      let html = `<circle cx="${cx}" cy="${cy}" r="${r}" stroke-dasharray="2 6"/>`;
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 - Math.PI / 2;
+        const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+        const big = i % 11 === 0;
+        html += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${big ? 13 : 9}" fill="${big ? "#111" : "#fff"}"/>`;
+      }
+      g.innerHTML = html;
+    })();
+
+    /* =========================================
+       PANELEN — van links naar rechts
+       ========================================= */
+    const panels = [...document.querySelectorAll(".panel")];
+    const navBtns = [...document.querySelectorAll("#navLinks button")];
+    const count = document.getElementById("count");
+    const prev = document.getElementById("prev");
+    const next = document.getElementById("next");
+    const mobile = matchMedia("(max-width: 760px)");
+    let current = 0;
+
+    function go(i) {
+      i = Math.max(0, Math.min(panels.length - 1, i));
+      current = i;
+      panels.forEach((p, k) => p.classList.toggle("is-active", k === i));
+      navBtns.forEach((b) => b.classList.toggle("is-active", Number(b.dataset.go) === i));
+      count.textContent = `${String(i + 1).padStart(2, "0")} / ${String(panels.length).padStart(2, "0")}`;
+      prev.disabled = i === 0;
+      next.disabled = i === panels.length - 1;
+      panels[i].querySelector(".content").scrollTop = 0;
+      if (mobile.matches) panels[i].scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    panels.forEach((p, i) => p.querySelector(".tab").addEventListener("click", () => go(i)));
+    document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); go(Number(b.dataset.go)); }));
+    prev.addEventListener("click", () => go(current - 1));
+    next.addEventListener("click", () => go(current + 1));
+
+    // pijltjestoetsen
+    addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") go(current + 1);
+      if (e.key === "ArrowLeft") go(current - 1);
+    });
+
+    // vegen op een touchscreen (alleen op desktop-layout, op mobiel scroll je gewoon)
+    let sx = null;
+    addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; }, { passive: true });
+    addEventListener("touchend", (e) => {
+      if (sx === null || mobile.matches) return;
+      const dx = e.changedTouches[0].clientX - sx;
+      if (Math.abs(dx) > 60) go(current + (dx < 0 ? 1 : -1));
+      sx = null;
+    });
+
+    go(0);
+  </script>
+</body>
+</html>

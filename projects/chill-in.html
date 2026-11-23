@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="nl" data-i18n-fixed>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chill-in — stress app</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================
+       TOKENS — Chill-in: rustig, donker, paars-blauw
+       ========================================= */
+    :root {
+      --bg: #06061a;
+      --bg-2: #0d0f2e;
+      --navy: #161a4a;
+      --violet: #8a6cff;
+      --lilac: #b7a6ff;
+      --blue: #6fb6f2;
+      --text: #eef0ff;
+      --muted: #9aa0c6;
+      --line: rgba(238, 240, 255, 0.14);
+      --glass: rgba(255, 255, 255, 0.05);
+
+      --font: "Outfit", "Helvetica Neue", Arial, sans-serif;
+      --pad-x: clamp(1.25rem, 5vw, 4.5rem);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; overflow-x: clip; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-weight: 300;
+      font-size: 17px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+    }
+    img, svg { display: block; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    button { font: inherit; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--lilac); outline-offset: 4px; }
+
+    /* =========================================
+       ZWEVENDE KNOPPEN — portfolio + figma
+       ========================================= */
+    .float {
+      position: fixed;
+      left: 1rem;
+      bottom: 1rem;
+      z-index: 100;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .float a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1rem;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 400;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .float a:hover { background: #000; border-color: rgba(255, 255, 255, 0.45); }
+    .float svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    /* =========================================
+       NAV
+       ========================================= */
+    .nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem var(--pad-x);
+      transition: background 0.4s var(--ease);
+    }
+    .nav.is-scrolled {
+      background: rgba(6, 6, 26, 0.78);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .nav__logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 400; letter-spacing: 0.08em; font-size: 0.95rem; }
+    .nav__logo svg { width: 26px; height: auto; }
+    .nav__links { display: flex; gap: clamp(1rem, 3vw, 2.6rem); font-size: 0.92rem; }
+    .nav__links a { opacity: 0.75; transition: opacity 0.2s, color 0.2s; }
+    .nav__links a:hover { opacity: 1; color: var(--lilac); }
+
+    /* =========================================
+       HERO — zoals het splash screen
+       ========================================= */
+    .hero {
+      position: relative;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 6rem var(--pad-x) 4rem;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+      z-index: -1;
+      opacity: 0.85;
+    }
+    .blob--a {
+      width: 60vmax; height: 60vmax;
+      left: -15vmax; top: -25vmax;
+      background: radial-gradient(circle, #7d5cff, transparent 65%);
+      animation: drift-a 16s ease-in-out infinite alternate;
+    }
+    .blob--b {
+      width: 55vmax; height: 55vmax;
+      right: -18vmax; bottom: -25vmax;
+      background: radial-gradient(circle, #4f8fe8, transparent 65%);
+      animation: drift-b 19s ease-in-out infinite alternate;
+    }
+    .blob--c {
+      width: 30vmax; height: 30vmax;
+      left: 40%; top: 45%;
+      background: radial-gradient(circle, #b7a6ff, transparent 65%);
+      opacity: 0.35;
+      animation: drift-a 13s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes drift-a { to { transform: translate(8vmax, 6vmax) scale(1.1); } }
+    @keyframes drift-b { to { transform: translate(-7vmax, -5vmax) scale(0.92); } }
+    .hero::after { /* zachte overgang naar de pagina */
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 30%;
+      background: linear-gradient(transparent, var(--bg));
+      z-index: -1;
+    }
+
+    .hero__logo { width: clamp(150px, 20vw, 240px); margin: 0 auto; }
+    .hero__logo .logo-head { transform-origin: 50% 50%; animation: breathe 8s ease-in-out infinite; }
+    @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    .hero__title {
+      margin-top: 1.4rem;
+      font-weight: 200;
+      font-size: clamp(3.6rem, 12vw, 10rem);
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+    }
+    .hero__sub {
+      margin: 1.4rem auto 0;
+      max-width: 34rem;
+      font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+      color: #d6d8f3;
+    }
+    .hero__type {
+      margin-bottom: 1.6rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .hero__scroll {
+      position: absolute;
+      left: 50%;
+      bottom: 2rem;
+      transform: translateX(-50%);
+      width: 40px; height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .hero__scroll:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--text); }
+    .hero__scroll svg { width: 16px; height: 16px; }
+
+    /* =========================================
+       SECTIES
+       ========================================= */
+    .section { padding: clamp(5rem, 11vw, 9rem) var(--pad-x) 0; }
+    .kicker {
+      font-size: 0.78rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--lilac);
+      margin-bottom: 1rem;
+    }
+    .h2 {
+      font-weight: 300;
+      font-size: clamp(2.1rem, 4.4vw, 3.6rem);
+      line-height: 1.1;
+      max-width: 22ch;
+    }
+    .lead { margin-top: 1.4rem; max-width: 38rem; color: #cfd2ee; font-size: 1.08rem; }
+
+    /* ---------- wat is het ---------- */
+    .about {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: clamp(2rem, 6vw, 6rem);
+      align-items: start;
+    }
+    .facts { border-top: 1px solid var(--line); }
+    .facts li { padding: 1rem 0; border-bottom: 1px solid var(--line); }
+    .facts b {
+      display: block;
+      font-weight: 400;
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+
+    /* ---------- probeer het: ademhaling ---------- */
+    .breath {
+      position: relative;
+      margin-top: 3rem;
+      border-radius: 32px;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(138, 108, 255, 0.25), transparent 60%),
+        linear-gradient(180deg, var(--navy), var(--bg-2));
+      border: 1px solid var(--line);
+      min-height: min(78vh, 680px);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: 3rem 1.5rem;
+    }
+    .breath__inner { display: grid; place-items: center; gap: 2rem; text-align: center; }
+    .orb-wrap { position: relative; width: clamp(220px, 34vw, 340px); aspect-ratio: 1; display: grid; place-items: center; }
+    .orb {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.35), transparent 40%),
+        conic-gradient(from 200deg, #6fb6f2, #8a6cff, #c3b4ff, #6fb6f2);
+      filter: blur(2px);
+      box-shadow: 0 0 80px rgba(138, 108, 255, 0.55), inset 0 0 40px rgba(6, 6, 26, 0.6);
+      transform: scale(0.62);
+      transition-property: transform, filter;
+      transition-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+    }
+    .orb::after { /* donkere kern zoals in de app */
+      content: "";
+      position: absolute;
+      inset: 18%;
+      border-radius: 50%;
+      background: radial-gradient(circle, #0d0f2e 40%, rgba(13, 15, 46, 0.6) 70%, transparent);
+    }
+    .orb-ring { position: absolute; inset: -14px; transform: rotate(-90deg); }
+    .orb-ring circle { fill: none; stroke-width: 2; }
+    .orb-ring .track { stroke: var(--line); }
+    .orb-ring .bar { stroke: var(--lilac); stroke-linecap: round; transition: stroke-dashoffset 0.4s linear; }
+    .orb-label {
+      position: relative;
+      z-index: 2;
+      font-size: clamp(1.1rem, 2vw, 1.4rem);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+    .orb-count { position: relative; z-index: 2; display: block; margin-top: 0.3rem; font-size: 0.85rem; color: var(--muted); letter-spacing: 0.1em; }
+    .breath__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.75rem 1.8rem;
+      border: 0;
+      border-radius: 999px;
+      background: #fff;
+      color: #12143a;
+      font-weight: 500;
+      transition: transform 0.3s var(--ease), box-shadow 0.3s;
+    }
+    .breath__btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(138, 108, 255, 0.4); }
+    .breath__note { font-size: 0.85rem; color: var(--muted); max-width: 26rem; }
+
+    /* ---------- features ---------- */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin-top: 3rem;
+    }
+    .feature {
+      position: relative;
+      border-radius: 24px;
+      padding: 1.8rem 1.6rem 1.6rem;
+      background: linear-gradient(160deg, rgba(138, 108, 255, 0.14), rgba(111, 182, 242, 0.04) 60%, transparent);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      min-height: 360px;
+      transition: transform 0.5s var(--ease), border-color 0.4s;
+    }
+    .feature:hover { transform: translateY(-6px); border-color: rgba(183, 166, 255, 0.5); }
+    .feature__num { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.14em; }
+    .feature h3 { font-weight: 400; font-size: 1.5rem; line-height: 1.15; }
+    .feature p { color: #c8cbe8; font-size: 0.98rem; }
+    .feature__vis { margin-top: auto; padding-top: 1.4rem; }
+
+    /* hvr-golf */
+    .wave { width: 100%; height: 90px; }
+    .wave path { fill: none; stroke: var(--lilac); stroke-width: 2.5; stroke-linecap: round; }
+    .wave .base { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 5; }
+    .wave .live { stroke-dasharray: 600; stroke-dashoffset: 600; animation: draw 4.5s ease-in-out infinite; }
+    @keyframes draw { 60%, 100% { stroke-dashoffset: 0; } }
+    .stat { display: flex; align-items: baseline; gap: 0.4rem; margin-top: 0.4rem; }
+    .stat b { font-weight: 300; font-size: 2.4rem; line-height: 1; }
+    .stat small { color: var(--muted); }
+
+    /* mini ademhalingsbol */
+    .mini-orb {
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      background: conic-gradient(from 200deg, #6fb6f2, #8a6cff, #c3b4ff, #6fb6f2);
+      box-shadow: 0 0 40px rgba(138, 108, 255, 0.5);
+      animation: inout 8s ease-in-out infinite;
+    }
+    @keyframes inout { 0%, 100% { transform: scale(0.7); } 50% { transform: scale(1); } }
+
+    /* streak */
+    .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; text-align: center; font-size: 0.78rem; color: var(--muted); }
+    .week i {
+      display: grid;
+      place-items: center;
+      margin: 0.4rem auto 0;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      font-style: normal;
+      color: transparent;
+      transition: background 0.4s, color 0.4s, border-color 0.4s;
+    }
+    .week i.is-on { background: var(--lilac); border-color: var(--lilac); color: #12143a; }
+    .flame { font-size: 2.4rem; line-height: 1; }
+
+    /* ---------- flow ---------- */
+    .flow {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1rem;
+      margin-top: 3.5rem;
+    }
+    .flow__line {
+      position: absolute;
+      left: 0; right: 0;
+      top: 13px;
+      height: 1px;
+      background: var(--line);
+    }
+    .flow__line span {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, var(--blue), var(--violet), var(--lilac));
+      transform-origin: left;
+      transform: scaleX(0);
+    }
+    .step { position: relative; }
+    .step__dot {
+      width: 27px; height: 27px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1px solid var(--lilac);
+      display: grid;
+      place-items: center;
+      font-size: 0.7rem;
+      margin-bottom: 1rem;
+    }
+    .step h3 { font-weight: 400; font-size: 1.05rem; }
+    .step p { font-size: 0.88rem; color: var(--muted); margin-top: 0.3rem; }
+
+    /* ---------- figma cta ---------- */
+    .cta {
+      margin-top: clamp(5rem, 11vw, 9rem);
+      margin-inline: var(--pad-x);
+      border-radius: 32px;
+      padding: clamp(2.5rem, 6vw, 5rem);
+      background:
+        radial-gradient(circle at 85% 20%, rgba(111, 182, 242, 0.45), transparent 55%),
+        radial-gradient(circle at 10% 90%, rgba(138, 108, 255, 0.55), transparent 55%),
+        var(--navy);
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .cta h2 { font-weight: 200; font-size: clamp(2.4rem, 6vw, 5rem); line-height: 1; }
+    .cta__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.9rem 1.8rem;
+      border-radius: 999px;
+      background: #fff;
+      color: #12143a;
+      font-weight: 500;
+      transition: transform 0.3s var(--ease);
+    }
+    .cta__btn:hover { transform: translateY(-3px); }
+    .cta__btn svg { width: 16px; height: auto; }
+
+    /* ---------- credits ---------- */
+    .credits {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      padding-bottom: 5rem;
+      margin-top: 2.5rem;
+      border-top: 1px solid var(--line);
+      padding-top: 2rem;
+    }
+    .credits h3 {
+      font-weight: 400;
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .footer {
+      padding: 2rem var(--pad-x) 5rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* =========================================
+       RESPONSIVE
+       ========================================= */
+    @media (max-width: 960px) {
+      .about { grid-template-columns: 1fr; }
+      .features { grid-template-columns: 1fr; }
+      .feature { min-height: 0; }
+      .flow { grid-template-columns: 1fr; gap: 1.6rem; padding-left: 2.6rem; }
+      .flow__line { left: 13px; right: auto; top: 0; bottom: 0; width: 1px; height: auto; }
+      .flow__line span { transform-origin: top; transform: scaleY(0); }
+      .step__dot { position: absolute; left: -2.6rem; top: 0; }
+      .credits { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .nav__links { display: none; }
+      .float a span { display: none; }
+      .float a { padding: 0.6rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
+      .wave .live { stroke-dashoffset: 0; }
+    }
+    /* =========================================
+       MIJN ROL / MY ROLE — NL + EN
+       ========================================= */
+    .myrole { position: relative; z-index: 2; padding: clamp(4rem, 9vw, 7rem) var(--pad-x, 5vw) 0; }
+    .myrole__in { max-width: 1100px; margin: 0 auto; padding-top: 2rem; border-top: 1px solid var(--role-line, currentColor); }
+    .myrole__kick { font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; margin-bottom: 0.8rem; }
+    .myrole__title { font-family: var(--role-head, inherit); font-weight: var(--role-weight, 400); font-size: clamp(1.8rem, 3.6vw, 3rem); line-height: 1.1; margin-bottom: 2rem; }
+    .myrole__cols { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 4vw, 3.5rem); }
+    .myrole__lang { display: inline-block; margin-bottom: 0.8rem; padding: 0.15rem 0.5rem; border: 1px solid currentColor; border-radius: var(--role-r, 999px); font-size: 0.7rem; letter-spacing: 0.14em; opacity: 0.75; }
+    .myrole__cols p + p { margin-top: 0.8rem; }
+    .myrole__list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1.1rem; list-style: none; padding: 0; }
+    .myrole__list li { padding: 0.3rem 0.75rem; border: 1px solid var(--role-line, currentColor); border-radius: var(--role-r, 999px); font-size: 0.82rem; }
+    .myrole__note { margin-top: 1.1rem; font-size: 0.88rem; font-style: italic; opacity: 0.75; }
+    @media (max-width: 760px) { .myrole__cols { grid-template-columns: 1fr; } }
+    .myrole { --role-line: var(--line); padding-left: 0; padding-right: 0; }
+    .myrole__title { font-weight: 300; }
+    /* taalknop NL / EN */
+    .pl-switch { --pl-on: #12143a; }
+  </style>
+</head>
+<body>
+
+  <!-- zwevende knoppen -->
+  <div class="float">
+    <a href="../index.html#projects" aria-label="Terug naar portfolio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      <span data-i18n="float.back">Terug naar portfolio</span>
+    </a>
+    <a href="https://www.figma.com/design/Aqfba0dDRugWKBD2Ehgsyt/Chill-in-app-mockup-design?node-id=7-2&t=DAIB1CpgltgVqzc5-1" target="_blank" rel="noopener" aria-label="Bekijk het design in Figma">
+      <svg viewBox="0 0 38 57" fill="none">
+        <path d="M19 28.5a9.5 9.5 0 1 1 19 0 9.5 9.5 0 0 1-19 0Z" fill="#1ABCFE"/>
+        <path d="M0 47.5A9.5 9.5 0 0 1 9.5 38H19v9.5a9.5 9.5 0 1 1-19 0Z" fill="#0ACF83"/>
+        <path d="M19 0v19h9.5a9.5 9.5 0 1 0 0-19H19Z" fill="#FF7262"/>
+        <path d="M0 9.5A9.5 9.5 0 0 0 9.5 19H19V0H9.5A9.5 9.5 0 0 0 0 9.5Z" fill="#F24E1E"/>
+        <path d="M0 28.5A9.5 9.5 0 0 0 9.5 38H19V19H9.5A9.5 9.5 0 0 0 0 28.5Z" fill="#A259FF"/>
+      </svg>
+      <span data-i18n="float.figma">Bekijk in Figma</span>
+    </a>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <a href="#top" class="nav__logo">
+      <svg viewBox="0 0 100 60" fill="none" aria-hidden="true">
+        <circle cx="50" cy="14" r="10" fill="currentColor"/>
+        <path d="M6 26c12 18 30 24 44 24s32-6 44-24" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      CHILL-IN
+    </a>
+    <ul class="nav__links">
+      <li><a href="#wat">Wat is het</a></li>
+      <li><a href="#probeer">Probeer</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#flow">Flow</a></li>
+    </ul>
+  </nav>
+
+  <!-- =========================================
+       HERO
+       ========================================= -->
+  <header class="hero" id="top">
+    <div class="blob blob--a" aria-hidden="true"></div>
+    <div class="blob blob--b" aria-hidden="true"></div>
+    <div class="blob blob--c" aria-hidden="true"></div>
+
+    <div class="hero__inner" id="heroInner">
+      <p class="hero__type">App design · UI/UX</p>
+      <!-- Chill-in logo, in code nagebouwd -->
+      <svg class="hero__logo" viewBox="0 0 100 60" fill="none" aria-label="Chill-in logo">
+        <circle class="logo-head" cx="50" cy="14" r="10" fill="#fff"/>
+        <path d="M6 26c12 18 30 24 44 24s32-6 44-24" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <h1 class="hero__title">CHILL-IN</h1>
+      <p class="hero__sub">Een app die met een biosensor je stress meet en je helpt om rustig te worden, met ademhalingsoefeningen en kleine dagelijkse challenges.</p>
+    </div>
+
+    <a href="#wat" class="hero__scroll" aria-label="Scroll naar beneden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>
+    </a>
+  </header>
+
+  <main>
+
+    <!-- =========================================
+         WAT IS HET
+         ========================================= -->
+    <section class="section" id="wat">
+      <div class="about">
+        <div class="reveal">
+          <p class="kicker">Wat is Chill-in?</p>
+          <h2 class="h2">Even ademhalen, met je eigen hartslag als gids.</h2>
+          <p class="lead">Chill-in koppelt aan een biosensor en meet je hartslagvariabiliteit (HRV). Zo zie je wat je stress beïnvloedt en krijg je ademhalingsoefeningen die meebewegen met je lichaam. Mini challenges en streaks helpen om het een gewoonte te maken.</p>
+          <p class="lead">Ik heb de stijl van de app vernieuwd en een UI/UX-ontwerp gemaakt van hoe de app eruit zou kunnen zien: van onboarding en intake tot het koppelen van de sensor en de ademhalingssessie.</p>
+        </div>
+        <ul class="facts reveal">
+          <li><b>Type</b>Mobiele app + biosensor</li>
+          <li><b>Mijn rol</b>Nieuwe stijl + UI/UX design (concept)</li>
+          <li><b>Tools</b>Figma</li>
+          <li><b>Project van</b>Paul Zautsen</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- =========================================
+         PROBEER HET
+         ========================================= -->
+    <section class="section" id="probeer">
+      <div class="reveal">
+        <p class="kicker">Probeer het</p>
+        <h2 class="h2">Eén minuut rust.</h2>
+        <p class="lead">Zo voelt een sessie in de app. Adem in als de bol groeit, adem uit als hij krimpt.</p>
+      </div>
+
+      <div class="breath reveal" id="breath">
+        <div class="breath__inner">
+          <div class="orb-wrap">
+            <svg class="orb-ring" viewBox="0 0 100 100" aria-hidden="true">
+              <circle class="track" cx="50" cy="50" r="48"/>
+              <circle class="bar" id="ring" cx="50" cy="50" r="48" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+            </svg>
+            <div class="orb" id="orb"></div>
+            <p class="orb-label" aria-live="polite"><span id="orbLabel">Klaar?</span><span class="orb-count" id="orbCount">6 ademhalingen</span></p>
+          </div>
+          <button class="breath__btn" id="breathBtn" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>
+            <span>Start sessie</span>
+          </button>
+          <p class="breath__note">4 seconden in, 6 seconden uit. Langer uitademen helpt je lichaam om tot rust te komen.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================
+         FEATURES
+         ========================================= -->
+    <section class="section" id="features">
+      <div class="reveal">
+        <p class="kicker">Features</p>
+        <h2 class="h2">Drie dingen, die elkaar versterken.</h2>
+      </div>
+
+      <div class="features">
+        <article class="feature">
+          <span class="feature__num">01</span>
+          <h3>Guided breathing</h3>
+          <p>Simpele oefeningen, gebaseerd op wetenschap, die je in een paar minuten rustig maken.</p>
+          <div class="feature__vis"><div class="mini-orb" aria-hidden="true"></div></div>
+        </article>
+
+        <article class="feature">
+          <span class="feature__num">02</span>
+          <h3>Stress insights</h3>
+          <p>Volg je hartslagvariabiliteit en ontdek wat invloed heeft op je stress.</p>
+          <div class="feature__vis">
+            <svg class="wave" viewBox="0 0 300 90" preserveAspectRatio="none" aria-hidden="true">
+              <path class="base" d="M0 60 H300"/>
+              <path class="live" d="M0 70 C30 70 40 30 70 30 S110 75 140 70 S180 10 210 15 S250 75 300 50"/>
+            </svg>
+            <div class="stat"><b id="hrv">64</b><small>ms HRV</small></div>
+          </div>
+        </article>
+
+        <article class="feature">
+          <span class="feature__num">03</span>
+          <h3>Mini challenges</h3>
+          <p>Kleine, leuke opdrachten die je focus, rust en veerkracht trainen. Elke dag een beetje.</p>
+          <div class="feature__vis">
+            <p class="flame" aria-hidden="true">🔥</p>
+            <div class="week" id="week" aria-label="Streak van deze week">
+              <span>M<i>✓</i></span><span>D<i>✓</i></span><span>W<i>✓</i></span><span>D<i>✓</i></span><span>V<i>✓</i></span><span>Z<i>✓</i></span><span>Z<i>✓</i></span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- =========================================
+         FLOW
+         ========================================= -->
+    <section class="section" id="flow">
+      <div class="reveal">
+        <p class="kicker">De flow</p>
+        <h2 class="h2">Van eerste keer openen tot je eerste streak.</h2>
+      </div>
+
+      <div class="flow" id="flowSteps">
+        <div class="flow__line"><span id="flowLine"></span></div>
+        <div class="step"><span class="step__dot">1</span><h3>Onboarding</h3><p>Drie schermen die laten zien wat de app doet.</p></div>
+        <div class="step"><span class="step__dot">2</span><h3>Account</h3><p>Registreren of inloggen, ook met Apple of Google.</p></div>
+        <div class="step"><span class="step__dot">3</span><h3>Intake</h3><p>Korte vragen over beweging, energie en slaap. Eén per scherm.</p></div>
+        <div class="step"><span class="step__dot">4</span><h3>Sensor</h3><p>Biosensor koppelen voor real-time inzichten.</p></div>
+        <div class="step"><span class="step__dot">5</span><h3>Home</h3><p>Stressvoorspelling, focus en je huidige HRV.</p></div>
+        <div class="step"><span class="step__dot">6</span><h3>Sessie</h3><p>Ademhaling die reageert op je hartslag.</p></div>
+        <div class="step"><span class="step__dot">7</span><h3>Streak</h3><p>Elke dag een moment rust, bijgehouden per week.</p></div>
+      </div>
+    </section>
+
+    <!-- =========================================
+         FIGMA
+         ========================================= -->
+    <div class="cta reveal">
+      <h2>Alle schermen<br />staan in Figma.</h2>
+      <a class="cta__btn" href="https://www.figma.com/design/Aqfba0dDRugWKBD2Ehgsyt/Chill-in-app-mockup-design?node-id=7-2&t=DAIB1CpgltgVqzc5-1" target="_blank" rel="noopener">
+        <svg viewBox="0 0 38 57" fill="none" aria-hidden="true">
+          <path d="M19 28.5a9.5 9.5 0 1 1 19 0 9.5 9.5 0 0 1-19 0Z" fill="#1ABCFE"/>
+          <path d="M0 47.5A9.5 9.5 0 0 1 9.5 38H19v9.5a9.5 9.5 0 1 1-19 0Z" fill="#0ACF83"/>
+          <path d="M19 0v19h9.5a9.5 9.5 0 1 0 0-19H19Z" fill="#FF7262"/>
+          <path d="M0 9.5A9.5 9.5 0 0 0 9.5 19H19V0H9.5A9.5 9.5 0 0 0 0 9.5Z" fill="#F24E1E"/>
+          <path d="M0 28.5A9.5 9.5 0 0 0 9.5 38H19V19H9.5A9.5 9.5 0 0 0 0 28.5Z" fill="#A259FF"/>
+        </svg>
+        Bekijk het design
+      </a>
+    </div>
+
+    <!-- =========================================
+         CREDITS
+         ========================================= -->
+    <div class="section">
+    <!-- =========================================
+         MIJN ROL / MY ROLE (NL + EN)
+         ========================================= -->
+    <section class="myrole " id="mijn-rol">
+      <div class="myrole__in">
+        <p class="myrole__kick" data-en="My role">Mijn rol</p>
+        <h2 class="myrole__title" data-en="What I did">Wat ik deed</h2>
+        <div class="myrole__cols">
+          <div lang="nl">
+            <span class="myrole__lang">NL</span>
+            <p>Chill-in is een project van Paul Zautsen. Ik heb de stijl van de app vernieuwd en een UI/UX-ontwerp gemaakt van hoe de app er mogelijk uit kan zien.</p>
+            <ul class="myrole__list"><li>Nieuwe stijl</li><li>UI/UX design</li><li>Concept</li></ul>
+            <p class="myrole__note">Deze pagina is gemaakt in de stijl van het design van het project.</p>
+          </div>
+          <div lang="en">
+            <span class="myrole__lang">EN</span>
+            <p>Chill-in is a project by Paul Zautsen. I gave the app a new style and created a UI/UX design of how the app could look.</p>
+            <ul class="myrole__list"><li>New style</li><li>UI/UX design</li><li>Concept</li></ul>
+            <p class="myrole__note">This page is built in the style of the project's own design.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <section class="section" id="credits">
+      <p class="kicker">Credits</p>
+      <div class="credits">
+        <div><h3>Project</h3><p>Chill-in is een project van Paul Zautsen</p></div>
+        <div><h3>Stijl &amp; UI/UX design</h3><p>Yasmine Boucharib</p></div>
+        <div><h3>Tools</h3><p>Figma</p></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">Chill-in · een project van Paul Zautsen · design door Yasmine Boucharib</footer>
+
+  <script>
+    /* Engelse teksten voor de taalknop (Nederlands → Engels) */
+    window.PL_EN = {
+  "Terug naar portfolio": "Back to portfolio",
+  "Bekijk in Figma": "View in Figma",
+  "Wat is het": "What it is",
+  "Probeer": "Try it",
+  "Een app die met een biosensor je stress meet en je helpt om rustig te worden, met ademhalingsoefeningen en kleine dagelijkse challenges.": "An app that measures your stress with a biosensor and helps you calm down, with breathing exercises and small daily challenges.",
+  "Wat is Chill-in?": "What is Chill-in?",
+  "Even ademhalen, met je eigen hartslag als gids.": "Take a breath, with your own heartbeat as your guide.",
+  "Chill-in koppelt aan een biosensor en meet je hartslagvariabiliteit (HRV). Zo zie je wat je stress beïnvloedt en krijg je ademhalingsoefeningen die meebewegen met je lichaam. Mini challenges en streaks helpen om het een gewoonte te maken.": "Chill-in connects to a biosensor and measures your heart rate variability (HRV). You see what affects your stress and get breathing exercises that move with your body. Mini challenges and streaks help turn it into a habit.",
+  "Ik heb de stijl van de app vernieuwd en een UI/UX-ontwerp gemaakt van hoe de app eruit zou kunnen zien: van onboarding en intake tot het koppelen van de sensor en de ademhalingssessie.": "I gave the app a new style and created a UI/UX design of how the app could look: from onboarding and intake to connecting the sensor and the breathing session.",
+  "TypeMobiele app + biosensor": "<b>Type<\/b>Mobile app + biosensor",
+  "Mijn rolNieuwe stijl + UI/UX design (concept)": "<b>My role<\/b>New style + UI/UX design (concept)",
+  "Project vanPaul Zautsen": "<b>Project by<\/b>Paul Zautsen",
+  "Probeer het": "Try it",
+  "Eén minuut rust.": "One minute of calm.",
+  "Zo voelt een sessie in de app. Adem in als de bol groeit, adem uit als hij krimpt.": "This is what a session in the app feels like. Breathe in as the orb grows, breathe out as it shrinks.",
+  "Klaar?": "Ready?",
+  "6 ademhalingen": "6 breaths",
+  "Start sessie": "Start session",
+  "4 seconden in, 6 seconden uit. Langer uitademen helpt je lichaam om tot rust te komen.": "4 seconds in, 6 seconds out. Breathing out longer helps your body calm down.",
+  "Drie dingen, die elkaar versterken.": "Three things that strengthen each other.",
+  "Simpele oefeningen, gebaseerd op wetenschap, die je in een paar minuten rustig maken.": "Simple, science-based exercises that calm you down in just a few minutes.",
+  "Volg je hartslagvariabiliteit en ontdek wat invloed heeft op je stress.": "Track your heart rate variability and find out what affects your stress.",
+  "Kleine, leuke opdrachten die je focus, rust en veerkracht trainen. Elke dag een beetje.": "Small, fun tasks that train your focus, calm and resilience. A little every day.",
+  "D✓": "T<i>✓<\/i>",
+  "V✓": "F<i>✓<\/i>",
+  "Z✓": "S<i>✓<\/i>",
+  "De flow": "The flow",
+  "Van eerste keer openen tot je eerste streak.": "From opening the app for the first time to your first streak.",
+  "Drie schermen die laten zien wat de app doet.": "Three screens that show what the app does.",
+  "Registreren of inloggen, ook met Apple of Google.": "Sign up or log in, also with Apple or Google.",
+  "Korte vragen over beweging, energie en slaap. Eén per scherm.": "Short questions about exercise, energy and sleep. One per screen.",
+  "Biosensor koppelen voor real-time inzichten.": "Connect the biosensor for real-time insights.",
+  "Stressvoorspelling, focus en je huidige HRV.": "Stress prediction, focus and your current HRV.",
+  "Sessie": "Session",
+  "Ademhaling die reageert op je hartslag.": "Breathing that responds to your heart rate.",
+  "Elke dag een moment rust, bijgehouden per week.": "A moment of calm every day, tracked per week.",
+  "Alle schermenstaan in Figma.": "All screens<br>are in Figma.",
+  "Bekijk het design": "View the design",
+  "Project": "Project",
+  "Chill-in is een project van Paul Zautsen": "Chill-in is a project by Paul Zautsen",
+  "Stijl & UI/UX design": "Style &amp; UI/UX design",
+  "Chill-in · een project van Paul Zautsen · design door Yasmine Boucharib": "Chill-in · a project by Paul Zautsen · design by Yasmine Boucharib"
+};
+  </script>
+  <script src="page-lang.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="../lang.js"></script>
+  <script>
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* ---------- nav ---------- */
+    const nav = document.getElementById("nav");
+    const onScroll = () => nav.classList.toggle("is-scrolled", scrollY > 40);
+    addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    /* =========================================
+       ADEMHALING — 4 sec in, 6 sec uit, 6 keer
+       ========================================= */
+    (() => {
+      const IN = 4, OUT = 6, ROUNDS = 6;
+      const orb = document.getElementById("orb");
+      const label = document.getElementById("orbLabel");
+      const count = document.getElementById("orbCount");
+      const ring = document.getElementById("ring");
+      const btn = document.getElementById("breathBtn");
+      const btnText = btn.querySelector("span");
+      let timers = [], running = false, done = false;
+      const T = (nl, en) => (window.PL ? PL.t(nl, en) : nl);
+
+      const clear = () => { timers.forEach(clearTimeout); timers = []; };
+      const at = (sec, fn) => timers.push(setTimeout(fn, sec * 1000));
+
+      function reset(text) {
+        clear();
+        running = false;
+        done = false;
+        text = text || T("Klaar?", "Ready?");
+        orb.style.transitionDuration = "1.2s";
+        orb.style.transform = "scale(0.62)";
+        label.textContent = text;
+        count.textContent = T(`${ROUNDS} ademhalingen`, `${ROUNDS} breaths`);
+        ring.style.strokeDashoffset = 100;
+        btnText.textContent = T("Start sessie", "Start session");
+      }
+
+      function run() {
+        running = true;
+        btnText.textContent = T("Stop", "Stop");
+        const cycle = IN + OUT;
+        for (let r = 0; r < ROUNDS; r++) {
+          const t = r * cycle;
+          at(t, () => {
+            orb.style.transitionDuration = `${IN}s`;
+            orb.style.transform = "scale(1)";
+            label.textContent = T("Adem in", "Breathe in");
+            count.textContent = `${r + 1} / ${ROUNDS}`;
+          });
+          at(t + IN, () => {
+            orb.style.transitionDuration = `${OUT}s`;
+            orb.style.transform = "scale(0.62)";
+            label.textContent = T("Adem uit", "Breathe out");
+          });
+          at(t + cycle, () => { ring.style.strokeDashoffset = 100 - ((r + 1) / ROUNDS) * 100; });
+        }
+        at(ROUNDS * cycle + 0.4, () => {
+          running = false;
+          done = true;
+          showDone();
+        });
+      }
+
+      function showDone() {
+        label.textContent = T("Goed gedaan", "Well done");
+        count.textContent = T("Hoe voel je je nu?", "How do you feel now?");
+        btnText.textContent = T("Nog een keer", "Again");
+      }
+
+      // taal gewisseld: teksten van de sessie meteen aanpassen
+      document.addEventListener("pl-change", () => {
+        if (done) showDone();
+        else if (!running) reset();
+        else btnText.textContent = T("Stop", "Stop");
+      });
+
+      btn.addEventListener("click", () => {
+        if (running) { reset(); return; }
+        reset();
+        requestAnimationFrame(run);
+      });
+    })();
+
+    /* ---------- HRV-getal tikt zachtjes ---------- */
+    (() => {
+      const el = document.getElementById("hrv");
+      if (reduce) return;
+      let v = 64;
+      setInterval(() => {
+        v += Math.round(Math.random() * 4 - 2);
+        v = Math.max(58, Math.min(72, v));
+        el.textContent = v;
+      }, 1500);
+    })();
+
+    /* =========================================
+       SCROLL-ANIMATIES
+       ========================================= */
+    (() => {
+      const week = [...document.querySelectorAll("#week i")];
+      const fillWeek = () => week.forEach((d, i) => setTimeout(() => d.classList.add("is-on"), i * 180));
+
+      if (!window.gsap || !window.ScrollTrigger || reduce) {
+        fillWeek();
+        document.getElementById("flowLine").style.transform = "none";
+        return;
+      }
+      gsap.registerPlugin(ScrollTrigger);
+
+      // hero: logo en tekst zakken weg en vervagen bij wegscrollen
+      gsap.from("#heroInner > *", { y: 40, opacity: 0, duration: 1.4, stagger: 0.15, ease: "expo.out", delay: 0.2 });
+      gsap.to("#heroInner", {
+        y: 140, opacity: 0, scale: 0.94, ease: "none",
+        scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
+      });
+      gsap.to(".blob--a", { yPercent: 25, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+      gsap.to(".blob--b", { yPercent: -20, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+
+      // blokken komen zacht omhoog
+      gsap.utils.toArray(".reveal").forEach((el) => {
+        gsap.from(el, { y: 60, opacity: 0, duration: 1.2, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 85%" } });
+      });
+
+      // ademhalingsvlak opent als een scherm
+      gsap.fromTo("#breath", { clipPath: "inset(12% 8% 12% 8% round 32px)" }, {
+        clipPath: "inset(0% 0% 0% 0% round 32px)", ease: "none",
+        scrollTrigger: { trigger: "#breath", start: "top 90%", end: "top 35%", scrub: 0.6 },
+      });
+
+      // feature-kaarten
+      gsap.from(".feature", {
+        y: 100, opacity: 0, rotate: (i) => [-3, 0, 3][i], duration: 1.1, stagger: 0.15, ease: "expo.out",
+        scrollTrigger: { trigger: ".features", start: "top 85%", onEnter: fillWeek },
+      });
+
+      // flow: lijn tekent mee met scrollen, stappen lichten op
+      const vertical = matchMedia("(max-width: 960px)").matches;
+      gsap.to("#flowLine", {
+        [vertical ? "scaleY" : "scaleX"]: 1, ease: "none",
+        scrollTrigger: { trigger: "#flowSteps", start: "top 80%", end: "bottom 60%", scrub: 0.5 },
+      });
+      gsap.from(".step", {
+        y: 30, opacity: 0, duration: 0.8, stagger: 0.12, ease: "power3.out",
+        scrollTrigger: { trigger: "#flowSteps", start: "top 80%" },
+      });
+
+      // credits
+      gsap.from(".credits > div", {
+        y: 30, opacity: 0, duration: 0.8, stagger: 0.1, ease: "expo.out",
+        scrollTrigger: { trigger: ".credits", start: "top 90%" },
+      });
+    })();
+  </script>
+</body>
+</html>

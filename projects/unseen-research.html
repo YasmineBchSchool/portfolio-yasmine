@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+
+<html lang="nl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UNSEEN — Research-analyse · Team 6</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&amp;family=Courier+Prime:ital,wght@0,400;0,700;1,400&amp;family=Caveat:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    /* =========================================
+       TOKENS — zelfde sfeer als de UNSEEN pagina
+       ========================================= */
+    :root {
+      --bg: #1e1e1b;
+      --paper: #e9e3d3;
+      --paper-2: #d8d0bb;
+      --ink: #1f1f1c;
+      --chalk: #ecebe4;
+      --muted: #9a978a;
+      --red: #b3261e;
+      --sticky: #f6ef9c;
+      --sticky-pink: #f4a3a3;
+      --line: rgba(236, 235, 228, 0.18);
+      /* hoe donker de achtergrondfoto wordt: 0 = origineel, 1 = zwart */
+      --bg-dim: 0.78;
+
+      --type: "Special Elite", "Courier New", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Noto Sans Arabic", monospace;
+      --mono: "Courier Prime", "Courier New", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Noto Sans Arabic", monospace;
+      --hand: "Caveat", "Comic Sans MS", "PingFang SC", "Microsoft YaHei", "Noto Sans Arabic", cursive;
+      --pad-x: clamp(1.25rem, 5vw, 4.5rem);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; overflow-x: clip; }
+    body {
+      background:
+        linear-gradient(rgba(12, 12, 10, var(--bg-dim)), rgba(12, 12, 10, var(--bg-dim))),
+        var(--bg-img, none) center / cover fixed,
+        var(--bg);
+      color: var(--chalk);
+      font-family: var(--mono);
+      font-size: 17px;
+      line-height: 1.6;
+      overflow-x: clip;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.3;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.65) 100%);
+    }
+    header, main, footer, nav { position: relative; z-index: 1; }
+    a { color: inherit; }
+    :focus-visible { outline: 2px dashed var(--chalk); outline-offset: 4px; }
+
+    .stamp {
+      display: inline-block;
+      border: 3px solid var(--red);
+      color: var(--red);
+      font-family: var(--type);
+      letter-spacing: 0.12em;
+      padding: 0.3rem 0.9rem;
+      transform: rotate(-8deg);
+      opacity: 0.85;
+    }
+    .reveal { opacity: 0; transform: translateY(40px) rotate(var(--r, 0deg)); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
+    .reveal.is-in { opacity: 1; transform: translateY(0) rotate(var(--r, 0deg)); }
+
+    /* ---------- nav ---------- */
+    .nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem var(--pad-x);
+      font-family: var(--type);
+      background: rgba(22, 22, 19, 0.88);
+      backdrop-filter: blur(8px);
+    }
+    .nav a { text-decoration: none; }
+    .nav__back { display: inline-flex; gap: 0.5rem; align-items: center; opacity: 0.85; }
+    .nav__back:hover { opacity: 1; }
+    .nav__back svg { width: 16px; height: 16px; }
+    html[dir="rtl"] .nav__back svg { transform: scaleX(-1); }
+    .nav__lang { margin-inline-start: 1.4rem; font-family: var(--mono); }
+    .nav__links { margin-inline-start: auto; display: flex; gap: clamp(0.8rem, 2vw, 1.8rem); list-style: none; font-size: 0.9rem; }
+    .nav__links a { opacity: 0.75; }
+    .nav__links a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
+
+    /* ---------- hero ---------- */
+    .hero {
+      min-height: 85svh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 8rem var(--pad-x) 3rem;
+    }
+    .hero__file { font-family: var(--type); letter-spacing: 0.15em; color: var(--muted); }
+    .hero h1 {
+      font-family: var(--type);
+      font-weight: 400;
+      font-size: clamp(2.8rem, 8vw, 7rem);
+      line-height: 1;
+      letter-spacing: 0.04em;
+      margin: 0.6rem 0 1.4rem;
+    }
+    .hero p { max-width: 38rem; color: var(--muted); }
+    .hero .stamp { margin-top: 2rem; align-self: flex-start; }
+
+    .section { padding: clamp(4rem, 9vw, 7rem) var(--pad-x) 0; }
+    .h2 {
+      font-family: var(--type);
+      font-weight: 400;
+      font-size: clamp(1.8rem, 3.6vw, 2.8rem);
+      margin-bottom: 0.6rem;
+    }
+    .lead { max-width: 40rem; color: var(--muted); margin-bottom: 2.2rem; }
+
+    /* ---------- de vraag ---------- */
+    .brief {
+      max-width: 900px;
+      background: var(--paper);
+      color: var(--ink);
+      padding: clamp(1.8rem, 4vw, 3rem);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+      --r: -0.5deg;
+    }
+    .brief small { font-family: var(--type); letter-spacing: 0.1em; opacity: 0.6; }
+    .brief__q {
+      font-family: var(--type);
+      font-size: clamp(1.2rem, 2.2vw, 1.7rem);
+      line-height: 1.4;
+      margin: 0.6rem 0 1.2rem;
+    }
+    .brief__shift {
+      margin-top: 1.4rem;
+      padding-top: 1.2rem;
+      border-top: 1px dashed rgba(0, 0, 0, 0.35);
+    }
+    .brief__shift b { font-family: var(--type); font-weight: 400; }
+    .brief .note { font-family: var(--hand); font-size: 1.45rem; color: var(--red); display: inline-block; margin-top: 0.8rem; transform: rotate(-1.5deg); }
+
+    /* ---------- literatuur: bewijsstukken ---------- */
+    .evidence {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.8rem;
+      max-width: 1100px;
+    }
+    .exhibit {
+      position: relative;
+      background: #f3efe4;
+      color: var(--ink);
+      padding: 2.2rem 1.4rem 1.4rem;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+    }
+    .exhibit:nth-child(1) { --r: -1.5deg; }
+    .exhibit:nth-child(2) { --r: 1deg; }
+    .exhibit:nth-child(3) { --r: -0.8deg; }
+    .exhibit__tag {
+      position: absolute;
+      top: -0.9rem;
+      left: 1rem;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--type);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      padding: 0.2rem 0.7rem;
+    }
+    .exhibit h3 { font-family: var(--type); font-weight: 400; font-size: 1.15rem; line-height: 1.3; margin-bottom: 0.6rem; }
+    .exhibit p { font-size: 0.95rem; }
+    .exhibit a { display: inline-block; margin-top: 0.8rem; font-size: 0.85rem; }
+
+    /* ---------- interviews: transcripten ---------- */
+    .tapes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.8rem;
+      max-width: 1100px;
+    }
+    .tape {
+      background: var(--paper);
+      color: var(--ink);
+      padding: 1.4rem 1.4rem 1.6rem;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .tape:nth-child(1) { --r: 1deg; }
+    .tape:nth-child(2) { --r: -1.2deg; }
+    .tape:nth-child(3) { --r: 0.6deg; }
+    .tape__head {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-family: var(--type);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px dashed rgba(0, 0, 0, 0.35);
+    }
+    .tape__rec { width: 10px; height: 10px; border-radius: 50%; background: var(--red); animation: rec 1.4s steps(1) infinite; flex-shrink: 0; }
+    @keyframes rec { 50% { opacity: 0.2; } }
+    .tape__who { font-family: var(--type); font-size: 1.1rem; line-height: 1.3; }
+    .tape__role { font-size: 0.85rem; opacity: 0.7; margin-top: -0.5rem; }
+    .tape blockquote {
+      font-style: italic;
+      padding-left: 0.9rem;
+      border-left: 3px solid var(--red);
+    }
+    .tape__so {
+      margin-top: auto;
+      padding-top: 0.8rem;
+      border-top: 1px dashed rgba(0, 0, 0, 0.35);
+      font-size: 0.92rem;
+    }
+    .tape__so b { font-family: var(--type); font-weight: 400; font-size: 0.78rem; letter-spacing: 0.1em; display: block; opacity: 0.65; }
+
+    /* =========================================
+       DE CYCLUS — rechercheursbord
+       ========================================= */
+    .cycle { position: relative; height: 450vh; }
+    .cycle__sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      height: 100svh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: clamp(1.5rem, 4vw, 4rem);
+      padding: 5.5rem var(--pad-x) 2rem;
+    }
+    .board {
+      position: relative;
+      aspect-ratio: 1;
+      width: min(100%, 72vh);
+      justify-self: center;
+      background: #6b5338;
+      background-image:
+        radial-gradient(rgba(0, 0, 0, 0.15) 1px, transparent 1.5px),
+        radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1.5px);
+      background-size: 7px 7px, 11px 11px;
+      border: 12px solid #3d2c1b;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(0, 0, 0, 0.35);
+    }
+    .board svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .board__string { fill: none; stroke: var(--red); stroke-width: 0.6; stroke-linecap: round; }
+    .board__string--ghost { stroke: rgba(179, 38, 30, 0.25); stroke-dasharray: 1.2 1.6; }
+    .board__center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 36%;
+      transform: translate(-50%, -50%) rotate(-3deg);
+      background: var(--sticky);
+      color: var(--ink);
+      text-align: center;
+      padding: 0.9rem 0.6rem;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+    }
+    .board__center b { display: block; font-family: var(--type); font-weight: 400; font-size: clamp(0.85rem, 1.8vw, 1.3rem); line-height: 1.2; }
+    .board__center span { font-family: var(--hand); font-size: clamp(0.95rem, 1.6vw, 1.25rem); color: var(--red); }
+
+    .pin {
+      position: absolute;
+      width: 31%;
+      transform: translate(-50%, -50%) rotate(var(--r, 0deg)) scale(0.92);
+      background: #f3efe4;
+      color: var(--ink);
+      padding: 0.75rem 0.5rem 0.6rem;
+      text-align: center;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+      border: 0;
+      font: inherit;
+      opacity: 0.55;
+      transition: transform 0.5s var(--ease), opacity 0.4s, box-shadow 0.4s, background 0.4s;
+    }
+    .pin::before {
+      content: "";
+      position: absolute;
+      top: -7px;
+      left: 50%;
+      width: 14px;
+      height: 14px;
+      margin-left: -7px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ff6b5e, #8b130c);
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
+    }
+    .pin__name { display: block; font-family: var(--type); font-size: clamp(0.68rem, 1.2vw, 0.92rem); line-height: 1.2; overflow-wrap: anywhere; hyphens: auto; }
+    .pin.is-done { opacity: 0.85; }
+    .pin.is-active {
+      opacity: 1;
+      background: var(--sticky);
+      transform: translate(-50%, -50%) rotate(0deg) scale(1.12);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55);
+      z-index: 2;
+    }
+
+    .sheet {
+      position: relative;
+      background: var(--paper);
+      color: var(--ink);
+      padding: clamp(1.4rem, 3vw, 2.4rem);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+      transform: rotate(0.8deg);
+      max-height: calc(100svh - 8rem);
+      overflow-y: auto;
+    }
+    .sheet__step { font-family: var(--type); letter-spacing: 0.12em; font-size: 0.85rem; opacity: 0.6; }
+    .sheet h3 { font-family: var(--type); font-weight: 400; font-size: clamp(1.5rem, 2.8vw, 2.3rem); line-height: 1.15; margin: 0.3rem 0 0.9rem; }
+    .sheet h4 {
+      font-family: var(--type);
+      font-weight: 400;
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      margin: 1.1rem 0 0.4rem;
+      padding-top: 0.8rem;
+      border-top: 1px dashed rgba(0, 0, 0, 0.3);
+    }
+    .sheet blockquote { font-style: italic; padding-left: 0.9rem; border-left: 3px solid var(--red); }
+    .sheet__next { font-family: var(--hand); font-size: 1.35rem; color: var(--red); margin-top: 1rem; }
+    .sheet.is-swap > * { animation: swapIn 0.45s var(--ease) both; }
+    .sheet.is-swap > *:nth-child(2) { animation-delay: 0.04s; }
+    .sheet.is-swap > *:nth-child(3) { animation-delay: 0.08s; }
+    @keyframes swapIn { from { opacity: 0; transform: translateY(10px); } }
+    .sheet__nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1.2rem;
+      padding-top: 0.9rem;
+      border-top: 1px dashed rgba(0, 0, 0, 0.3);
+    }
+    .sheet__nav button {
+      background: none;
+      border: 0;
+      font-family: var(--type);
+      font-size: 0.9rem;
+      color: var(--ink);
+      cursor: pointer;
+      padding: 0.3rem 0;
+      border-bottom: 2px solid transparent;
+    }
+    .sheet__nav button:hover { border-bottom-color: var(--ink); }
+    .sheet__dots { display: flex; gap: 0.4rem; }
+    .sheet__dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(0, 0, 0, 0.2); }
+    .sheet__dots i.on { background: var(--red); }
+    .cycle__hint { position: absolute; bottom: 1.2rem; left: 50%; transform: translateX(-50%); font-size: 0.8rem; color: var(--muted); }
+
+    .breakout {
+      max-width: 820px;
+      margin: 0 auto;
+      text-align: center;
+      font-family: var(--type);
+      font-size: clamp(1.3rem, 2.6vw, 2rem);
+      line-height: 1.35;
+    }
+    .breakout em { font-style: normal; color: #ff8a80; }
+
+    /* ---------- empathy map ---------- */
+    .emap {
+      position: relative;
+      max-width: 1100px;
+      aspect-ratio: 16 / 10;
+      background: #151513;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55);
+      overflow: hidden;
+    }
+    .emap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .emap svg line { stroke: rgba(255, 255, 255, 0.25); stroke-width: 1; }
+    .emap__label {
+      position: absolute;
+      font-family: var(--type);
+      font-size: 0.95rem;
+      color: var(--chalk);
+      z-index: 2;
+    }
+    .emap__label--top { top: 0.8rem; left: 50%; transform: translateX(-50%); }
+    .emap__label--bottom { bottom: 0.8rem; left: 50%; transform: translateX(-50%); }
+    .emap__label--left { left: 0.6rem; top: 50%; transform: translateY(-50%) rotate(-90deg); }
+    .emap__label--right { right: 0.6rem; top: 50%; transform: translateY(-50%) rotate(90deg); }
+    .emap__zone {
+      position: absolute;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-content: center;
+      justify-content: center;
+    }
+    .emap__zone--top { top: 3rem; left: 22%; right: 22%; height: 36%; }
+    .emap__zone--bottom { bottom: 3rem; left: 22%; right: 22%; height: 30%; }
+    .emap__zone--left { left: 3rem; top: 20%; width: 24%; bottom: 20%; }
+    .emap__zone--right { right: 3rem; top: 20%; width: 24%; bottom: 20%; }
+    .sticky {
+      width: clamp(88px, 10vw, 128px);
+      min-height: clamp(70px, 7.5vw, 100px);
+      padding: 0.45rem;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      background: var(--sticky);
+      color: var(--ink);
+      font-size: clamp(0.6rem, 0.85vw, 0.78rem);
+      line-height: 1.25;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+      transform: rotate(var(--r, 0deg)) scale(var(--s, 1));
+      transition: transform 0.6s var(--ease), opacity 0.6s;
+    }
+    .sticky--pink { background: var(--sticky-pink); font-size: clamp(0.7rem, 1vw, 0.9rem); }
+    .sticky--wide { width: clamp(150px, 16vw, 210px); }
+    .emap:not(.is-in) .sticky { opacity: 0; --s: 0.4; }
+
+    .pg {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      max-width: 1100px;
+      margin-top: 1rem;
+    }
+    .pg > div { padding: 1rem 1.2rem 1.2rem; }
+    .pg__pain { background: #1f63e0; }
+    .pg__gain { background: #b6cdea; color: var(--ink); }
+    .pg h3 { font-family: var(--type); font-weight: 400; margin-bottom: 0.7rem; }
+    .pg__notes { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .pg .sticky { width: clamp(92px, 9vw, 120px); min-height: 84px; font-size: 0.72rem; }
+
+    /* ---------- persona's ---------- */
+    .personas { display: grid; gap: 3rem; max-width: 1100px; }
+    .persona {
+      display: grid;
+      grid-template-columns: 220px 1fr 1fr;
+      gap: 1.6rem;
+      background: var(--paper);
+      color: var(--ink);
+      padding: clamp(1.4rem, 3vw, 2.2rem);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+    .persona:nth-child(1) { --r: -0.6deg; }
+    .persona:nth-child(2) { --r: 0.5deg; }
+    .persona__photo {
+      background: #f7f3e8;
+      padding: 0.5rem 0.5rem 2rem;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+      transform: rotate(-3deg);
+      align-self: start;
+      position: relative;
+    }
+    .persona__photo img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; filter: sepia(0.2); }
+    .persona__photo figcaption { position: absolute; left: 0; right: 0; bottom: 0.2rem; text-align: center; font-family: var(--hand); font-size: 1.3rem; }
+    .persona__photo::before { /* paperclip */
+      content: "";
+      position: absolute;
+      top: -14px;
+      right: 22px;
+      width: 16px;
+      height: 44px;
+      border: 3px solid #9aa0a6;
+      border-radius: 10px;
+      z-index: 2;
+    }
+    .persona h3 { font-family: var(--type); font-weight: 400; font-size: 1.6rem; line-height: 1.1; }
+    .persona__role { font-size: 0.9rem; opacity: 0.7; margin-bottom: 0.8rem; }
+    .persona dl { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.8rem; font-size: 0.88rem; margin-bottom: 0.9rem; }
+    .persona dt { font-family: var(--type); opacity: 0.65; }
+    .persona p { font-size: 0.92rem; }
+    .persona h4 {
+      font-family: var(--type);
+      font-weight: 400;
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    .persona ul { padding-left: 1.1rem; font-size: 0.9rem; }
+    .persona li + li { margin-top: 0.3rem; }
+    .persona__obst { background: #f8e6df; padding: 0.9rem 1rem; }
+    .persona__need { background: #e2f1e2; padding: 0.9rem 1rem; margin-top: 1rem; }
+
+    /* ---------- ontwerpeisen ---------- */
+    .reqs {
+      max-width: 1100px;
+      background: var(--paper);
+      color: var(--ink);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+      overflow-x: auto;
+    }
+    .reqs table { width: 100%; border-collapse: collapse; min-width: 720px; }
+    .reqs th, .reqs td { border-bottom: 1px dashed rgba(0, 0, 0, 0.3); padding: 0.85rem 0.8rem; vertical-align: middle; }
+    .reqs thead th {
+      font-family: var(--type);
+      font-weight: 400;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      background: var(--paper-2);
+      text-align: center;
+    }
+    .reqs thead th:first-child, .reqs thead th:nth-child(2) { text-align: left; }
+    .reqs td:first-child { font-family: var(--type); width: 2.5rem; opacity: 0.6; }
+    .reqs td.x { text-align: center; width: 5.5rem; }
+    .reqs td.x span {
+      display: inline-block;
+      font-family: var(--type);
+      font-size: 1.6rem;
+      color: var(--red);
+      transform: rotate(-8deg) scale(var(--s, 1));
+      transition: transform 0.35s var(--ease), opacity 0.35s;
+    }
+    .reqs:not(.is-in) td.x span { opacity: 0; --s: 2.4; }
+    .reqs tr.is-used td:nth-child(2)::after {
+      content: " ✓ in UNSEEN";
+      font-family: var(--hand);
+      font-size: 1.15rem;
+      color: #2c7a3d;
+      white-space: nowrap;
+    }
+
+    /* ---------- bronnen ---------- */
+    .sources { max-width: 900px; list-style: none; display: grid; gap: 0.9rem; }
+    .sources li { background: rgba(233, 227, 211, 0.07); border-left: 3px solid var(--red); padding: 0.8rem 1rem; }
+    .sources a { text-underline-offset: 3px; word-break: break-word; }
+    .sources span { display: block; color: var(--muted); font-size: 0.9rem; }
+    .sources h3 { font-family: var(--type); font-weight: 400; color: var(--muted); font-size: 0.95rem; margin: 1.6rem 0 0.2rem; }
+
+    .downloads { display: flex; flex-wrap: wrap; gap: 1rem; margin: 2rem 0 6rem; }
+    .downloads a {
+      font-family: var(--type);
+      text-decoration: none;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 0.7rem 1.2rem;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s var(--ease);
+    }
+    .downloads a:hover { transform: translateY(-4px) rotate(-1deg); }
+
+    .footer { padding: 2rem var(--pad-x) 3rem; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
+
+    /* ---------- responsive ---------- */
+    @media (max-width: 960px) {
+      .evidence, .tapes { grid-template-columns: 1fr; }
+      .persona { grid-template-columns: 1fr; }
+      .persona__photo { max-width: 220px; }
+      .nav__links { display: none; }
+    }
+    @media (max-width: 860px) {
+      .cycle { height: auto; }
+      .cycle__sticky { position: relative; height: auto; grid-template-columns: 1fr; padding-top: 2rem; }
+      .board { width: min(100%, 460px); }
+      .sheet { max-height: none; }
+      .cycle__hint { display: none; }
+      .emap { aspect-ratio: auto; padding: 3rem 1rem; }
+      .emap svg, .emap__label { display: none; }
+      .emap__zone { position: static; width: auto; height: auto; justify-content: flex-start; }
+      .emap__zone::before { content: attr(data-label); width: 100%; font-family: var(--type); margin: 1rem 0 0.2rem; }
+      .pg { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+<nav class="nav">
+<a class="nav__back" href="unseen.html#documentatie">
+<svg fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+      <span data-t="">Terug naar UNSEEN</span>
+    </a>
+<ul class="nav__links">
+<li><a data-t="" href="#vraag">Vraag</a></li>
+<li><a data-t="" href="#interviews">Interviews</a></li>
+<li><a data-t="" href="#cyclus">Cyclus</a></li>
+<li><a data-t="" href="#empathy">Empathy map</a></li>
+<li><a data-t="" href="#personas">Persona's</a></li>
+<li><a data-t="" href="#eisen">Ontwerpeisen</a></li>
+</ul>
+<div class="nav__lang" data-lang-switcher=""></div>
+</nav>
+<header class="hero">
+<p class="hero__file" data-t="">BIJLAGE A · TEAM 6 · OPDRACHTGEVER RIEC</p>
+<h1 data-t="">Research-analyse</h1>
+<p data-t="">Van een vraag over risicovol gedrag naar een docu over labels en gespreksvoering. Dit is hoe ons onderzoek liep, en wat we onderweg ontdekten.</p>
+<span class="stamp" data-t="">DOSSIER GEOPEND</span>
+</header>
+<main>
+<!-- =========================================
+         DE VRAAG
+         ========================================= -->
+<section class="section" id="vraag">
+<h2 class="h2" data-t="">Start van het onderzoek</h2>
+<p class="lead" data-t="">Na de presentatie over ondermijning wilden we eerst de bredere situatie begrijpen: welke knelpunten spelen bij jongeren, politie, gemeenten en jeugdzorg?</p>
+<article class="brief reveal">
+<small data-t="">HOOFDVRAAG</small>
+<p class="brief__q" data-t="">Hoe kunnen we professionals bewustmaken van online risicovol gedrag van jongeren en hen helpen onderscheid te maken tussen normaal en onveilig gedrag?</p>
+<div class="brief__shift">
+<b data-t="">VAN PATROONHERKENNING NAAR STIGMATISERING</b>
+<p data-t="">Wanneer helpt patroonherkenning om jongeren op tijd te ondersteunen, en wanneer leidt het tot aannames of labels waardoor de persoonlijke context uit beeld raakt? Onze aandacht verschoof van alleen het herkennen van risicovol gedrag naar de manier waarop professionals jongeren beoordelen en benaderen.</p>
+<span class="note" data-t="">↳ hier begon UNSEEN</span>
+</div>
+</article>
+</section>
+<!-- =========================================
+         LITERATUUR
+         ========================================= -->
+<section class="section" id="literatuur">
+<h2 class="h2" data-t="">Literatuuronderzoek</h2>
+<p class="lead" data-t="">Drie bronnen die onze richting bepaalden.</p>
+<div class="evidence">
+<article class="exhibit reveal">
+<span class="exhibit__tag" data-t="">BEWIJSSTUK 1</span>
+<h3 data-t="">Integrale Jeugd Aanpak Parkstad</h3>
+<p data-t="">Problemen van jongeren zijn vaak complex. Persoonlijke aandacht, samenwerking en het samen beoordelen van signalen zijn belangrijk om passende steun te bieden.</p>
+<a data-t="" href="https://www.nederlandtegengeorganiseerdemisdaad.nl/" rel="noopener" target="_blank">Min. van Justitie en Veiligheid ▸</a>
+</article>
+<article class="exhibit reveal">
+<span class="exhibit__tag" data-t="">BEWIJSSTUK 2</span>
+<h3 data-t="">Jeugdmonitor 2022</h3>
+<p data-t="">Steeds meer jeugdhulp en een tekort aan personeel. Dat liet ons zien onder welke omstandigheden professionals werken.</p>
+<a data-t="" href="https://longreads.cbs.nl/jeugdmonitor-2022/" rel="noopener" target="_blank">CBS, 2022 ▸</a>
+</article>
+<article class="exhibit reveal">
+<span class="exhibit__tag" data-t="">BEWIJSSTUK 3</span>
+<h3 data-t="">Bezemer &amp; Leerkes (2021)</h3>
+<p data-t="">Jongeren met vergelijkbaar crimineel gedrag hebben niet dezelfde kans om als verdachte geregistreerd te worden. Etnisch profileren werd als mogelijke verklaring genoemd. Reden om de beoordeling van jongeren verder te onderzoeken.</p>
+<a data-t="" href="https://www.politieenwetenschap.nl/" rel="noopener" target="_blank">Politie en Wetenschap ▸</a>
+</article>
+</div>
+</section>
+<!-- =========================================
+         INTERVIEWS
+         ========================================= -->
+<section class="section" id="interviews">
+<h2 class="h2" data-t="">Verdieping door interviews</h2>
+<p class="lead" data-t="">We gingen in gesprek met professionals: hoe beoordelen zij gedrag, welke rol spelen aannames, en wat vinden ze lastig in het contact met jongeren?</p>
+<div class="tapes">
+<article class="tape reveal">
+<div class="tape__head" data-t=""><span class="tape__rec"></span>INTERVIEW · MONDRIAAN</div>
+<p class="tape__who" data-t="">Medewerker Mondriaan</p>
+<blockquote data-t="">“Heel vaak wordt er gekeken naar het kind. Wat is er mis met het kind? Maar kijk eens naar de omgeving. Kijk eens naar de ouders.”</blockquote>
+<blockquote data-t="">“Ga het gesprek aan met het kind. Kijk wat hun vertellen. En daaruit haal je soms al heel veel.”</blockquote>
+<blockquote data-t="">“Dit is wat wij zien. Wat gaan we hiermee doen? En het niet laten wachten.”</blockquote>
+<p class="tape__so" data-t=""><b>DUS</b>Kijk verder dan het zichtbare gedrag. Signalen blijven liggen als iedereen denkt dat een ander het oppakt.</p>
+</article>
+<article class="tape reveal">
+<div class="tape__head" data-t=""><span class="tape__rec"></span>INTERVIEW · MONDRIAAN</div>
+<p class="tape__who" data-t="">Merel van Verbeek</p>
+<p class="tape__role" data-t="">Persoonlijk begeleider bij Mondriaan</p>
+<p data-t="">Advies: leg de focus op <b>gespreksvoering</b>. Hoe benader je de jongere? Professionals kunnen hier moeite mee hebben.</p>
+<p data-t="">Hier kwam het begrip <b>zelfvervullende voorspelling</b> naar voren: een verwachting over een jongere stuurt de vragen van de professional. Sluit de jongere zich af, dan lijkt de verwachting bevestigd.</p>
+<p class="tape__so" data-t=""><b>DUS</b>Professionals laten reflecteren op hoe hun aannames en gesprekskeuzes het contact beïnvloeden.</p>
+</article>
+<article class="tape reveal">
+<div class="tape__head" data-t=""><span class="tape__rec"></span>INTERVIEW</div>
+<p class="tape__who" data-t="">Susan Hurenkamp</p>
+<p class="tape__role" data-t="">Eigenaarschap en verbinding met jongeren</p>
+<blockquote data-t="">“Ja, in ieder geval eigenaarschap gewoon bij de jongeren zelf neerleggen.”</blockquote>
+<p data-t="">Toch werd een plek die jongeren zelf hadden gekozen kort daarna beklad. Het gesprek daarover aangaan vond ze lastig.</p>
+<blockquote data-t="">“We proberen in ieder geval altijd die connectie te behouden.”</blockquote>
+<p class="tape__so" data-t=""><b>DUS</b>Hoe spreek je jongeren aan en stel je grenzen, zonder het contact te verliezen?</p>
+</article>
+</div>
+</section>
+<!-- =========================================
+         DE CYCLUS
+         ========================================= -->
+<section class="section" id="cyclus" style="padding-bottom:0">
+<h2 class="h2" data-t="">De cyclus</h2>
+<p class="lead" data-t="">Uit onze inzichten maakten we deze cyclus. Aannames en labels beïnvloeden hoe een jongere benaderd wordt. Voelt de jongere zich minder gehoord, dan deelt hij minder, en dat lijkt de aanname weer te bevestigen. Scroll door de cyclus.</p>
+</section>
+<section class="cycle" id="cycle">
+<div class="cycle__sticky">
+<div class="board" id="board">
+<svg aria-hidden="true" viewbox="0 0 100 100">
+<path class="board__string board__string--ghost" id="ghost"></path>
+<path class="board__string" id="string"></path>
+</svg>
+<div class="board__center"><b data-t="">Onderzoeks­verzameling</b><span data-t="">en weer rond ↻</span></div>
+</div>
+<article aria-live="polite" class="sheet" id="sheet"></article>
+</div>
+<p class="cycle__hint" data-t="">scroll ↓ · klik op een kaartje · of gebruik ◂ ▸</p>
+</section>
+<section class="section">
+<p class="breakout reveal" data-t="">Daarom onderzoeken we hoe <em>bewuste gespreksvoering</em> deze cyclus kan helpen doorbreken. In UNSEEN is elke keuze een gespreksvraag: een gesloten vraag houdt de cyclus draaiende, een open vraag breekt hem open.</p>
+</section>
+<!-- =========================================
+         EMPATHY MAP
+         ========================================= -->
+<section class="section" id="empathy">
+<h2 class="h2" data-t="">Empathy map</h2>
+<p class="lead" data-t="">Wat we weten over de gebruiker: de professional. Gebaseerd op literatuur, vier interviews en de aannames die we tegenkwamen.</p>
+<div class="emap" id="emap">
+<svg aria-hidden="true" preserveaspectratio="none" viewbox="0 0 100 100"><line x1="0" x2="100" y1="0" y2="100"></line><line x1="100" x2="0" y1="0" y2="100"></line></svg>
+<span class="emap__label emap__label--top" data-t="">Think and feel?</span>
+<span class="emap__label emap__label--left" data-t="">Hear?</span>
+<span class="emap__label emap__label--right" data-t="">See?</span>
+<span class="emap__label emap__label--bottom" data-t="">Say and do?</span>
+<div class="emap__zone emap__zone--top" data-label="Think and feel?">
+<div class="sticky" data-t="" style="--r:-2deg">De professionals geven aan dat zij moeite hebben om goed aan te sluiten bij de leefwereld van jongeren.</div>
+<div class="sticky" data-t="" style="--r:1.5deg">Ervaart dat er veel verschillende factoren meespelen in het gedrag van jongeren.</div>
+<div class="sticky" data-t="" style="--r:-1deg">Kan moeite hebben om voldoende inzicht te krijgen in de leefwereld van jongeren.</div>
+<div class="sticky sticky--pink" data-t="" style="--r:2.5deg">Het profileren gaat vaak onbewust</div>
+<div class="sticky sticky--pink" data-t="" style="--r:-2deg">Weinig vertrouwen</div>
+</div>
+<div class="emap__zone emap__zone--left" data-label="Hear?">
+<div class="sticky" data-t="" style="--r:-2deg">Verschillende interpretaties van hetzelfde gedrag.</div>
+<div class="sticky" data-t="" style="--r:2deg">Jongeren hebben vaak weinig vertrouwen in politie, ambtenaren en andere professionals.</div>
+<div class="sticky" data-t="" style="--r:1deg">Verhalen over jongeren die mogelijk risico's vormen.</div>
+<div class="sticky" data-t="" style="--r:-1.5deg">Aannames hebben over bepaalde niveaus/rassen</div>
+</div>
+<div class="emap__zone emap__zone--right" data-label="See?">
+<div class="sticky" data-t="" style="--r:2deg">Jongeren die verschillend reageren op politie, gemeenten en andere professionals.</div>
+<div class="sticky sticky--wide" data-t="" style="--r:-1deg">Het rekruteringsproces verschuift steeds vaker naar besloten online kanalen zoals Telegram, waardoor criminelen onder de radar van de politie blijven.</div>
+<div class="sticky" data-t="" style="--r:-2deg">Dat bepaalde jongeren vaker gecontroleerd of geregistreerd worden.</div>
+</div>
+<div class="emap__zone emap__zone--bottom" data-label="Say and do?">
+<div class="sticky" data-t="" style="--r:1.5deg">Bespreekt jongeren en mogelijke risico's met collega's.</div>
+<div class="sticky" data-t="" style="--r:-1.5deg">Wil onderbouwde beslissingen nemen in plaats van alleen op aannames af te gaan.</div>
+<div class="sticky sticky--wide" data-t="" style="--r:1deg">Jongeren rollen de georganiseerde misdaad in via vijf hoofdroutes: sociale relaties, werk en hobby's, levensloopgebeurtenissen of bewuste rekrutering.</div>
+</div>
+</div>
+<div class="pg">
+<div class="pg__pain reveal">
+<h3 data-t="">Pain</h3>
+<div class="pg__notes">
+<div class="sticky" data-t="">Vindt het lastig om vertrouwen op te bouwen bij een jongere die weinig vertelt.</div>
+<div class="sticky" data-t="">Heeft onvoldoende zicht op de achtergrond van de jongere.</div>
+<div class="sticky" data-t="">Moet risico's inschatten met onvolledige informatie.</div>
+<div class="sticky" data-t="">Ervaart spanning tussen vertrouwen opbouwen en grenzen stellen.</div>
+<div class="sticky" data-t="">Merkt dat signalen tussen instanties blijven liggen.</div>
+<div class="sticky" data-t="">Herkent eigen aannames niet altijd.</div>
+</div>
+</div>
+<div class="pg__gain reveal">
+<h3 data-t="">Gain</h3>
+<div class="pg__notes">
+<div class="sticky" data-t="">Wil dat de jongere zich veilig genoeg voelt om te vertellen.</div>
+<div class="sticky" data-t="">Wil beter begrijpen wat achter het gedrag zit.</div>
+<div class="sticky" data-t="">Wil signalen serieus nemen en eigen aannames controleren.</div>
+</div>
+</div>
+</div>
+</section>
+<!-- =========================================
+         PERSONA'S
+         ========================================= -->
+<section class="section" id="personas">
+<h2 class="h2" data-t="">Persona's</h2>
+<p class="lead" data-t="">Voor wie we UNSEEN ontwerpen.</p>
+<div class="personas">
+<article class="persona reveal">
+<figure class="persona__photo">
+<img alt="Persona Yvonne Berg" src="../assets/Unseen/persona-yvonne.jpg"/>
+<figcaption data-t="">Yvonne, 23</figcaption>
+</figure>
+<div>
+<h3 data-t="">Yvonne Berg</h3>
+<p class="persona__role" data-t="">Persoonlijk begeleider · Mondriaan</p>
+<dl><dt data-t="">Leeftijd</dt><dd>23</dd><dt data-t="">Ervaring</dt><dd data-t="">3 werkjaren</dd></dl>
+<p data-t="">Woont met haar partner en twee jonge kinderen in Zuid-Limburg. Ze ziet dagelijks hoe belangrijk de vroege hechtingsjaren zijn, en zet zich in voor jongeren bij wie het daar misging. Ze wil een betekenisvolle, steunende derde zijn.</p>
+</div>
+<div>
+<div class="persona__obst">
+<h4 data-t="">OBSTAKELS</h4>
+<ul>
+<li data-t="">Verhalen over verwaarlozing en mishandeling raken haar persoonlijk.</li>
+<li data-t="">Een drukke baan combineren met haar gezin.</li>
+<li data-t="">Mist soms concrete handvatten om gedrag vanuit trauma en vroege hechting te begrijpen.</li>
+</ul>
+</div>
+<div class="persona__need">
+<h4 data-t="">WAT ZE NODIG HEEFT</h4>
+<ul>
+<li data-t="">Een veilige plek om moeilijke ervaringen te bespreken.</li>
+<li data-t="">Concrete voorbeelden en technieken om jongeren met een moeilijke achtergrond te begeleiden.</li>
+<li data-t="">Meer inzicht in de invloed van hechting, trauma en emotionele pijn op gedrag.</li>
+</ul>
+</div>
+</div>
+</article>
+<article class="persona reveal">
+<figure class="persona__photo">
+<img alt="Persona Jaqueline" src="../assets/Unseen/persona-jaqueline.jpg"/>
+<figcaption data-t="">Jaqueline, 42</figcaption>
+</figure>
+<div>
+<h3 data-t="">Jaqueline</h3>
+<p class="persona__role" data-t="">Beleidsmaker jeugd en veiligheid · Gemeente</p>
+<dl><dt data-t="">Leeftijd</dt><dd>42</dd><dt data-t="">Ervaring</dt><dd data-t="">12 jaar, waarvan 5 bij de gemeente</dd><dt data-t="">Werkt met</dt><dd data-t="">Beleidsoverleg, RIEC en samenwerkingspartners</dd></dl>
+<p data-t="">Ze wil voorkomen dat jongeren in de criminaliteit terechtkomen, en vindt het belangrijk dat beleid aansluit bij de werkelijkheid van jongeren. Professionals mogen hen niet te snel beoordelen op uiterlijk, achtergrond of omgeving.</p>
+</div>
+<div>
+<div class="persona__obst">
+<h4 data-t="">OBSTAKELS</h4>
+<ul>
+<li data-t="">Jongeren en ondermijning: complex en steeds in verandering.</li>
+<li data-t="">Weinig zicht op de dagelijkse en online leefwereld van jongeren.</li>
+<li data-t="">Organisaties hebben verschillende belangen en werkwijzen.</li>
+<li data-t="">Tijd, budget en politieke druk.</li>
+</ul>
+</div>
+<div class="persona__need">
+<h4 data-t="">WAT ZE NODIG HEEFT</h4>
+<ul>
+<li data-t="">Betrouwbare, actuele inzichten uit de praktijk.</li>
+<li data-t="">Inzicht in hoe profilering en vooroordelen het beeld van jongeren beïnvloeden.</li>
+<li data-t="">Handvatten voor preventief beleid dat jongeren niet onterecht als risico bestempelt.</li>
+</ul>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- =========================================
+         ONTWERPEISEN
+         ========================================= -->
+<section class="section" id="eisen">
+<h2 class="h2" data-t="">Ontwerpeisen</h2>
+<p class="lead" data-t="">Per eis staat aan welk aspect hij gekoppeld is. Het groene vinkje laat zien waar de eis terugkomt in de speelbare casus.</p>
+<div class="reqs" id="reqs">
+<table>
+<thead>
+<tr><th>#</th><th data-t="">Ontwerpeis</th><th data-t="">Context</th><th data-t="">Content</th><th data-t="">Medium</th><th data-t="">Stijl/Vorm</th><th data-t="">Interactie</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td data-t="">Beide kanten, de jongere en de professional, kunnen elkaars leefwereld ervaren voor meer begrip en medeleven.</td><td class="x"><span data-t="">X</span></td><td class="x"></td><td class="x"></td><td class="x"></td><td class="x"></td></tr>
+<tr><td>2</td><td data-t="">Rekrutering vindt steeds vaker plaats via social media en onzichtbare kanalen. Het ontwerp helpt professionals kleine, subtiele (digitale) signalen te herkennen.</td><td class="x"></td><td class="x"><span data-t="">X</span></td><td class="x"><span data-t="">X</span></td><td class="x"></td><td class="x"></td></tr>
+<tr class="is-used"><td>3</td><td data-t="">De gegevens geven inzicht in het ontwikkelingsproces van de jongere: profilering, vroegkinderlijke hechtingsjaren, trauma en onderliggende emotionele pijn.</td><td class="x"><span data-t="">X</span></td><td class="x"><span data-t="">X</span></td><td class="x"></td><td class="x"></td><td class="x"></td></tr>
+<tr class="is-used"><td>4</td><td data-t="">De interactie combineert theorie met realistische situaties en emoties vanuit het perspectief van jongeren, zodat professionals zich beter verplaatsen in hun leefwereld.</td><td class="x"><span data-t="">X</span></td><td class="x"></td><td class="x"></td><td class="x"><span data-t="">X</span></td><td class="x"></td></tr>
+<tr class="is-used"><td>5</td><td data-t="">De professional maakt keuzes in realistische situaties. De gevolgen worden zichtbaar, en duidelijk wordt hoe aannames en profilering de beoordeling beïnvloeden.</td><td class="x"></td><td class="x"><span data-t="">X</span></td><td class="x"></td><td class="x"></td><td class="x"><span data-t="">X</span></td></tr>
+<tr class="is-used"><td>6</td><td data-t="">De ervaring neemt de professional stap voor stap mee in een realistische casus, met beeld, geluid en persoonlijke verhalen.</td><td class="x"></td><td class="x"><span data-t="">X</span></td><td class="x"><span data-t="">X</span></td><td class="x"><span data-t="">X</span></td><td class="x"></td></tr>
+<tr class="is-used"><td>7</td><td data-t="">De professional ontdekt verschillende perspectieven op dezelfde situatie, zodat duidelijk wordt dat gedrag meerdere oorzaken kan hebben en niet direct op criminaliteit hoeft te wijzen.</td><td class="x"></td><td class="x"></td><td class="x"><span data-t="">X</span></td><td class="x"><span data-t="">X</span></td><td class="x"><span data-t="">X</span></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- =========================================
+         BRONNEN
+         ========================================= -->
+<section class="section" id="bronnen">
+<h2 class="h2" data-t="">Bronvermelding</h2>
+<ul class="sources">
+<li><a data-t="" href="https://www.nederlandtegengeorganiseerdemisdaad.nl/" rel="noopener" target="_blank">Ministerie van Justitie en Veiligheid. (2026, 31 augustus). Home | Nederland tegen georganiseerde misdaad.</a></li>
+<li><a data-t="" href="https://longreads.cbs.nl/jeugdmonitor-2022/" rel="noopener" target="_blank">CBS. (2022, 9 november). Inleiding – Jaarrapport Landelijke Jeugdmonitor 2022.</a></li>
+<li><a data-t="" href="https://www.politieenwetenschap.nl/" rel="noopener" target="_blank">Van der Klok, J., Klopman, R., Spithoven, J., &amp; Jansen, S. W. N. (z.d.). Politie en Wetenschap | Wetenschappelijk onderzoek.</a></li>
+</ul>
+<div class="downloads">
+<a data-t="" href="../assets/Unseen/team6-onderzoek.pdf" rel="noopener" target="_blank">↓ Onderzoeksverslag (PDF)</a>
+<a data-t="" href="../assets/Unseen/team6-synthese.pdf" rel="noopener" target="_blank">↓ Synthese: cyclus, empathy map, persona's, eisen (PDF)</a>
+</div>
+</section>
+</main>
+<footer class="footer">UNSEEN · Research-analyse · Team 6 · in opdracht van het RIEC · Communication &amp; Multimedia Design, Zuyd</footer>
+<script src="../lang.js"></script>
+<script src="unseen-i18n.js"></script>
+<script>
+    /* ---------- achtergrond (zelfde als UNSEEN pagina) ---------- */
+    (() => {
+      const names = ["background.jpg", "background.png", "bg.jpg", "bg.png", "achtergrond.jpg", "achtergrond.png"];
+      const tryNext = (i) => {
+        if (i >= names.length) return;
+        const url = `../assets/Unseen/${names[i]}`;
+        const img = new Image();
+        img.onload = () => document.body.style.setProperty("--bg-img", `url("${url}")`);
+        img.onerror = () => tryNext(i + 1);
+        img.src = url;
+      };
+      tryNext(0);
+    })();
+
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* ---------- dingen in beeld laten komen bij scrollen ---------- */
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add("is-in");
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.2 });
+    document.querySelectorAll(".reveal").forEach((n, i) => {
+      n.style.transitionDelay = `${(i % 3) * 0.12}s`;
+      io.observe(n);
+    });
+
+    // empathy map: briefjes worden een voor een opgeplakt
+    const emap = document.getElementById("emap");
+    emap.querySelectorAll(".sticky").forEach((s, i) => (s.style.transitionDelay = `${i * 0.08}s`));
+    io.observe(emap);
+
+    // ontwerpeisen: kruisjes worden een voor een gestempeld
+    const reqs = document.getElementById("reqs");
+    reqs.querySelectorAll("td.x span").forEach((s, i) => (s.style.transitionDelay = `${0.2 + i * 0.09}s`));
+    io.observe(reqs);
+
+    /* =========================================
+       DE CYCLUS van Team 6
+       Elk kaartje = een stap. Tekst uit de synthese.
+       ========================================= */
+    const STEPS = [
+      {
+        name: "Aannames en risicobeelden",
+        text: "Professionals moeten voortdurend kiezen welke jongeren extra aandacht nodig hebben, wie als risico wordt gezien en wanneer er wordt ingegrepen. Die keuzes zijn niet altijd volledig objectief. Bestaande registraties, eerdere ervaringen, risicoprofielen en beeldvorming kleuren hoe jongeren worden bekeken.",
+        proof: "Het profileren gaat vaak onbewust. — empathy map",
+        next: "Die beelden worden een label.",
+      },
+      {
+        name: "Stigmatisering / labels",
+        text: "Een jongere krijgt sneller het stempel ‘risicojongere’. Patroonherkenning kan helpen om op tijd te ondersteunen, maar kan ook leiden tot aannames waardoor de persoonlijke context uit beeld raakt.",
+        proof: "Jongeren met vergelijkbaar gedrag hebben niet dezelfde kans om geregistreerd te worden. — Bezemer & Leerkes, 2021",
+        next: "Wie een label krijgt, gaat wantrouwen.",
+      },
+      {
+        name: "Wantrouwen",
+        text: "Door wantrouwen ontstaat steeds meer afstand tussen jongeren en professionals. Jongeren voelen zich minder begrepen en delen minder snel wat er echt speelt. Professionals krijgen minder zicht op hun situatie, en aannames gaan een grotere rol spelen.",
+        proof: "“Ga het gesprek aan met het kind. Kijk wat hun vertellen.” — medewerker Mondriaan",
+        next: "Wantrouwen wordt structureel.",
+      },
+      {
+        name: "Gebrek aan vertrouwen",
+        text: "Wanneer bepaalde groepen jongeren vaker als ‘risicogroep’ worden gezien, worden zij ook vaker gecontroleerd en geregistreerd. Dat versterkt bestaande beelden en beschadigt het vertrouwen verder.",
+        proof: "Dat bepaalde jongeren vaker gecontroleerd of geregistreerd worden. — empathy map",
+        next: "En dan raakt ook de samenwerking beschadigd.",
+      },
+      {
+        name: "Gebrek aan samenwerking",
+        text: "Jongeren hebben vaak weinig vertrouwen in politie, ambtenaren en andere professionals. Tegelijk geven professionals aan dat ze moeite hebben om aan te sluiten bij de leefwereld van jongeren. Signalen blijven liggen.",
+        proof: "“Iemand anders ziet dat wel. Die pakt dat wel op.” — medewerker Mondriaan",
+        next: "Met minder informatie blijven alleen de aannames over… en de cyclus begint opnieuw.",
+      },
+    ];
+
+    const board = document.getElementById("board");
+    const sheet = document.getElementById("sheet");
+    const stringEl = document.getElementById("string");
+    const ghost = document.getElementById("ghost");
+
+    // kaartjes in een cirkel, met de klok mee
+    const R = 36;
+    const pts = STEPS.map((_, i) => {
+      const a = -Math.PI / 2 + (i / STEPS.length) * Math.PI * 2;
+      return { x: 50 + Math.cos(a) * R, y: 50 + Math.sin(a) * R };
+    });
+    const pins = STEPS.map((s, i) => {
+      const b = document.createElement("button");
+      b.className = "pin";
+      b.type = "button";
+      b.style.left = `${pts[i].x}%`;
+      b.style.top = `${pts[i].y}%`;
+      b.style.setProperty("--r", `${[-4, 3, -2, 5, -3][i]}deg`);
+      b.innerHTML = `<span class="pin__name">${tr(s.name)}</span>`;
+      b.addEventListener("click", () => goTo(i));
+      board.appendChild(b);
+      return b;
+    });
+
+    function seg(a, b) {
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      const cx = mx + (50 - mx) * 0.25, cy = my + (50 - my) * 0.25 + 3;
+      return `Q ${cx} ${cy} ${b.x} ${b.y}`;
+    }
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i <= pts.length; i++) d += " " + seg(pts[i - 1], pts[i % pts.length]);
+    stringEl.setAttribute("d", d);
+    ghost.setAttribute("d", d);
+    const LEN = stringEl.getTotalLength();
+    stringEl.style.strokeDasharray = LEN;
+    stringEl.style.strokeDashoffset = LEN;
+
+    let active = -1;
+    function render(i) {
+      if (i === active) return;
+      active = i;
+      const s = STEPS[i];
+      pins.forEach((p, k) => {
+        p.classList.toggle("is-active", k === i);
+        p.classList.toggle("is-done", k < i);
+      });
+      sheet.classList.remove("is-swap");
+      void sheet.offsetWidth;
+      if (!reduce) sheet.classList.add("is-swap");
+      sheet.innerHTML = `
+        <p class="sheet__step">${tr("STAP {i} VAN {n}", { i: i + 1, n: STEPS.length })}</p>
+        <h3>${tr(s.name)}</h3>
+        <p>${tr(s.text)}</p>
+        <h4>${tr("UIT ONS ONDERZOEK")}</h4>
+        <blockquote>${tr(s.proof)}</blockquote>
+        <p class="sheet__next">→ ${tr(s.next)}</p>
+        <div class="sheet__nav">
+          <button type="button" data-go="-1" aria-label="Vorige stap">${tr("◂ vorige")}</button>
+          <span class="sheet__dots">${STEPS.map((_, k) => `<i class="${k === i ? "on" : ""}"></i>`).join("")}</span>
+          <button type="button" data-go="1" aria-label="Volgende stap">${i === STEPS.length - 1 ? tr("opnieuw ↻") : tr("volgende ▸")}</button>
+        </div>`;
+    }
+
+    const cycle = document.getElementById("cycle");
+    const isSticky = () => matchMedia("(min-width: 861px)").matches;
+    // echte positie op de pagina (offsetTop klopt niet binnen <main>)
+    const cycleTop = () => cycle.getBoundingClientRect().top + scrollY;
+    const cycleTotal = () => cycle.offsetHeight - innerHeight;
+    let lockUntil = 0; // na een klik even niet door tussenliggende stappen bladeren
+
+    function onScroll() {
+      if (!isSticky()) { stringEl.style.strokeDashoffset = 0; return; }
+      const prog = Math.min(1, Math.max(0, (scrollY - cycleTop()) / cycleTotal()));
+      stringEl.style.strokeDashoffset = LEN * (1 - prog);
+      if (performance.now() < lockUntil) return;
+      render(Math.min(STEPS.length - 1, Math.floor(prog * STEPS.length)));
+    }
+
+    function goTo(i) {
+      i = (i + STEPS.length) % STEPS.length;
+      render(i);
+      if (!isSticky()) return;
+      lockUntil = performance.now() + 1200;
+      const y = cycleTop() + cycleTotal() * ((i + 0.5) / STEPS.length);
+      window.scrollTo({ top: y, behavior: reduce ? "auto" : "smooth" });
+    }
+
+    // vorige / volgende knoppen en pijltjestoetsen op het blad
+    sheet.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-go]");
+      if (b) goTo(active + Number(b.dataset.go));
+    });
+    document.addEventListener("keydown", (e) => {
+      const r = cycle.getBoundingClientRect();
+      if (r.top > innerHeight * 0.5 || r.bottom < innerHeight * 0.5) return;
+      if (e.key === "ArrowRight") goTo(active + 1);
+      if (e.key === "ArrowLeft") goTo(active - 1);
+    });
+
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", onScroll);
+
+    // andere taal: kaartjes en blad opnieuw vullen
+    document.addEventListener("langchange", () => {
+      pins.forEach((p, k) => (p.querySelector(".pin__name").textContent = tr(STEPS[k].name)));
+      const cur = Math.max(0, active);
+      active = -1;
+      render(cur);
+    });
+    render(0);
+    onScroll();
+  </script>
+</body>
+</html>

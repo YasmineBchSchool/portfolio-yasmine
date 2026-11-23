@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html lang="nl" data-i18n-fixed>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNSEEN — een interactieve docu</title>
+
+  <!-- typemachine + handschrift -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Caveat:wght@500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================
+       TOKENS — UNSEEN dossier-sfeer
+       ========================================= */
+    :root {
+      --bg: #262622;
+      --bg-2: #1c1c19;
+      --paper: #e9e3d3;
+      --paper-2: #d8d0bb;
+      --ink: #1f1f1c;
+      --chalk: #ecebe4;
+      --muted: #9a978a;
+      --red: #b3261e;
+      --sepia: #a68a5b;
+      --line: rgba(236, 235, 228, 0.18);
+
+      --type: "Special Elite", "Courier New", monospace;
+      --mono: "Courier Prime", "Courier New", monospace;
+      --hand: "Caveat", "Comic Sans MS", cursive;
+      --pad-x: clamp(1.25rem, 5vw, 4.5rem);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; overflow-x: clip; }
+    body {
+      background: var(--bg);
+      color: var(--chalk);
+      font-family: var(--mono);
+      font-size: 17px;
+      line-height: 1.6;
+      overflow-x: clip;
+    }
+    /* stoffige textuur over de hele pagina */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.55) 100%);
+    }
+    main, header, footer, nav { position: relative; z-index: 1; }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; }
+    button { font: inherit; cursor: pointer; }
+    :focus-visible { outline: 2px dashed var(--chalk); outline-offset: 4px; }
+
+    /* =========================================
+       ZWEVENDE KNOP — terug naar portfolio
+       ========================================= */
+    .float {
+      position: fixed;
+      left: 1rem;
+      bottom: 1rem;
+      z-index: 100;
+    }
+    .float a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1rem;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      text-decoration: none;
+    }
+    .float svg { width: 15px; height: 15px; }
+
+    /* =========================================
+       NAV
+       ========================================= */
+    .nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.1rem var(--pad-x);
+      font-family: var(--type);
+      transition: background 0.4s;
+    }
+    .nav.is-scrolled { background: rgba(28, 28, 25, 0.9); backdrop-filter: blur(8px); }
+    .nav__logo { font-size: 1.3rem; letter-spacing: 0.12em; text-decoration: none; }
+    .nav__links { display: flex; gap: clamp(1rem, 3vw, 2.4rem); list-style: none; font-size: 0.95rem; }
+    .nav__links a { text-decoration: none; opacity: 0.8; }
+    .nav__links a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 4px; }
+
+    /* =========================================
+       HERO — zoals het startscherm van de game
+       ========================================= */
+    .hero {
+      position: relative;
+      min-height: 100svh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 2rem;
+      padding: 6rem var(--pad-x) 4rem;
+      overflow: hidden;
+    }
+    /* schuine filmstrip */
+    .filmstrip {
+      position: absolute;
+      left: -10%;
+      right: -10%;
+      top: 9%;
+      height: 74px;
+      transform: rotate(-8deg);
+      background:
+        repeating-linear-gradient(90deg, transparent 0 18px, #fff 18px 32px) top / 100% 12px no-repeat,
+        repeating-linear-gradient(90deg, transparent 0 18px, #fff 18px 32px) bottom / 100% 12px no-repeat,
+        #000;
+      opacity: 1;
+      border-block: 6px solid #000;
+    }
+    .hero__left { position: relative; z-index: 2; }
+    .hero__title {
+      font-family: var(--type);
+      font-weight: 400;
+      font-size: clamp(3.6rem, 11vw, 9.5rem);
+      line-height: 1;
+      letter-spacing: 0.06em;
+      color: var(--chalk);
+    }
+    .hero__title .ch { display: inline-block; opacity: 0; animation: type 0.01s forwards; }
+    @keyframes type { to { opacity: 1; } }
+    .hero__sub {
+      margin-top: 1rem;
+      max-width: 30rem;
+      color: var(--muted);
+    }
+    .start {
+      display: inline-block;
+      margin-top: 2.2rem;
+      font-family: var(--hand);
+      font-size: 2rem;
+      letter-spacing: 0.2em;
+      color: var(--chalk);
+      text-decoration: none;
+      position: relative;
+      padding: 0 0.3rem;
+    }
+    .start::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0.25rem;
+      height: 2px;
+      background: var(--chalk);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s var(--ease);
+    }
+    .start:hover::after { transform: scaleX(1); }
+
+    /* polaroids */
+    .hero__pile {
+      position: relative;
+      height: min(70vh, 560px);
+      z-index: 2;
+    }
+    .polaroid {
+      --r: 0deg;
+      position: absolute;
+      width: clamp(110px, 13vw, 170px);
+      background: var(--paper);
+      padding: 0.5rem 0.5rem 1.8rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      transform: rotate(var(--r));
+      transition: transform 0.45s var(--ease), z-index 0s;
+      color: var(--ink);
+    }
+    .polaroid:hover { transform: rotate(0deg) scale(1.08); z-index: 5; }
+    .polaroid img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      object-position: 50% 15%;
+      background: #d6d0c4;
+      filter: sepia(0.25) contrast(1.05);
+    }
+    .polaroid figcaption {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0.15rem;
+      text-align: center;
+      font-family: var(--hand);
+      font-size: 1.15rem;
+    }
+    .hero__pile .polaroid:nth-child(1) { --r: -8deg; left: 4%;  top: 4%; }
+    .hero__pile .polaroid:nth-child(2) { --r: 9deg;  left: 58%; top: 0%; }
+    .hero__pile .polaroid:nth-child(3) { --r: -3deg; left: 30%; top: 24%; }
+    .hero__pile .polaroid:nth-child(4) { --r: 5deg;  left: 4%;  top: 52%; }
+    .hero__pile .polaroid:nth-child(5) { --r: -10deg; left: 34%; top: 62%; }
+    .hero__pile .polaroid:nth-child(6) { --r: 7deg;  left: 64%; top: 46%; }
+
+    /* =========================================
+       SECTIES
+       ========================================= */
+    .section { padding: clamp(5rem, 11vw, 9rem) var(--pad-x) 0; }
+    .h2 {
+      font-family: var(--type);
+      font-weight: 400;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: 0.04em;
+      margin-bottom: 2rem;
+    }
+
+    /* ---------- WAT IS HET: dossiermap ---------- */
+    .dossier {
+      position: relative;
+      max-width: 980px;
+      margin: 0 auto;
+      background: var(--paper);
+      color: var(--ink);
+      padding: clamp(1.8rem, 5vw, 3.5rem);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      transform: rotate(-0.6deg);
+    }
+    .dossier::before { /* tabje van de map */
+      content: "CASUS 1";
+      position: absolute;
+      top: -2.1rem;
+      left: 2rem;
+      background: var(--paper-2);
+      padding: 0.4rem 1.4rem 0.6rem;
+      font-family: var(--type);
+      font-size: 0.9rem;
+      letter-spacing: 0.12em;
+    }
+    .dossier__grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: clamp(1.5rem, 4vw, 3rem);
+    }
+    .dossier h2 { font-family: var(--type); font-weight: 400; font-size: clamp(1.6rem, 3vw, 2.4rem); margin-bottom: 1rem; }
+    .dossier p + p { margin-top: 1rem; }
+    .dossier .note {
+      font-family: var(--hand);
+      font-size: 1.5rem;
+      line-height: 1.2;
+      color: var(--red);
+      margin-top: 1.4rem;
+      transform: rotate(-2deg);
+    }
+    .stamp {
+      display: inline-block;
+      border: 3px solid var(--red);
+      color: var(--red);
+      font-family: var(--type);
+      letter-spacing: 0.12em;
+      padding: 0.3rem 0.9rem;
+      transform: rotate(-8deg);
+      opacity: 0.85;
+    }
+    .dossier .stamp { position: absolute; right: 2rem; top: 1.5rem; }
+    .facts { list-style: none; border-top: 1px dashed rgba(0, 0, 0, 0.35); }
+    .facts li { padding: 0.7rem 0; border-bottom: 1px dashed rgba(0, 0, 0, 0.35); }
+    .facts b { display: block; font-family: var(--type); font-weight: 400; font-size: 0.8rem; letter-spacing: 0.1em; opacity: 0.7; }
+
+    /* doelen als index-kaartjes */
+    .goals {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.4rem;
+      max-width: 980px;
+      margin: 4rem auto 0;
+    }
+    .goal {
+      background: #f3efe4;
+      color: var(--ink);
+      padding: 1.4rem 1.3rem 1.6rem;
+      background-image: repeating-linear-gradient(transparent 0 27px, rgba(70, 110, 160, 0.25) 27px 28px);
+      background-position: 0 2.6rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+    .goal:nth-child(1) { transform: rotate(-1.5deg); }
+    .goal:nth-child(2) { transform: rotate(1deg); }
+    .goal:nth-child(3) { transform: rotate(-0.5deg); }
+    .goal::before { /* plakbandje */
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      width: 80px;
+      height: 24px;
+      margin-left: -40px;
+      background: rgba(230, 225, 200, 0.6);
+      transform: rotate(-3deg);
+    }
+    .goal h3 { font-family: var(--type); font-weight: 400; font-size: 1.1rem; line-height: 1.3; margin-bottom: 0.6rem; }
+    .goal p { font-size: 0.92rem; line-height: 28px; }
+
+    /* ---------- PERSONAGES ---------- */
+    .cast {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 2.2rem 1.6rem;
+    }
+    .cast .polaroid { position: relative; width: 100%; }
+    .cast .polaroid:nth-child(odd) { --r: -2.5deg; }
+    .cast .polaroid:nth-child(even) { --r: 2deg; }
+    .cast__role {
+      margin-top: 0.8rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* =========================================
+       SPELEN — de scène-speler
+       ========================================= */
+    .play__intro { max-width: 40rem; color: var(--muted); margin-bottom: 2rem; }
+    .player {
+      position: relative;
+      max-width: 1100px;
+      margin: 0 auto;
+      aspect-ratio: 16 / 9;
+      min-height: 520px;
+      background: #14140f;
+      border: 10px solid #0d0d0b;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+      user-select: none;
+    }
+    .player.is-flashback .player__scene { filter: sepia(0.8) saturate(0.7) brightness(0.95); }
+    .player__scene {
+      position: absolute;
+      inset: 0;
+      transition: filter 0.6s;
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.07), transparent 60%),
+        linear-gradient(#22221d, #161612);
+    }
+    /* korrel over het beeld */
+    .player::after {
+      content: "";
+      position: absolute;
+      inset: -50%;
+      pointer-events: none;
+      opacity: 0.12;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      animation: grain 0.6s steps(3) infinite;
+    }
+    @keyframes grain {
+      0% { transform: translate(0, 0); }
+      33% { transform: translate(-4%, 3%); }
+      66% { transform: translate(3%, -2%); }
+    }
+
+    .player__caption {
+      position: absolute;
+      top: 1.2rem;
+      left: 1.4rem;
+      font-family: var(--type);
+      font-size: clamp(0.8rem, 1.4vw, 1rem);
+      letter-spacing: 0.08em;
+      color: var(--chalk);
+      background: rgba(0, 0, 0, 0.45);
+      padding: 0.3rem 0.7rem;
+    }
+    .player__tag {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.4rem;
+      font-size: 0.9rem;
+    }
+    .player__portrait {
+      position: absolute;
+      left: 50%;
+      top: 44%;
+      width: clamp(150px, 22%, 240px);
+      transform: translate(-50%, -50%) rotate(var(--r, -2deg));
+      transition: opacity 0.35s, transform 0.5s var(--ease);
+    }
+    .player__portrait.is-swap { opacity: 0; transform: translate(-50%, -46%) rotate(var(--r, -2deg)); }
+
+    /* dialoogvak als getypt papiertje */
+    .player__box {
+      position: absolute;
+      left: 50%;
+      bottom: 1.4rem;
+      width: min(92%, 760px);
+      transform: translateX(-50%);
+      background: var(--paper);
+      color: var(--ink);
+      padding: 1.1rem 1.4rem 1.3rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      min-height: 120px;
+      cursor: pointer;
+    }
+    .player__who {
+      position: absolute;
+      top: -0.9rem;
+      left: 1rem;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--type);
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      padding: 0.15rem 0.7rem;
+    }
+    .player__how { font-style: italic; opacity: 0.6; font-size: 0.85rem; }
+    .player__text { font-size: clamp(1rem, 1.7vw, 1.2rem); min-height: 2.6em; }
+    .player__text.is-narration { font-family: var(--type); }
+    .player__next {
+      position: absolute;
+      right: 1rem;
+      bottom: 0.5rem;
+      font-size: 0.75rem;
+      opacity: 0.55;
+      animation: blink 1.2s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* keuzes als indexkaarten */
+    .player__choices {
+      position: absolute;
+      inset: auto 0 1.4rem 0;
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      padding: 0 1.4rem;
+    }
+    .choice {
+      flex: 1;
+      max-width: 400px;
+      text-align: left;
+      background: #f3efe4;
+      color: var(--ink);
+      border: 0;
+      padding: 1rem 1.2rem 1.1rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s var(--ease);
+      font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+      line-height: 1.45;
+    }
+    .choice:nth-child(1) { transform: rotate(-1.5deg); }
+    .choice:nth-child(2) { transform: rotate(1.2deg); }
+    .choice:hover, .choice:focus-visible { transform: rotate(0) translateY(-6px); }
+    .choice b {
+      display: inline-grid;
+      place-items: center;
+      width: 1.8rem;
+      height: 1.8rem;
+      margin-right: 0.5rem;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      font-family: var(--type);
+      font-weight: 400;
+    }
+    .player__q {
+      position: absolute;
+      top: 22%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(90%, 720px);
+      text-align: center;
+      font-family: var(--type);
+      font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+    }
+
+    /* titelkaart tussen de scènes */
+    .player__card {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      background: #0d0d0b;
+      z-index: 5;
+      padding: 2rem;
+    }
+    .player__card h3 { font-family: var(--type); font-weight: 400; font-size: clamp(1.8rem, 4vw, 3rem); letter-spacing: 0.08em; }
+    .player__card p { color: var(--muted); margin-top: 0.6rem; }
+    .player__card .stamp { margin-top: 1.2rem; }
+
+    /* startscherm van de speler */
+    .player__start h3 { font-size: clamp(2.6rem, 6vw, 4.5rem); }
+    .player__start button {
+      margin-top: 1.6rem;
+      background: none;
+      border: 0;
+      color: var(--chalk);
+      font-family: var(--hand);
+      font-size: 2rem;
+      letter-spacing: 0.2em;
+      border-bottom: 2px solid var(--chalk);
+    }
+
+    /* voortgang */
+    .player__progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: var(--red);
+      transition: width 0.5s var(--ease);
+      z-index: 6;
+    }
+
+    /* het bord aan het eind */
+    .board {
+      position: absolute;
+      inset: 0;
+      z-index: 7;
+      background: #6b5338;
+      background-image:
+        radial-gradient(rgba(0, 0, 0, 0.15) 1px, transparent 1.5px),
+        radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1.5px);
+      background-size: 7px 7px, 11px 11px;
+      color: var(--ink);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 1.6rem;
+      overflow-y: auto;
+    }
+    .board__col h4 {
+      font-family: var(--type);
+      font-weight: 400;
+      color: var(--chalk);
+      margin-bottom: 0.6rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    }
+    .board__note {
+      background: #f6f0c8;
+      padding: 0.55rem 0.8rem;
+      margin-bottom: 0.6rem;
+      font-family: var(--hand);
+      font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+      line-height: 1.15;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      transform: translateY(10px) rotate(var(--r, -1deg));
+      transition: opacity 0.5s, transform 0.5s var(--ease);
+    }
+    .board__note.is-in { opacity: 1; transform: rotate(var(--r, -1deg)); }
+    .board__note--empty { background: rgba(246, 240, 200, 0.25); color: rgba(0, 0, 0, 0.55); border: 2px dashed rgba(246, 240, 200, 0.6); box-shadow: none; }
+    .board__label {
+      position: relative;
+      font-family: var(--type);
+      font-size: clamp(1.4rem, 3vw, 2.4rem);
+      color: var(--red);
+      border: 4px solid var(--red);
+      background: rgba(246, 240, 230, 0.85);
+      padding: 0.5rem 1rem;
+      transform: rotate(-6deg);
+    }
+    .board__label::after { /* doorstrepen */
+      content: "";
+      position: absolute;
+      left: -8%;
+      right: -8%;
+      top: 50%;
+      height: 5px;
+      background: var(--ink);
+      transform: scaleX(0) rotate(-4deg);
+      transform-origin: left;
+      transition: transform 0.6s var(--ease) 0.3s;
+    }
+    .board.is-crossed .board__label::after { transform: scaleX(1) rotate(-4deg); }
+    .board__end {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(0, 0, 0, 0.55);
+      color: var(--chalk);
+      padding: 0.9rem 1.1rem;
+    }
+    .board__end p { max-width: 38rem; }
+    .board__end button {
+      background: var(--chalk);
+      color: var(--ink);
+      border: 0;
+      padding: 0.6rem 1.2rem;
+      font-family: var(--type);
+    }
+
+
+    /* ---------- achtergrond uit assets/Unseen ---------- */
+    body { background: var(--bg) var(--bg-img, none) center / cover fixed; }
+
+    /* ---------- video in de speler ---------- */
+    .player__video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+      z-index: 1;
+    }
+    .player.is-flashback .player__video { filter: sepia(0.35) contrast(1.05); }
+    .player__skip {
+      position: absolute;
+      right: 1rem;
+      bottom: 1rem;
+      z-index: 8;
+      background: rgba(0, 0, 0, 0.6);
+      color: var(--chalk);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 0.4rem 0.9rem;
+      font-family: var(--type);
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+    }
+    .player__skip:hover { background: #000; }
+    .player__caption, .player__tag, .player__portrait, .player__box,
+    .player__choices, .player__q { z-index: 3; }
+
+    /* ---------- overgangen ---------- */
+    .fx {
+      position: absolute;
+      inset: 0;
+      z-index: 9;
+      pointer-events: none;
+      opacity: 0;
+    }
+    /* film burn: brandvlek die het beeld opvreet */
+    .fx--burn {
+      background:
+        radial-gradient(circle at var(--x, 70%) var(--y, 40%), #fff8e0 0%, #ffb347 12%, #d2491b 26%, #3a0d02 48%, #000 70%);
+      mix-blend-mode: screen;
+    }
+    /* VHS terugspoelen */
+    .fx--rewind {
+      background:
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.08) 0 2px, transparent 2px 4px),
+        linear-gradient(rgba(20, 20, 30, 0.85), rgba(20, 20, 30, 0.85));
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-family: var(--type);
+      font-size: clamp(1.4rem, 3vw, 2.4rem);
+      letter-spacing: 0.15em;
+      text-shadow: 3px 0 #f0f, -3px 0 #0ff;
+    }
+    .fx--rewind::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(180deg, transparent 0 40px, rgba(255,255,255,0.12) 40px 46px);
+      animation: roll 0.25s linear infinite;
+    }
+    @keyframes roll { to { background-position: 0 46px; } }
+    /* glitch: blokken en kleurverschuiving */
+    .fx--glitch {
+      background:
+        linear-gradient(90deg, transparent 0 12%, rgba(255,0,80,0.55) 12% 30%, transparent 30% 55%, rgba(0,255,255,0.45) 55% 70%, transparent 70%),
+        repeating-linear-gradient(0deg, #000 0 7px, transparent 7px 19px, rgba(255,255,255,0.25) 19px 21px, transparent 21px 33px);
+    }
+    /* dossierpagina die eroverheen schuift */
+    .fx--page {
+      background:
+        repeating-linear-gradient(transparent 0 27px, rgba(70, 110, 160, 0.25) 27px 28px),
+        var(--paper);
+      box-shadow: -30px 0 40px rgba(0, 0, 0, 0.5);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      font-family: var(--type);
+      font-size: clamp(1.4rem, 3vw, 2.4rem);
+      letter-spacing: 0.1em;
+    }
+    /* iris: cirkel sluit en opent */
+    .fx--iris { background: #000; }
+
+    .player.is-shake { animation: shake 0.35s steps(2) 2; }
+    @keyframes shake {
+      0% { transform: translate(0, 0); filter: hue-rotate(0); }
+      50% { transform: translate(-6px, 2px); filter: hue-rotate(90deg) saturate(2); }
+      100% { transform: translate(5px, -3px); }
+    }
+
+    /* keuze over een stilstaand videobeeld */
+    .player.is-choosing .player__video { filter: grayscale(1) brightness(0.45) blur(2px); transition: filter 0.6s; }
+
+    /* ---------- rode draad ---------- */
+    body { position: relative; }
+    .thread {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: visible;
+    }
+    .thread path {
+      fill: none;
+      stroke: var(--red);
+      stroke-width: 2;
+      stroke-linecap: round;
+      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+    }
+    .thread circle { fill: #d33; stroke: #6b0f0a; stroke-width: 2; }
+    .h2 .ch { display: inline-block; white-space: pre; }
+
+    /* ---------- documentatie-mappen ---------- */
+    .docs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem;
+      max-width: 980px;
+    }
+    .docfile {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      min-height: 230px;
+      padding: 2.2rem 1.8rem 1.6rem;
+      background: #c9b48a;
+      color: var(--ink);
+      text-decoration: none;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+      transform: rotate(-1.2deg);
+      transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease);
+    }
+    .docfile--b { background: #b9c2a6; transform: rotate(1deg); }
+    .docfile:hover, .docfile:focus-visible { transform: rotate(0) translateY(-8px); box-shadow: 0 24px 40px rgba(0, 0, 0, 0.55); }
+    .docfile__tab {
+      position: absolute;
+      top: -1.7rem;
+      left: 1.4rem;
+      background: inherit;
+      padding: 0.35rem 1rem 0.5rem;
+      font-family: var(--type);
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+    }
+    .docfile__title { font-family: var(--type); font-size: clamp(1.4rem, 2.4vw, 2rem); }
+    .docfile__text { max-width: 26rem; }
+    .docfile__open {
+      margin-top: auto;
+      align-self: flex-start;
+      font-family: var(--type);
+      border-bottom: 2px solid var(--ink);
+    }
+    @media (max-width: 720px) { .docs { grid-template-columns: 1fr; } }
+
+    /* ---------- CREDITS ---------- */
+    .credits {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      max-width: 980px;
+      padding-bottom: 6rem;
+    }
+    .credits h3 { font-family: var(--type); font-weight: 400; font-size: 1rem; color: var(--muted); margin-bottom: 0.4rem; }
+
+    .footer {
+      padding: 2rem var(--pad-x) 5rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* =========================================
+       RESPONSIVE
+       ========================================= */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; text-align: center; }
+      .hero__sub { margin-inline: auto; }
+      .hero__pile { height: 420px; max-width: 520px; width: 100%; margin: 0 auto; }
+      .dossier__grid { grid-template-columns: 1fr; }
+      .goals { grid-template-columns: 1fr; }
+      .credits { grid-template-columns: 1fr; }
+      .board { grid-template-columns: 1fr; align-content: start; }
+      .board__label { justify-self: center; }
+    }
+    @media (max-width: 640px) {
+      .nav__links { display: none; }
+      .player { aspect-ratio: auto; height: 640px; min-height: 0; border-width: 6px; }
+      .player__portrait { top: 34%; width: 150px; }
+      .player__choices { flex-direction: column; align-items: center; bottom: 1rem; }
+      .choice { width: 100%; }
+      .player__q { top: 12%; }
+      .dossier .stamp { position: static; margin-bottom: 1rem; }
+      .polaroid { width: 120px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
+      .hero__title .ch { opacity: 1; }
+    }
+    /* =========================================
+       MIJN ROL / MY ROLE — NL + EN
+       ========================================= */
+    .myrole { position: relative; z-index: 2; padding: clamp(4rem, 9vw, 7rem) var(--pad-x, 5vw) 0; }
+    .myrole__in { max-width: 1100px; margin: 0 auto; padding-top: 2rem; border-top: 1px solid var(--role-line, currentColor); }
+    .myrole__kick { font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; margin-bottom: 0.8rem; }
+    .myrole__title { font-family: var(--role-head, inherit); font-weight: var(--role-weight, 400); font-size: clamp(1.8rem, 3.6vw, 3rem); line-height: 1.1; margin-bottom: 2rem; }
+    .myrole__cols { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 4vw, 3.5rem); }
+    .myrole__lang { display: inline-block; margin-bottom: 0.8rem; padding: 0.15rem 0.5rem; border: 1px solid currentColor; border-radius: var(--role-r, 999px); font-size: 0.7rem; letter-spacing: 0.14em; opacity: 0.75; }
+    .myrole__cols p + p { margin-top: 0.8rem; }
+    .myrole__list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1.1rem; list-style: none; padding: 0; }
+    .myrole__list li { padding: 0.3rem 0.75rem; border: 1px solid var(--role-line, currentColor); border-radius: var(--role-r, 999px); font-size: 0.82rem; }
+    .myrole__note { margin-top: 1.1rem; font-size: 0.88rem; font-style: italic; opacity: 0.75; }
+    @media (max-width: 760px) { .myrole__cols { grid-template-columns: 1fr; } }
+    .myrole { --role-line: var(--line); --role-head: var(--type); --role-r: 0; }
+    .myrole__note { font-family: var(--hand); font-style: normal; font-size: 1.3rem; }
+    /* taalknop NL / EN */
+    .pl-switch { --pl-r: 0; --pl-on: #1f1f1c; font-family: "Courier Prime", monospace; }
+  </style>
+</head>
+<body>
+
+  <!-- rode draad over de pagina (wordt getekend bij scrollen) -->
+  <svg class="thread" id="thread" aria-hidden="true"><path id="threadPath" /><g id="threadPins"></g></svg>
+
+  <div class="float">
+    <a href="../index.html#projects">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      <span data-i18n="float.back">Terug naar portfolio</span>
+    </a>
+  </div>
+
+  <nav class="nav" id="nav">
+    <a href="#top" class="nav__logo">UNSEEN</a>
+    <ul class="nav__links">
+      <li><a href="#wat">Wat is het</a></li>
+      <li><a href="#personages">Personages</a></li>
+      <li><a href="#spelen">Speel</a></li>
+      <li><a href="#documentatie">Documentatie</a></li>
+    </ul>
+  </nav>
+
+  <!-- =========================================
+       HERO
+       ========================================= -->
+  <header class="hero" id="top">
+    <div class="filmstrip" aria-hidden="true"></div>
+
+    <div class="hero__left">
+      <h1 class="hero__title" id="heroTitle">UNSEEN</h1>
+      <p class="hero__sub">Een interactieve docu over Jason, 17. Iedereen heeft al een beeld van hem. Wat zie jij als je verder kijkt?</p>
+      <a href="#spelen" class="start">START</a>
+    </div>
+
+    <!-- poppetjes uit assets/Unseen/ (zie de namen hieronder). Ontbreekt er een? Dan komt er een silhouet. -->
+    <div class="hero__pile" aria-hidden="true">
+      <figure class="polaroid"><img src="../assets/Unseen/noor.png" data-name="Noor" alt="" /></figure>
+      <figure class="polaroid"><img src="../assets/Unseen/mo.png" data-name="Mo" alt="" /></figure>
+      <figure class="polaroid"><img src="../assets/Unseen/jason_vriendelijk.png" data-name="Jason" alt="" /></figure>
+      <figure class="polaroid"><img src="../assets/Unseen/mama.png" data-name="Mama" alt="" /></figure>
+      <figure class="polaroid"><img src="../assets/Unseen/rayan.png" data-name="Rayan" alt="" /></figure>
+      <figure class="polaroid"><img src="../assets/Unseen/medewerker_vriendelijk.png" data-name="Jij" alt="" /></figure>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- =========================================
+         WAT IS HET
+         ========================================= -->
+    <section class="section" id="wat">
+      <article class="dossier">
+        <span class="stamp">VERTROUWELIJK</span>
+        <div class="dossier__grid">
+          <div>
+            <h2>Wat is UNSEEN?</h2>
+            <p>UNSEEN is een interactieve docu voor professionals in de jeugdzorg. Je speelt een jeugdzorgmedewerker die een eerste gesprek heeft met Jason, 17.</p>
+            <p>Jason is gisteravond aangetroffen bij een gestolen scooter. Politie, school en de buurt hebben hun conclusie al getrokken. Jij krijgt alleen zijn dossier.</p>
+            <p>Bij elk moment in het gesprek kies je hoe je reageert. Een gesloten vraag houdt je bij het label. Als je doorvraagt, zie je wat er onder zijn gedrag zit.</p>
+            <p class="note">Wie doorvraagt, ziet meer.</p>
+          </div>
+          <ul class="facts">
+            <li><b>VOOR WIE</b>Professionals in de jeugdzorg, politie en onderwijs</li>
+            <li><b>HOE</b>Video's van het verhaal; spelers stemmen samen via hun telefoon</li>
+            <li><b>DUUR</b>Ongeveer 15 minuten per casus</li>
+            <li><b>OPDRACHTGEVER</b>RIEC · Team 6</li>
+            <li><b>MIJN ROL</b>Het hele project, van research tot design, en de filmpjes</li>
+          </ul>
+        </div>
+      </article>
+
+      <div class="goals">
+        <div class="goal">
+          <h3>Achter het gedrag kijken</h3>
+          <p>Je ziet waar Jason vandaan komt: zijn thuissituatie, hechting, stress en pijn.</p>
+        </div>
+        <div class="goal">
+          <h3>Meerdere kanten</h3>
+          <p>Dezelfde situatie, verteld door verschillende mensen. Gedrag kan meerdere oorzaken hebben.</p>
+        </div>
+        <div class="goal">
+          <h3>Stap voor stap</h3>
+          <p>Een realistische casus met beeld, geluid en persoonlijke verhalen.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================
+         PERSONAGES
+         ========================================= -->
+    <section class="section" id="personages">
+      <h2 class="h2">Personages</h2>
+      <div class="cast">
+        <div>
+          <figure class="polaroid"><img src="../assets/Unseen/jason_vriendelijk.png" data-name="Jason" alt="Jason" /><figcaption>Jason, 17</figcaption></figure>
+          <p class="cast__role">Zorgt vaak voor zijn broertje. Staat in het dossier als risicojongere.</p>
+        </div>
+        <div>
+          <figure class="polaroid"><img src="../assets/Unseen/medewerker_vriendelijk.png" data-name="Jij" alt="Jeugdzorgmedewerker" /><figcaption>Jij</figcaption></figure>
+          <p class="cast__role">Jeugdzorgmedewerker. Voert het eerste gesprek.</p>
+        </div>
+        <div>
+          <figure class="polaroid"><img src="../assets/Unseen/mo.png" data-name="Mo" alt="Mo" /><figcaption>Mo</figcaption></figure>
+          <p class="cast__role">Woont in dezelfde portiek. Zoekt jongens die iets voor hem bewaren.</p>
+        </div>
+        <div>
+          <figure class="polaroid"><img src="../assets/Unseen/rayan.png" data-name="Rayan" alt="Rayan" /><figcaption>Rayan</figcaption></figure>
+          <p class="cast__role">Jasons beste vriend. Weet meer dan hij zegt.</p>
+        </div>
+        <div>
+          <figure class="polaroid"><img src="../assets/Unseen/mama.png" data-name="Mama" alt="Mama" /><figcaption>Mama</figcaption></figure>
+          <p class="cast__role">Werkt nachtdiensten. Het geld is altijd krap.</p>
+        </div>
+        <div>
+          <figure class="polaroid"><img src="../assets/Unseen/noor.png" data-name="Noor" alt="Noor" /><figcaption>Noor</figcaption></figure>
+          <p class="cast__role">Klasgenoot. Kijkt als eerste naar Jason als er iets weg is.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================
+         SPELEN
+         ========================================= -->
+    <section class="section" id="spelen">
+      <h2 class="h2">Speel de casus</h2>
+      <p class="play__intro">Zet je geluid aan. Bij elk moment kies je A of B. In de echte docu stemt de groep samen; hier kies je zelf. Tekst gaat verder met een klik of de spatiebalk.</p>
+
+      <div class="player" id="player" tabindex="0" aria-live="polite">
+        <div class="player__scene"></div>
+        <video class="player__video" id="pVideo" playsinline preload="auto" hidden></video>
+        <div class="player__caption" id="pCaption" hidden></div>
+        <div class="player__tag" id="pTag" hidden><span class="stamp">PERSPECTIEF</span></div>
+
+        <figure class="polaroid player__portrait" id="pPortrait" hidden>
+          <img id="pImg" alt="" />
+          <figcaption id="pImgName"></figcaption>
+        </figure>
+
+        <div class="player__q" id="pQuestion" hidden></div>
+
+        <div class="player__box" id="pBox" hidden>
+          <span class="player__who" id="pWho"></span>
+          <p class="player__how" id="pHow"></p>
+          <p class="player__text" id="pText"></p>
+          <span class="player__next">klik ▸</span>
+        </div>
+
+        <div class="player__choices" id="pChoices" hidden></div>
+
+        <div class="player__card player__start" id="pStart">
+          <div>
+            <h3>UNSEEN</h3>
+            <p>Casus 1 · Jason, 17</p>
+            <button type="button" id="pStartBtn">START</button>
+          </div>
+        </div>
+        <div class="player__card" id="pCard" hidden></div>
+
+        <div class="board" id="pBoard" hidden></div>
+        <button class="player__skip" id="pSkip" type="button" hidden>Overslaan ▸▸</button>
+        <div class="fx" id="pFx"></div>
+        <div class="player__progress" id="pProgress" style="width:0"></div>
+      </div>
+    </section>
+
+    <!-- =========================================
+         ACHTER DE SCHERMEN
+         ========================================= -->
+    <section class="section" id="documentatie">
+      <h2 class="h2">Achter de schermen</h2>
+      <div class="docs">
+        <a class="docfile" href="unseen-research.html">
+          <span class="docfile__tab">BIJLAGE A</span>
+          <span class="docfile__title">Research-analyse</span>
+          <span class="docfile__text">Ons onderzoek, de ontwerpcyclus en hoe we van vraag naar docu kwamen.</span>
+          <span class="docfile__open">Open dossier ▸</span>
+        </a>
+        <!-- PLACEHOLDER: zet jullie documentatie als PDF in assets/Unseen/documentatie.pdf -->
+        <a class="docfile docfile--b" href="../assets/Unseen/documentatie.pdf" target="_blank" rel="noopener">
+          <span class="docfile__tab">BIJLAGE B</span>
+          <span class="docfile__title">Documentatie</span>
+          <span class="docfile__text">Het volledige verslag van Team 6, met script, keuzes en testresultaten.</span>
+          <span class="docfile__open">Open PDF ▸</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- =========================================
+         CREDITS
+         ========================================= -->
+
+    <!-- =========================================
+         MIJN ROL / MY ROLE (NL + EN)
+         ========================================= -->
+    <section class="myrole " id="mijn-rol">
+      <div class="myrole__in">
+        <p class="myrole__kick" data-en="My role">Mijn rol</p>
+        <h2 class="myrole__title" data-en="What I did">Wat ik deed</h2>
+        <div class="myrole__cols">
+          <div lang="nl">
+            <span class="myrole__lang">NL</span>
+            <p>UNSEEN hebben we als team helemaal zelf gemaakt: van het research tot het design, en ook de filmpjes. Ik werkte mee aan alle stappen.</p>
+            <ul class="myrole__list"><li>Research</li><li>Interaction design</li><li>Filmpjes</li><li>Teamwerk</li></ul>
+            <p class="myrole__note">Deze pagina is gemaakt in de stijl van het design van het project.</p>
+          </div>
+          <div lang="en">
+            <span class="myrole__lang">EN</span>
+            <p>We made UNSEEN as a team from start to finish: from the research to the design, and the videos too. I worked on every step.</p>
+            <ul class="myrole__list"><li>Research</li><li>Interaction design</li><li>Videos</li><li>Teamwork</li></ul>
+            <p class="myrole__note">This page is built in the style of the project's own design.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="credits">
+      <h2 class="h2">Team</h2>
+      <div class="credits">
+        <div><h3>Research, design &amp; video</h3><p>Yasmine Boucharib</p></div>
+        <div><h3>Team</h3><p>Team 6</p></div>
+        <div><h3>Opdrachtgever</h3><p>RIEC</p></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">UNSEEN · Team 6 · in opdracht van het RIEC</footer>
+
+  <!-- GSAP voor de scroll-animaties -->
+  <script>
+    /* Engelse teksten voor de taalknop (Nederlands → Engels) */
+    window.PL_EN = {
+  "Terug naar portfolio": "Back to portfolio",
+  "Wat is het": "What it is",
+  "Personages": "Characters",
+  "Speel": "Play",
+  "Documentatie": "Documentation",
+  "Een interactieve docu over Jason, 17. Iedereen heeft al een beeld van hem. Wat zie jij als je verder kijkt?": "An interactive documentary about Jason, 17. Everyone already has an image of him. What do you see when you look further?",
+  "VERTROUWELIJK": "CONFIDENTIAL",
+  "Wat is UNSEEN?": "What is UNSEEN?",
+  "UNSEEN is een interactieve docu voor professionals in de jeugdzorg. Je speelt een jeugdzorgmedewerker die een eerste gesprek heeft met Jason, 17.": "UNSEEN is an interactive documentary for youth care professionals. You play a youth care worker having a first conversation with Jason, 17.",
+  "Jason is gisteravond aangetroffen bij een gestolen scooter. Politie, school en de buurt hebben hun conclusie al getrokken. Jij krijgt alleen zijn dossier.": "Last night, Jason was found next to a stolen scooter. The police, the school and the neighbourhood have already drawn their conclusions. All you get is his file.",
+  "Bij elk moment in het gesprek kies je hoe je reageert. Een gesloten vraag houdt je bij het label. Als je doorvraagt, zie je wat er onder zijn gedrag zit.": "At every moment in the conversation you choose how to respond. A closed question keeps you stuck on the label. If you ask further, you see what lies beneath his behaviour.",
+  "Wie doorvraagt, ziet meer.": "Ask further, see more.",
+  "VOOR WIEProfessionals in de jeugdzorg, politie en onderwijs": "<b>FOR<\/b>Professionals in youth care, police and education",
+  "HOEVideo's van het verhaal; spelers stemmen samen via hun telefoon": "<b>HOW<\/b>Videos of the story; players vote together on their phones",
+  "DUUROngeveer 15 minuten per casus": "<b>LENGTH<\/b>About 15 minutes per case",
+  "OPDRACHTGEVERRIEC · Team 6": "<b>CLIENT<\/b>RIEC · Team 6",
+  "MIJN ROLHet hele project, van research tot design, en de filmpjes": "<b>MY ROLE<\/b>The whole project, from research to design, and the videos",
+  "Achter het gedrag kijken": "Looking beyond behaviour",
+  "Je ziet waar Jason vandaan komt: zijn thuissituatie, hechting, stress en pijn.": "You see where Jason comes from: his home situation, attachment, stress and pain.",
+  "Meerdere kanten": "Multiple sides",
+  "Dezelfde situatie, verteld door verschillende mensen. Gedrag kan meerdere oorzaken hebben.": "The same situation, told by different people. Behaviour can have more than one cause.",
+  "Stap voor stap": "Step by step",
+  "Een realistische casus met beeld, geluid en persoonlijke verhalen.": "A realistic case with images, sound and personal stories.",
+  "Zorgt vaak voor zijn broertje. Staat in het dossier als risicojongere.": "Often takes care of his little brother. Listed in his file as an at-risk youth.",
+  "Jij": "You",
+  "Jeugdzorgmedewerker. Voert het eerste gesprek.": "Youth care worker. Has the first conversation.",
+  "Woont in dezelfde portiek. Zoekt jongens die iets voor hem bewaren.": "Lives in the same building. Looks for boys who'll keep things for him.",
+  "Jasons beste vriend. Weet meer dan hij zegt.": "Jason's best friend. Knows more than he says.",
+  "Mama": "Mum",
+  "Werkt nachtdiensten. Het geld is altijd krap.": "Works night shifts. Money is always tight.",
+  "Klasgenoot. Kijkt als eerste naar Jason als er iets weg is.": "Classmate. The first to look at Jason when something goes missing.",
+  "Speel de casus": "Play the case",
+  "Zet je geluid aan. Bij elk moment kies je A of B. In de echte docu stemt de groep samen; hier kies je zelf. Tekst gaat verder met een klik of de spatiebalk.": "Turn your sound on. At every moment you choose A or B. In the real documentary the group votes together; here you choose yourself. Text continues with a click or the space bar. (The case itself is in Dutch.)",
+  "PERSPECTIEF": "PERSPECTIVE",
+  "klik ▸": "click ▸",
+  "Casus 1 · Jason, 17": "Case 1 · Jason, 17",
+  "Overslaan ▸▸": "Skip ▸▸",
+  "Achter de schermen": "Behind the scenes",
+  "BIJLAGE A": "APPENDIX A",
+  "Research-analyse": "Research analysis",
+  "Ons onderzoek, de ontwerpcyclus en hoe we van vraag naar docu kwamen.": "Our research, the design cycle and how we went from question to documentary.",
+  "Open dossier ▸": "Open file ▸",
+  "BIJLAGE B": "APPENDIX B",
+  "Het volledige verslag van Team 6, met script, keuzes en testresultaten.": "The full report by Team 6, with script, choices and test results.",
+  "Research, design & video": "Research, design &amp; video",
+  "Opdrachtgever": "Client",
+  "UNSEEN · Team 6 · in opdracht van het RIEC": "UNSEEN · Team 6 · commissioned by the RIEC"
+};
+  </script>
+  <script src="page-lang.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="../lang.js"></script>
+  <script>
+    /* =========================================
+       PLACEHOLDER-FOTO'S
+       Zolang assets/Unseen/naam.png er niet is,
+       komt er een getekend silhouet met de naam.
+       ========================================= */
+    function placeholder(name) {
+      const hues = { Jason: 28, Mo: 0, Rayan: 200, Mama: 330, Noor: 270, Jij: 140 };
+      const h = hues[name] ?? 40;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+        <defs><radialGradient id="g" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="hsl(${h},18%,38%)"/><stop offset="1" stop-color="hsl(${h},14%,16%)"/></radialGradient></defs>
+        <rect width="200" height="200" fill="url(#g)"/>
+        <circle cx="100" cy="82" r="34" fill="hsl(${h},10%,10%)" opacity=".85"/>
+        <path d="M34 200c4-48 32-72 66-72s62 24 66 72z" fill="hsl(${h},10%,10%)" opacity=".85"/>
+        <text x="100" y="190" text-anchor="middle" font-family="Courier New" font-size="15" fill="#cfcabb" opacity=".7">${name.toUpperCase()}</text>
+      </svg>`;
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    }
+    function withFallback(img) {
+      img.addEventListener("error", () => { img.src = placeholder(img.dataset.name || "?"); }, { once: true });
+    }
+    document.querySelectorAll("img[data-name]").forEach((img) => {
+      withFallback(img);
+      if (img.complete && img.naturalWidth === 0) img.src = placeholder(img.dataset.name);
+    });
+
+    /* ---------- nav ---------- */
+    const nav = document.getElementById("nav");
+    addEventListener("scroll", () => nav.classList.toggle("is-scrolled", scrollY > 40), { passive: true });
+
+    /* ---------- titel typt zichzelf ---------- */
+    (() => {
+      const t = document.getElementById("heroTitle");
+      t.innerHTML = [...t.textContent].map((c, i) => `<span class="ch" style="animation-delay:${0.25 + i * 0.16}s">${c}</span>`).join("");
+    })();
+
+    /* =========================================
+       ACHTERGROND
+       Zoekt je achtergrond in assets/Unseen/.
+       Heet hij anders? Zet de naam dan bovenaan deze lijst.
+       ========================================= */
+    (() => {
+      const names = ["background.jpg", "background.png", "Background.jpg", "Background.png", "bg.jpg", "bg.png", "achtergrond.jpg", "achtergrond.png"];
+      const tryNext = (i) => {
+        if (i >= names.length) return;
+        const url = `../assets/Unseen/${names[i]}`;
+        const img = new Image();
+        img.onload = () => document.body.style.setProperty("--bg-img", `url("${url}")`);
+        img.onerror = () => tryNext(i + 1);
+        img.src = url;
+      };
+      tryNext(0);
+    })();
+
+    /* =========================================
+       HET VERHAAL
+       Elk stuk (segment) speelt een video uit
+       assets/Unseen/clips/. Is die er niet?
+       Dan speelt de tekstversie eronder.
+
+       Stappen in de tekstversie:
+         { cap }              tijd/plek linksboven
+         { who, how, text }   iemand zegt iets
+         { nar }              vertelstem
+         { card, sub }        titelkaart
+       ========================================= */
+    const CLIPS = "../assets/Unseen/clips/";
+
+    // poppetjes: Jason en de medewerker zijn de getekende figuren, de rest wordt een silhouet
+    const PORTRAITS = {
+      Jason: "jason_vriendelijk.png",
+      Jij: "medewerker_vriendelijk.png",
+      Mo: "mo.png",
+      Rayan: "rayan.png",
+      Mama: "mama.png",
+      Noor: "noor.png",
+    };
+
+    const SEGMENTS = {
+      intro: {
+        video: "00_intro.mp4",
+        next: "label", fx: "page", fxText: "HOE EEN LABEL ONTSTAAT",
+        text: [
+          { card: "CASUS 1", sub: "Jason, 17. Aangetroffen bij een gestolen scooter. Zijn rol daarbij is nog onduidelijk." },
+        ],
+      },
+      label: {
+        video: "00b_hoe_een_label_ontstaat.mp4",
+        next: "m1", fx: "iris",
+        text: [
+          { cap: "21:52 — STRAAT" },
+          { who: "Agent", how: "streng", text: "Naam?" },
+          { who: "Jason", how: "nerveus", text: "Jason. Ik stond er alleen bij." },
+          { who: "Portofoon", how: "vlak", text: "Jason, zeventien? Die is bekend. Die van die telefoons." },
+          { who: "Agent", how: "weet genoeg", text: "Ah. Die." },
+          { cap: "VOLGENDE OCHTEND — SCHOOL" },
+          { who: "Wijkagent", text: "Jason is gisteravond aangetroffen bij een gestolen scooter." },
+          { who: "Zorgcoördinator", how: "zucht", text: "Oké. Ik zet het in zijn dossier." },
+          { cap: "DOCENTENKAMER" },
+          { who: "Docent", how: "afwijzend", text: "Jason? Die zit toch in de criminaliteit?" },
+          { who: "Mentor", how: "aarzelend", text: "Nou ja… het zou me niks verbazen." },
+        ],
+      },
+
+      /* ---------- MOMENT 1 ---------- */
+      m1: {
+        video: "01_moment1_gesprek_beginnen.mp4",
+        choice: "m1",
+        text: [
+          { card: "Moment 1", sub: "Het eerste gesprek" },
+          { cap: "SCHOOL — SPREEKKAMER" },
+          { who: "Jij", how: "warm", text: "Hoi Jason. Ik ben van jeugdzorg. Fijn dat je er bent." },
+          { who: "Jason", how: "geïrriteerd", text: "Moest van school." },
+          { who: "Jij", how: "rustig", text: "Dat klopt. School maakt zich zorgen. Maar ik wil vooral jouw kant horen." },
+          { who: "Jason", how: "wantrouwig", text: "Wat staat er over mij?" },
+        ],
+      },
+      m1A: {
+        video: "01a_moment1_keuzeA.mp4",
+        next: "m2", fx: "burn", fxText: "MOMENT 2",
+        text: [
+          { who: "Jij", text: "Er staat dat je gisteravond bij een gestolen scooter stond. Klopt dat?" },
+          { who: "Jason", how: "klapt dicht", text: "Zie je. Jullie hebben het al besloten." },
+          { nar: "Jason zegt de rest van het gesprek weinig. Jij blijft met het beeld van de politie zitten." },
+        ],
+      },
+      m1B: {
+        video: "01b_moment1_keuzeB.mp4",
+        next: "p1B", fx: "rewind", fxText: "◀◀ GISTERAVOND",
+        text: [
+          { who: "Jij", how: "rustig", text: "Ik heb gelezen wat school heeft doorgegeven. Wat vind jij belangrijk dat ik over je weet?" },
+          { who: "Jason", how: "aarzelend", text: "Weet niet. Wat wil je weten?" },
+          { nar: "Hij begint te vertellen over gisteravond." },
+        ],
+      },
+      p1B: {
+        video: "01b_perspectief_jasons_kant.mp4",
+        persp: "Jasons kant",
+        finds: ["Hij haalde koortsdrank voor zijn zieke broertje", "Hij zei nee tegen Mo, en bleef staan omdat rennen schuldig lijkt"],
+        next: "m2", fx: "burn", fxText: "MOMENT 2",
+        text: [
+          { cap: "GISTERAVOND 21:30 — AVONDAPOTHEEK" },
+          { who: "Apotheker", how: "vriendelijk", text: "Kinderparacetamol. Beterschap voor je broertje." },
+          { who: "Jason", how: "zacht", text: "Dank u wel." },
+          { cap: "21:45 — PORTIEK" },
+          { who: "Mo", how: "luchtig", text: "Jason! Zet hem effe in je berging. Eén nachtje." },
+          { who: "Jason", how: "stellig", text: "Nee man. Milo is ziek, ik moet naar boven." },
+          { who: "Mo", how: "geïrriteerd", text: "Doe niet zo moeilijk, man." },
+          { nar: "Sirenes. Mo en zijn maat rennen weg." },
+          { who: "Jason", how: "fluistert", text: "Als ik nu ren, denken ze dat ik het was." },
+          { who: "Agent", how: "streng", text: "Wat zit er in die tas?" },
+          { who: "Jason", how: "nerveus", text: "Koortsdrank. Voor mijn broertje." },
+          { who: "Agent", how: "zakelijk", text: "Ik noteer je toch even. Je weet hoe het gaat." },
+        ],
+      },
+
+      /* ---------- MOMENT 2 ---------- */
+      m2: {
+        video: "02_moment2_contacten.mp4",
+        choice: "m2",
+        text: [
+          { cap: "SCHOOL — SPREEKKAMER" },
+          { who: "Jason", how: "defensief", text: "Ik ken die jongens gewoon uit de buurt." },
+        ],
+      },
+      m2A: {
+        video: "02a_moment2_keuzeA.mp4",
+        next: "p2A", fx: "rewind", fxText: "◀◀ DE BUURVROUW",
+        text: [
+          { who: "Jij", text: "Met wat voor jongens ga je eigenlijk om?" },
+          { who: "Jason", how: "kortaf", text: "Gewoon. Jongens." },
+        ],
+      },
+      p2A: {
+        video: "02a_perspectief_buurvrouw.mp4",
+        persp: "De buurvrouw",
+        next: "m3", fx: "burn", fxText: "MOMENT 3",
+        text: [
+          { cap: "AVOND — VANACHTER HET RAAM" },
+          { who: "Buurvrouw", how: "roddelend", text: "Daar staat hij weer, hoor. Die jongen van Karin." },
+          { who: "Buurvrouw", how: "afkeurend", text: "Elke avond bij dat tuig beneden. Die gaat ook de verkeerde kant op." },
+          { who: "Buurvrouw", how: "zucht", text: "Ik bel de wijkagent wel weer." },
+          { nar: "Zo ziet het er van buitenaf uit. Waarom hij daar staat, weet de buurvrouw niet." },
+        ],
+      },
+      m2B: {
+        video: "02b_moment2_keuzeB.mp4",
+        next: "p2B", fx: "rewind", fxText: "◀◀ RAYAN VERTELT",
+        text: [
+          { who: "Jij", how: "rustig", text: "Hoe gaat dat als zij iets willen doen waar jij geen zin in hebt?" },
+          { who: "Jason", how: "ongemakkelijk", text: "Dan zeg ik dat. … Soms." },
+        ],
+      },
+      p2B: {
+        video: "02b_perspectief_rayan.mp4",
+        persp: "Rayan vertelt",
+        finds: ["Geldproblemen thuis, mama werkt nachtdiensten", "Druk en dreiging van Mo, die in zijn portiek woont"],
+        next: "m3", fx: "burn", fxText: "MOMENT 3",
+        text: [
+          { cap: "HET SCHOOLPLEIN" },
+          { who: "Rayan", how: "serieus", text: "Mo woont gewoon in onze portiek. Je kúnt hem niet ontwijken." },
+          { who: "Rayan", how: "zacht", text: "Vorig jaar zaten ze thuis bij Jason bijna zonder stroom." },
+          { cap: "VORIG JAAR — DE KEUKEN" },
+          { nar: "Op tafel ligt een brief van het energiebedrijf." },
+          { who: "Mama", how: "bezorgd", text: "Als we dit niet betalen, zitten we volgende week in het donker." },
+          { who: "Jason", how: "vastberaden", text: "Ik regel wel wat, mam." },
+          { cap: "VORIG JAAR — PORTIEK" },
+          { who: "Mo", how: "overtuigend", text: "Eén nachtje bewaren. Vijftig euro. Niemand merkt het." },
+          { who: "Mo", how: "zelfvoldaan", text: "Goed zo. Nu hoor je bij ons." },
+          { cap: "HET SCHOOLPLEIN" },
+          { who: "Rayan", how: "verdrietig", text: "Daarna kon hij geen nee meer zeggen. Ze weten waar hij woont." },
+        ],
+      },
+
+      /* ---------- MOMENT 3 ---------- */
+      m3: {
+        video: "03_moment3_eigen_keuzes.mp4",
+        choice: "m3",
+        text: [
+          { cap: "SCHOOL — SPREEKKAMER" },
+          { who: "Jason", how: "bitter", text: "Sinds die telefoons kijken ze op school toch al naar mij." },
+        ],
+      },
+      m3A: {
+        video: "03a_moment3_keuzeA.mp4",
+        next: "p3A", fx: "rewind", fxText: "◀◀ DE KLAS",
+        text: [
+          { who: "Jij", text: "Wat kun jij doen om hun vertrouwen terug te winnen?" },
+          { who: "Jason", how: "zucht", text: "Niks. Wat ik ook doe." },
+        ],
+      },
+      p3A: {
+        video: "03a_perspectief_de_klas.mp4",
+        persp: "De klas",
+        next: "board", fx: "page", fxText: "HET BORD",
+        text: [
+          { cap: "LOKAAL 2.14" },
+          { who: "Noor", how: "verward", text: "Huh, waar is mijn etui?" },
+          { who: "Docent", how: "achterdochtig", text: "Jason, weet jij daar iets van?" },
+          { who: "Noor", how: "beschaamd", text: "Oh… hij ligt gewoon onder mijn stoel." },
+          { nar: "Niemand zegt sorry. Jason pakt zijn tas en loopt het lokaal uit." },
+        ],
+      },
+      m3B: {
+        video: "03b_moment3_keuzeB.mp4",
+        next: "p3B", fx: "rewind", fxText: "◀◀ DE KANTINE",
+        text: [
+          { who: "Jij", how: "nieuwsgierig", text: "Wat gebeurt er op school waardoor jij dat gevoel krijgt?" },
+          { who: "Jason", how: "voorzichtig", text: "Als er iets weg is, vragen ze eerst waar ik was." },
+        ],
+      },
+      p3B: {
+        video: "03b_perspectief_de_kantine.mp4",
+        persp: "De kantine",
+        finds: ["Te laat omdat hij Milo naar de opvang brengt", "Het label zelf: steeds eerst verdacht, dus hij blijft thuis"],
+        next: "board", fx: "page", fxText: "HET BORD",
+        text: [
+          { cap: "DINSDAG — KANTINE" },
+          { who: "Daan", how: "in paniek", text: "Mevrouw, mijn telefoon is weg!" },
+          { who: "Mentor", how: "denkt na", text: "Even kijken wie er het eerste uur niet was…" },
+          { who: "Mentor", how: "weet genoeg", text: "Jason. Natuurlijk." },
+          { cap: "DINSDAG 08:10 — KINDEROPVANG" },
+          { who: "Milo", how: "vrolijk", text: "Doei Jason!" },
+          { who: "Juf", how: "vriendelijk", text: "Gaat het weer met zijn koorts?" },
+          { who: "Jason", how: "gehaast", text: "Beter. Ik moet rennen, ik ben al te laat." },
+          { cap: "DINSDAG — GYMZAAL" },
+          { who: "Gymleraar", text: "Van wie is deze telefoon? Lag hier op de bank." },
+          { who: "Daan", how: "opgelucht", text: "O! Die is van mij. Vergeten na gym." },
+          { cap: "WOENSDAG — KANTINE" },
+          { who: "Noor", how: "fluistert", text: "Pas op je telefoon, Jason is er." },
+          { who: "Jason", how: "verdrietig", text: "Waarom zou ik nog gaan. Ze denken het toch al." },
+        ],
+      },
+
+      /* ---------- HET BORD ---------- */
+      board: {
+        video: "04_bord_wat_eronder_zat.mp4",
+        end: true,
+        text: [],
+      },
+    };
+
+    // de keuzes per moment
+    const CHOICES = {
+      m1: {
+        q: "Moment 1 · Hoe begin je?",
+        A: "“Er staat dat je gisteravond bij een gestolen scooter stond. Klopt dat?”",
+        B: "“Wat vind jij belangrijk dat ik over je weet?”",
+      },
+      m2: {
+        q: "Moment 2 · Hoe vraag je door?",
+        A: "“Met wat voor jongens ga je eigenlijk om?”",
+        B: "“Hoe gaat dat als zij iets willen doen waar jij geen zin in hebt?”",
+      },
+      m3: {
+        q: "Moment 3 · Wat vraag je over school?",
+        A: "“Wat kun jij doen om hun vertrouwen terug te winnen?”",
+        B: "“Wat gebeurt er op school waardoor jij dat gevoel krijgt?”",
+      },
+    };
+
+    // wat iedereen ziet (links op het bord)
+    const SEEN = ["Stond bij een gestolen scooter", "Hangt elke avond met 'die jongens'", "Komt vaak te laat", "Was ‘die van de telefoons’"];
+    const TOTAL_FINDS = 6;
+    const ORDER_EST = 9; // ongeveer aantal segmenten per speelbeurt, voor de voortgangsbalk
+
+    /* =========================================
+       DE SPELER
+       ========================================= */
+    const $ = (id) => document.getElementById(id);
+    const player = $("player");
+    const el = {
+      start: $("pStart"), startBtn: $("pStartBtn"), card: $("pCard"), caption: $("pCaption"), tag: $("pTag"),
+      portrait: $("pPortrait"), img: $("pImg"), imgName: $("pImgName"), box: $("pBox"), who: $("pWho"),
+      how: $("pHow"), text: $("pText"), choices: $("pChoices"), q: $("pQuestion"), board: $("pBoard"),
+      progress: $("pProgress"), video: $("pVideo"), skip: $("pSkip"), fx: $("pFx"),
+    };
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let current = null, queue = [], finds = [], picks = {}, typing = null, waiting = null, segCount = 0, busy = false;
+
+    const show = (node, on = true) => { node.hidden = !on; };
+    const hideText = () => [el.card, el.box, el.choices, el.q, el.board].forEach((n) => show(n, false));
+
+    /* ---------- poppetjes ---------- */
+    let swapTimer = null;
+    function hidePortrait() { clearTimeout(swapTimer); show(el.portrait, false); }
+    function setPortrait(who) {
+      const file = PORTRAITS[who];
+      clearTimeout(swapTimer);
+      if (!file) { show(el.portrait, false); return; }
+      if (el.img.dataset.name === who && !el.portrait.hidden) return;
+      el.portrait.classList.add("is-swap");
+      swapTimer = setTimeout(() => {
+        el.img.dataset.name = who;
+        el.img.onerror = () => { el.img.onerror = null; el.img.src = placeholder(who); };
+        el.img.src = `../assets/Unseen/${file}`;
+        el.imgName.textContent = who;
+        el.portrait.style.setProperty("--r", `${(Math.random() * 6 - 3).toFixed(1)}deg`);
+        show(el.portrait, true);
+        el.portrait.classList.remove("is-swap");
+      }, reduce ? 0 : 180);
+    }
+
+    /* ---------- overgangen (de 'coole file transitions') ---------- */
+    function transition(type, label = "") {
+      return new Promise((resolve) => {
+        if (reduce || !type) { resolve(() => {}); return; }
+        const fx = el.fx;
+        fx.className = `fx fx--${type}`;
+        fx.textContent = type === "rewind" || type === "page" ? label : "";
+        const done = (anim) => anim.finished.then(() => { fx.style.opacity = 0; fx.className = "fx"; fx.textContent = ""; });
+
+        // elke overgang heeft een 'in' en 'uit' helft; in het midden wisselt de scène
+        const plans = {
+          burn: () => {
+            fx.style.setProperty("--x", `${30 + Math.random() * 40}%`);
+            fx.style.setProperty("--y", `${30 + Math.random() * 40}%`);
+            const a = fx.animate(
+              [{ opacity: 0, transform: "scale(0.6)" }, { opacity: 1, transform: "scale(1.6)", offset: 0.45 }, { opacity: 1, transform: "scale(2.4)", offset: 0.55 }, { opacity: 0, transform: "scale(3)" }],
+              { duration: 1300, easing: "ease-in-out" }
+            );
+            player.animate([{ filter: "brightness(1)" }, { filter: "brightness(2.2) contrast(1.4)", offset: 0.45 }, { filter: "brightness(1)" }], { duration: 1300 });
+            setTimeout(() => resolve(), 600);
+            done(a);
+          },
+          rewind: () => {
+            const a = fx.animate(
+              [{ opacity: 0, transform: "skewX(0deg)" }, { opacity: 1, transform: "skewX(-6deg)", offset: 0.2 }, { opacity: 1, transform: "skewX(5deg)", offset: 0.6 }, { opacity: 0, transform: "skewX(0)" }],
+              { duration: 1600, easing: "steps(12)" }
+            );
+            player.classList.add("is-shake");
+            setTimeout(() => player.classList.remove("is-shake"), 800);
+            setTimeout(() => resolve(), 700);
+            done(a);
+          },
+          glitch: () => {
+            const a = fx.animate(
+              [{ opacity: 0, transform: "translateX(0)" }, { opacity: 1, transform: "translateX(-20px)", offset: 0.2 }, { opacity: 0.6, transform: "translateX(25px)", offset: 0.4 }, { opacity: 1, transform: "translateX(-8px) scaleY(1.3)", offset: 0.6 }, { opacity: 0 }],
+              { duration: 700, easing: "steps(6)" }
+            );
+            player.classList.add("is-shake");
+            setTimeout(() => player.classList.remove("is-shake"), 700);
+            setTimeout(() => resolve(), 300);
+            done(a);
+          },
+          page: () => {
+            const a = fx.animate(
+              [{ opacity: 1, transform: "translateX(105%) rotate(4deg)" }, { opacity: 1, transform: "translateX(0) rotate(0)", offset: 0.4 }, { opacity: 1, transform: "translateX(0) rotate(0)", offset: 0.6 }, { opacity: 1, transform: "translateX(-110%) rotate(-4deg)" }],
+              { duration: 1700, easing: "cubic-bezier(0.7, 0, 0.3, 1)" }
+            );
+            setTimeout(() => resolve(), 850);
+            done(a);
+          },
+          iris: () => {
+            const a = fx.animate(
+              [{ opacity: 1, clipPath: "circle(0% at 50% 50%)" }, { opacity: 1, clipPath: "circle(80% at 50% 50%)", offset: 0.45 }, { opacity: 1, clipPath: "circle(80% at 50% 50%)", offset: 0.55 }, { opacity: 1, clipPath: "circle(0% at 50% 50%)" }],
+              { duration: 1200, easing: "cubic-bezier(0.7, 0, 0.3, 1)" }
+            );
+            setTimeout(() => resolve(), 600);
+            done(a);
+          },
+        };
+        (plans[type] || plans.glitch)();
+      });
+    }
+
+    /* ---------- video afspelen ---------- */
+    // zoekt de video in clips/ én direct in assets/Unseen/,
+    // ook als er " (1)" achter de naam staat (dubbel gedownload)
+    function videoCandidates(file) {
+      const dup = file.replace(".mp4", " (1).mp4");
+      return [CLIPS + file, CLIPS + dup, "../assets/Unseen/" + file, "../assets/Unseen/" + dup];
+    }
+    const found = {}; // onthoudt welke video waar staat
+
+    function loadOne(url) {
+      return new Promise((resolve) => {
+        const v = el.video;
+        let settled = false;
+        const finish = (ok) => { if (settled) return; settled = true; clearTimeout(t); v.onloadeddata = v.onerror = null; resolve(ok); };
+        const t = setTimeout(() => finish(false), 2500);
+        v.onloadeddata = () => finish(true);
+        v.onerror = () => finish(false);
+        v.src = encodeURI(url);
+        v.load();
+      });
+    }
+
+    async function tryVideo(file) {
+      if (found[file] === false) return false;
+      const list = found[file] ? [found[file]] : videoCandidates(file);
+      for (const url of list) {
+        if (await loadOne(url)) { found[file] = url; return true; }
+      }
+      found[file] = false;
+      return false;
+    }
+
+    function playVideo() {
+      return new Promise((resolve) => {
+        const v = el.video;
+        show(v, true);
+        show(el.skip, true);
+        hideText();
+        hidePortrait();
+        show(el.caption, false);
+        v.currentTime = 0;
+        v.play().catch(() => {});
+        const end = () => { v.onended = null; el.skip.onclick = null; show(el.skip, false); resolve(); };
+        v.onended = end;
+        el.skip.onclick = (e) => { e.stopPropagation(); v.pause(); end(); };
+      });
+    }
+
+    /* ---------- tekstversie afspelen ---------- */
+    function typeText(str, done) {
+      clearInterval(typing);
+      if (reduce) { el.text.textContent = str; done(); return; }
+      let i = 0;
+      el.text.textContent = "";
+      typing = setInterval(() => {
+        el.text.textContent = str.slice(0, ++i);
+        if (i >= str.length) { clearInterval(typing); typing = null; done(); }
+      }, 22);
+      waiting = () => { clearInterval(typing); typing = null; el.text.textContent = str; done(); };
+    }
+
+    function playText(steps) {
+      return new Promise((resolve) => {
+        show(el.video, false);
+        queue = [...steps];
+        const step = () => {
+          waiting = null;
+          if (!queue.length) { resolve(); return; }
+          const s = queue.shift();
+          if (s.cap) { el.caption.textContent = s.cap; show(el.caption, true); return step(); }
+          hideText();
+          if (s.card) {
+            el.card.innerHTML = `<div><h3>${s.card}</h3><p>${s.sub || ""}</p></div>`;
+            show(el.card, true);
+            hidePortrait();
+            waiting = step;
+            return;
+          }
+          show(el.box, true);
+          if (s.nar) {
+            hidePortrait();
+            el.who.textContent = "—";
+            el.how.textContent = "";
+            el.text.classList.add("is-narration");
+            typeText(s.nar, () => (waiting = step));
+          } else {
+            setPortrait(s.who);
+            el.who.textContent = s.who.toUpperCase();
+            el.how.textContent = s.how ? `(${s.how})` : "";
+            el.text.classList.remove("is-narration");
+            typeText(s.text, () => (waiting = step));
+          }
+        };
+        step();
+      });
+    }
+
+    /* ---------- een segment spelen ---------- */
+    async function playSegment(id) {
+      current = id;
+      const seg = SEGMENTS[id];
+      segCount++;
+      el.progress.style.width = `${Math.min(100, (segCount / ORDER_EST) * 100)}%`;
+
+      // perspectief-stempel + sepia
+      player.classList.toggle("is-flashback", !!seg.persp);
+      el.tag.querySelector(".stamp").textContent = seg.persp ? `PERSPECTIEF: ${seg.persp.toUpperCase()}` : "";
+      show(el.tag, !!seg.persp);
+
+      const hasVideo = seg.video && (await tryVideo(seg.video));
+      if (hasVideo) await playVideo();
+      else await playText(seg.text);
+
+      if (seg.finds) finds.push(...seg.finds);
+
+      if (seg.choice) return showChoice(seg.choice, hasVideo);
+      if (seg.end) return showBoard();
+      await go(seg.next, seg.fx, seg.fxText);
+    }
+
+    async function go(nextId, fx, fxText) {
+      busy = true;
+      await transition(fx, fxText);
+      hideText();
+      hidePortrait();
+      show(el.caption, false);
+      el.video.pause();
+      show(el.video, false);
+      busy = false;
+      playSegment(nextId);
+    }
+
+    function showChoice(id, overVideo) {
+      const c = CHOICES[id];
+      show(el.box, false);
+      hidePortrait();
+      // bij video: laatste beeld blijft staan, grijs en wazig
+      if (overVideo) { show(el.video, true); player.classList.add("is-choosing"); }
+      el.q.textContent = c.q;
+      show(el.q, true);
+      el.choices.innerHTML = ["A", "B"].map((k) => `<button class="choice" data-k="${k}"><b>${k}</b>${c[k]}</button>`).join("");
+      show(el.choices, true);
+      el.choices.querySelector("button").focus({ preventScroll: true });
+      el.choices.querySelectorAll("button").forEach((b) =>
+        b.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          picks[id] = b.dataset.k;
+          // gekozen kaart blijft even staan, de andere valt weg
+          el.choices.querySelectorAll("button").forEach((o) => {
+            if (o !== b) o.animate([{ opacity: 1 }, { opacity: 0, transform: "translateY(40px) rotate(8deg)" }], { duration: 400, fill: "forwards" });
+          });
+          await new Promise((r) => setTimeout(r, reduce ? 0 : 450));
+          player.classList.remove("is-choosing");
+          go(id + b.dataset.k, "glitch");
+        })
+      );
+    }
+
+    /* ---------- het bord ---------- */
+    function showBoard() {
+      hideText();
+      hidePortrait();
+      show(el.caption, false);
+      show(el.tag, false);
+      show(el.video, false);
+      player.classList.remove("is-flashback");
+      el.progress.style.width = "100%";
+
+      const empty = TOTAL_FINDS - finds.length;
+      const bCount = Object.values(picks).filter((p) => p === "B").length;
+      el.board.innerHTML = `
+        <div class="board__col">
+          <h4>Wat iedereen zag</h4>
+          ${SEEN.map((t, i) => `<div class="board__note" style="--r:${i % 2 ? 1.5 : -1.5}deg">${t}</div>`).join("")}
+        </div>
+        <div class="board__label">CRIMINEEL?</div>
+        <div class="board__col">
+          <h4>Wat eronder zat</h4>
+          ${finds.map((t, i) => `<div class="board__note" style="--r:${i % 2 ? -1 : 1.5}deg">${t}</div>`).join("")}
+          ${Array.from({ length: empty }, () => `<div class="board__note board__note--empty">… niet gevonden</div>`).join("")}
+        </div>
+        <div class="board__end">
+          <p>Je koos ${bCount} van de 3 keer de open vraag. ${empty ? `Er bleven ${empty} oorzaken onzichtbaar. Wat had je anders kunnen vragen?` : "Je hebt alles gezien wat onder het label zat."}</p>
+          <button type="button" id="pRestart">Opnieuw spelen</button>
+        </div>`;
+      show(el.board, true);
+      el.board.querySelectorAll(".board__note").forEach((n, i) => setTimeout(() => n.classList.add("is-in"), 200 + i * 160));
+      if (finds.length >= 4) setTimeout(() => el.board.classList.add("is-crossed"), 400 + 10 * 160);
+      $("pRestart").addEventListener("click", (e) => { e.stopPropagation(); start(); });
+    }
+
+    function start() {
+      finds = []; picks = {}; segCount = 0;
+      el.board.classList.remove("is-crossed");
+      player.classList.remove("is-choosing", "is-flashback");
+      show(el.start, false);
+      show(el.caption, false);
+      show(el.tag, false);
+      hideText();
+      playSegment("intro");
+      player.focus({ preventScroll: true });
+    }
+
+    // "terug naar portfolio" knop even weg zolang je speelt
+    const floatBtn = document.querySelector(".float");
+    new IntersectionObserver(([e]) => { floatBtn.style.visibility = e.isIntersecting ? "hidden" : ""; }, { threshold: 0.3 }).observe(player);
+
+    el.startBtn.addEventListener("click", (e) => { e.stopPropagation(); start(); });
+    player.addEventListener("click", () => !busy && waiting && waiting());
+    player.addEventListener("keydown", (e) => {
+      if ((e.key === " " || e.key === "Enter") && document.activeElement === player) {
+        e.preventDefault();
+        if (!busy && waiting) waiting();
+      }
+    });
+
+    /* =========================================
+       SCROLL-ANIMATIES
+       ========================================= */
+    (() => {
+      if (!window.gsap || !window.ScrollTrigger || reduce) return;
+      gsap.registerPlugin(ScrollTrigger);
+
+      /* ---------- hero: filmstrip en polaroids bij wegscrollen ---------- */
+      gsap.to(".filmstrip", {
+        xPercent: -12,
+        ease: "none",
+        scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
+      });
+      gsap.utils.toArray(".hero__pile .polaroid").forEach((p, i) => {
+        gsap.to(p, {
+          y: -120 - i * 40,
+          x: (i % 2 ? 1 : -1) * (30 + i * 12),
+          rotate: (i % 2 ? 1 : -1) * (10 + i * 3),
+          ease: "none",
+          scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.6 },
+        });
+      });
+      gsap.to(".hero__left", {
+        y: 80,
+        opacity: 0.2,
+        ease: "none",
+        scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
+      });
+
+      /* ---------- titels typen zichzelf ---------- */
+      gsap.utils.toArray(".h2").forEach((h) => {
+        h.innerHTML = [...h.textContent].map((c) => `<span class="ch">${c}</span>`).join("");
+        gsap.from(h.querySelectorAll(".ch"), {
+          opacity: 0,
+          duration: 0.01,
+          stagger: 0.06,
+          scrollTrigger: { trigger: h, start: "top 85%" },
+        });
+      });
+
+      /* ---------- dossier: map schuift omhoog, tekst typt, stempel knalt ---------- */
+      const dos = gsap.timeline({ scrollTrigger: { trigger: ".dossier", start: "top 80%" } });
+      dos.from(".dossier", { y: 160, rotate: 6, opacity: 0, duration: 1.1, ease: "expo.out" })
+         .from(".dossier h2, .dossier .dossier__grid p:not(.note), .facts li", {
+           clipPath: "inset(0 100% 0 0)",
+           duration: 0.7,
+           stagger: 0.12,
+           ease: "steps(18)",
+         }, "-=0.5")
+         .from(".dossier .note", { opacity: 0, x: -20, rotate: -8, duration: 0.6, ease: "back.out(2)" })
+         .from(".dossier .stamp", {
+           scale: 3.5,
+           opacity: 0,
+           rotate: -25,
+           duration: 0.35,
+           ease: "power4.in",
+           onComplete: () => gsap.fromTo(".dossier", { x: -6 }, { x: 0, duration: 0.4, ease: "elastic.out(1, 0.3)" }),
+         }, "-=0.2");
+
+      /* ---------- indexkaartjes worden op tafel gelegd ---------- */
+      gsap.from(".goal", {
+        y: -120,
+        rotate: (i) => [-14, 10, -8][i],
+        opacity: 0,
+        duration: 0.9,
+        stagger: 0.18,
+        ease: "bounce.out",
+        scrollTrigger: { trigger: ".goals", start: "top 85%" },
+      });
+
+      /* ---------- personages: polaroids worden op tafel gegooid ---------- */
+      gsap.utils.toArray(".cast > div").forEach((card, i) => {
+        const fromLeft = i % 2 === 0;
+        gsap.from(card, {
+          x: fromLeft ? -300 : 300,
+          y: 200,
+          rotate: fromLeft ? -40 : 40,
+          opacity: 0,
+          duration: 1,
+          delay: (i % 3) * 0.1,
+          ease: "power3.out",
+          scrollTrigger: { trigger: card, start: "top 92%" },
+        });
+      });
+
+      /* ---------- speler: oude tv gaat aan ---------- */
+      gsap.timeline({ scrollTrigger: { trigger: "#player", start: "top 85%", end: "top 30%", scrub: 0.8 } })
+        .fromTo("#player", { scale: 0.82, rotateX: 18, filter: "brightness(0.3)" }, { scale: 1, rotateX: 0, filter: "brightness(1)", ease: "none" });
+      gsap.set("#spelen", { perspective: 1400 });
+
+      /* ---------- credits ---------- */
+      gsap.from(".docfile", {
+        y: 120,
+        rotate: (i) => (i ? 12 : -12),
+        opacity: 0,
+        duration: 1,
+        stagger: 0.15,
+        ease: "expo.out",
+        clearProps: "transform", // daarna weer de normale (bijna rechte) stand uit de CSS
+        scrollTrigger: { trigger: ".docs", start: "top 85%" },
+      });
+      gsap.from(".credits > div", {
+        y: 40,
+        opacity: 0,
+        stagger: 0.12,
+        duration: 0.8,
+        ease: "expo.out",
+        scrollTrigger: { trigger: ".credits", start: "top 85%" },
+      });
+
+      /* ---------- de rode draad ---------- */
+      const svg = document.getElementById("thread");
+      const path = document.getElementById("threadPath");
+      const pins = document.getElementById("threadPins");
+      const anchors = [
+        ".hero__pile .polaroid:nth-child(3)",
+        ".dossier .stamp",
+        ".goal:nth-child(2)",
+        ".cast > div:nth-child(1) .polaroid",
+        ".cast > div:nth-child(6) .polaroid",
+        "#player",
+      ];
+      let drawTween;
+
+      function buildThread() {
+        const docH = document.documentElement.scrollHeight;
+        const docW = document.documentElement.clientWidth;
+        svg.setAttribute("width", docW);
+        svg.setAttribute("height", docH);
+        svg.setAttribute("viewBox", `0 0 ${docW} ${docH}`);
+
+        // middelpunt bovenaan elk element (in pagina-coördinaten, zonder animatie-verschuiving)
+        const pts = anchors.map((sel) => {
+          const n = document.querySelector(sel);
+          if (!n) return null;
+          // positie zonder animatie-verschuivingen (offset* negeert transforms)
+          let x = 0, y = 0, e = n;
+          while (e) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; }
+          return { x: x + n.offsetWidth / 2, y: y + 12 };
+        }).filter(Boolean);
+
+        // hangende draad: elk stuk zakt een beetje door
+        let d = `M ${pts[0].x} ${pts[0].y}`;
+        for (let i = 1; i < pts.length; i++) {
+          const a = pts[i - 1], b = pts[i];
+          const sag = Math.min(160, Math.abs(b.x - a.x) * 0.25 + 60);
+          d += ` Q ${(a.x + b.x) / 2} ${(a.y + b.y) / 2 + sag} ${b.x} ${b.y}`;
+        }
+        path.setAttribute("d", d);
+        // punaises bij elk punt, behalve bij de video (laatste punt)
+        pins.innerHTML = pts.slice(0, -1).map((p) => `<circle cx="${p.x}" cy="${p.y}" r="6" />`).join("");
+
+        const len = path.getTotalLength();
+        path.style.strokeDasharray = len;
+        if (drawTween) drawTween.scrollTrigger.kill(), drawTween.kill();
+        drawTween = gsap.fromTo(path, { strokeDashoffset: len }, {
+          strokeDashoffset: 0,
+          ease: "none",
+          scrollTrigger: { trigger: document.body, start: "top top", end: "bottom bottom", scrub: 0.5 },
+        });
+      }
+
+      window.addEventListener("load", () => { buildThread(); ScrollTrigger.refresh(); });
+      let rt;
+      window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { buildThread(); ScrollTrigger.refresh(); }, 250); });
+      buildThread();
+    })();
+  </script>
+</body>
+</html>
