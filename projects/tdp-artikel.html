@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="nl" data-i18n-fixed>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TDP — The Design Papers</title>
+
+  <style>
+    /* =========================================
+       FONT — Articulat CF (alleen voor TDP)
+       ========================================= */
+    @font-face {
+      font-family: "Articulat CF";
+      src: url("../assets/fonts/Articulat CF Normal.ttf") format("truetype");
+      font-weight: 400;
+      font-display: swap;
+    }
+    /* Heb je ook een Bold of Heavy van Articulat? Haal de comment weg:
+    @font-face {
+      font-family: "Articulat CF";
+      src: url("../assets/fonts/Articulat CF Bold.ttf") format("truetype");
+      font-weight: 800;
+      font-display: swap;
+    }
+    */
+
+    /* =========================================
+       TOKENS
+       ========================================= */
+    :root {
+      --bg: #15161f;
+      --card: #101117;
+      --pink: #d0475a;
+      --pink-soft: #e2687a;
+      --cream: #fbe5c4;
+      --peach: #f5a37e;
+      --white: #ffffff;
+      --muted: #8d8e99;
+      --line: rgba(255, 255, 255, 0.3);
+
+      /* snijdt de witte rand van de beelden weg. Nog wit? Zet hoger, bijv. 1.1 */
+      --crop: 1.07;
+
+      --nav-h: 64px;
+      --font: "Articulat CF", "Helvetica Neue", Arial, sans-serif;
+      --pad-x: clamp(1.25rem, 5vw, 4rem);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    button { font: inherit; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--pink); outline-offset: 4px; }
+
+    /* beeld bijsnijden */
+    .crop {
+      overflow: hidden;
+      border-radius: 10px;
+      background: var(--card);
+    }
+    .crop img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(var(--crop));
+    }
+
+    /* knoppen */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.6rem 1.6rem;
+      border-radius: 4px;
+      font-size: 0.88rem;
+      border: 1px solid transparent;
+      transition: transform 0.25s var(--ease), filter 0.25s;
+    }
+    .btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+    .btn--pink { background: var(--pink-soft); color: var(--white); }
+    .btn--outline { border-color: var(--white); color: var(--white); }
+    .btn--cream { background: var(--cream); color: #3a2a1a; }
+    .btn--peach { background: var(--peach); color: #3a1a10; }
+    .btn--red { background: #e8553f; color: var(--white); }
+
+    /* =========================================
+       ZWEVENDE KNOPPEN — portfolio + figma
+       ========================================= */
+    .float {
+      position: fixed;
+      left: 1rem;
+      bottom: 1rem;
+      z-index: 100;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .float a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1rem;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .float a:hover { background: #000; border-color: rgba(255, 255, 255, 0.45); }
+    .float svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    /* =========================================
+       NAV — blijft bovenin staan
+       ========================================= */
+    .nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 90;
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--pad-x);
+      transition: background 0.4s var(--ease);
+    }
+    .nav.is-scrolled {
+      background: rgba(21, 22, 31, 0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .nav__logo { font-weight: 800; font-size: 1.5rem; letter-spacing: 0.02em; }
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: clamp(1.2rem, 3.4vw, 3.4rem);
+      font-size: 0.95rem;
+    }
+    .nav__links a:not(.nav__sub) { opacity: 0.85; transition: opacity 0.2s, color 0.2s; }
+    .nav__links a:not(.nav__sub):hover,
+    .nav__links a.is-active { opacity: 1; color: var(--pink-soft); }
+    .nav__sub {
+      background: var(--white);
+      color: #111;
+      padding: 0.35rem 1.1rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+    }
+    .nav__toggle {
+      display: none;
+      background: none;
+      border: 0;
+      color: var(--white);
+      font-size: 0.85rem;
+    }
+
+    /* =========================================
+       SECTIES — elke sectie past op één scherm
+       ========================================= */
+    .screen {
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: calc(var(--nav-h) + 1.5rem) var(--pad-x) 2.5rem;
+    }
+    .h2 {
+      font-weight: 400;
+      font-size: clamp(1.9rem, 3vw, 2.7rem);
+      line-height: 1.1;
+    }
+
+    /* =========================================
+       HERO
+       ========================================= */
+    .hero {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      padding-left: calc(var(--pad-x) + 2rem);
+    }
+    /* achtergrond iets ingezoomd zodat een witte rand wegvalt */
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+    .hero::before {
+      z-index: -2;
+      background: url("../assets/TDP/TDP-bg.jpg") center top / cover no-repeat;
+      transform: scale(1.12);
+    }
+    .hero::after {
+      z-index: -1;
+      background: linear-gradient(to bottom, transparent 55%, var(--bg) 100%);
+    }
+    .hero__social {
+      position: absolute;
+      left: 1.2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: grid;
+      gap: 1rem;
+      opacity: 0.7;
+    }
+    .hero__social svg { width: 16px; height: 16px; }
+    .hero__social a:hover { opacity: 1; color: var(--pink-soft); }
+
+    .hero__text { max-width: 34rem; }
+    .hero__title {
+      font-size: clamp(2.2rem, 4.2vw, 3.7rem);
+      line-height: 1.15;
+      font-weight: 400;
+    }
+    .hero__title strong { display: block; font-weight: 800; }
+    .hero__sub { margin-top: 0.8rem; font-size: 1.05rem; }
+    .hero__by { margin-top: 0.9rem; font-size: 0.72rem; opacity: 0.8; }
+    .hero__btns { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 2rem; }
+
+    /* ChatGPT-veld, in code nagebouwd (geen achtergrond meer) */
+    .chat {
+      position: absolute;
+      right: 0;
+      top: 38%;
+      width: clamp(280px, 33vw, 500px);
+      background: #fff;
+      color: #9a9ca5;
+      border-radius: 14px 0 0 14px;
+      padding: 1rem 1.2rem 0.9rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+    .chat__input {
+      display: flex;
+      align-items: center;
+      font-size: 1.1rem;
+      min-height: 2.4rem;
+    }
+    .chat__caret {
+      width: 1px;
+      height: 1.1em;
+      background: #333;
+      margin-right: 2px;
+      animation: blink 1s steps(1) infinite;
+    }
+    .chat__tools {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-top: 0.6rem;
+    }
+    .chat__tools > svg { width: 17px; height: 17px; color: #b5b7bf; }
+    .chat__search {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #eaf2fd;
+      color: #2f7de1;
+      font-size: 0.75rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+    }
+    .chat__search svg { width: 15px; height: 15px; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .hero__rail {
+      position: absolute;
+      right: 2.6rem;
+      top: 0;
+      bottom: 10%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .hero__rail::before,
+    .hero__rail::after { content: ""; width: 1px; background: var(--line); }
+    .hero__rail::before { height: 62%; }
+    .hero__rail::after { flex: 1; }
+    .hero__scroll {
+      margin: 0.5rem 0;
+      width: 38px; height: 38px;
+      border: 1px solid var(--white);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      transition: background 0.3s, color 0.3s;
+    }
+    .hero__scroll:hover { background: var(--white); color: #111; }
+    .hero__scroll svg { width: 16px; height: 16px; }
+
+    /* =========================================
+       LATEST NEWS
+       ========================================= */
+    .news__grid {
+      display: grid;
+      grid-template-columns: 5fr 7fr;
+      gap: 1.2rem;
+      width: 100%;
+      max-width: 1120px;
+      margin: 2.2rem auto 0;
+    }
+    .news__feature {
+      background: var(--pink);
+      border-radius: 16px;
+      padding: 1.1rem 1.1rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .news__feature .crop {
+      width: 100%;
+      aspect-ratio: 435 / 419;
+      max-height: 44vh;
+    }
+    .news__feature h3 { margin-top: 1.1rem; font-weight: 400; font-size: 1.1rem; }
+    .news__feature h3 strong { font-weight: 800; }
+    .news__meta { margin-top: 0.4rem; font-size: 0.82rem; opacity: 0.75; }
+    .news__meta b { margin-left: 0.8rem; font-weight: 800; }
+    .news__feature .btn { margin-top: auto; align-self: flex-start; }
+    .news__feature .news__meta { margin-bottom: 1.1rem; }
+
+    .news__list { display: grid; gap: 1.2rem; }
+    .news__item {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1.3rem 1.7rem;
+      transition: transform 0.35s var(--ease);
+    }
+    .news__item:hover { transform: translateX(5px); }
+    .news__item .crop {
+      flex-shrink: 0;
+      width: 36%;
+      max-width: 170px;
+      aspect-ratio: 178 / 135;
+      border-radius: 8px;
+    }
+    .news__item h3 { font-weight: 400; font-size: 0.95rem; line-height: 1.4; }
+    .news__item h3 strong { display: block; font-weight: 800; }
+    .news__item .news__meta { font-size: 0.75rem; }
+    .news__item .btn { margin-top: 0.8rem; padding: 0.45rem 1.3rem; font-size: 0.8rem; }
+    .pink-text { color: var(--pink-soft); }
+    .cream-text { color: var(--cream); }
+
+    /* =========================================
+       ARTICLES
+       ========================================= */
+    .articles__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 2rem;
+    }
+    /* titel en intro naast elkaar, zodat de carousel meer ruimte krijgt */
+    .articles__title {
+      display: flex;
+      align-items: end;
+      gap: clamp(1.5rem, 4vw, 4rem);
+    }
+    .articles__title .articles__intro { margin-top: 0; }
+    .articles__intro {
+      margin-top: 0.8rem;
+      max-width: 25rem;
+      font-size: 1.25rem;
+      line-height: 1.4;
+    }
+    .articles__intro .lead { color: var(--pink-soft); font-weight: 800; }
+    .articles__intro b { font-weight: 800; }
+
+    .arrows { display: flex; gap: 0.6rem; }
+    .arrows button {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      border: 1px solid var(--white);
+      background: transparent;
+      color: var(--white);
+      display: grid;
+      place-items: center;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .arrows button:hover { background: var(--pink); border-color: var(--pink); }
+    .arrows svg { width: 18px; height: 18px; }
+
+    .screen.articles { padding-bottom: 1.2rem; }
+
+    /* 3D carousel — hoogte schaalt mee met je scherm */
+    .stage {
+      --stage-h: clamp(420px, 67vh, 800px);
+      position: relative;
+      height: var(--stage-h);
+      margin-top: 1.8rem;
+      perspective: 1400px;
+      touch-action: pan-y;
+      user-select: none;
+      cursor: grab;
+      outline: none;
+    }
+    .stage.is-dragging { cursor: grabbing; }
+
+    .card {
+      /* breedte zo dat de hele kaart in de stage past */
+      --w: min(34vw, calc((var(--stage-h) - 124px) / 1.15), 520px);
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: var(--w);
+      margin-left: calc(var(--w) / -2);
+      transform-style: preserve-3d;
+      will-change: transform, opacity;
+    }
+    .card__inner {
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--card);
+      transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+      transition: transform 0.4s var(--ease);
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
+    }
+    .card__img {
+      position: relative;
+      aspect-ratio: 4 / 4.6;
+      overflow: hidden;
+    }
+    .card__img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(calc(var(--crop) + 0.1)) translateX(var(--px, 0px));
+      pointer-events: none;
+    }
+    .card__img::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255,255,255,0.18), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .card.is-active:hover .card__img::after { opacity: 1; }
+    .card__body {
+      padding: 0.9rem 1.1rem 1rem;
+      height: 124px;
+      background: var(--card);
+      transition: background 0.5s var(--ease);
+    }
+    .card.is-active .card__body { background: var(--pink); }
+    .card__tag { font-size: 0.75rem; opacity: 0.75; }
+    .card__body h3 {
+      margin-top: 0.2rem;
+      font-weight: 800;
+      font-size: 1.1rem;
+      line-height: 1.25;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card__more {
+      display: inline-flex;
+      margin-top: 0.6rem;
+      font-size: 0.8rem;
+      padding: 0.4rem 1.1rem;
+      border-radius: 4px;
+      background: var(--cream);
+      color: #3a2a1a;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+      pointer-events: none;
+    }
+    .card.is-active .card__more { opacity: 1; transform: none; pointer-events: auto; }
+
+    .carousel__foot {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.2rem;
+      margin-top: 0.5rem;
+    }
+    .counter { font-size: 0.8rem; color: var(--muted); min-width: 3.5rem; text-align: center; }
+    .counter b { color: var(--white); font-weight: 400; }
+    .dots { display: flex; gap: 0.5rem; }
+    .dots button {
+      width: 7px; height: 7px;
+      border-radius: 999px;
+      border: 0;
+      background: var(--muted);
+      transition: width 0.4s var(--ease), background 0.3s;
+    }
+    .dots button.is-active { width: 24px; background: var(--pink-soft); }
+
+    /* =========================================
+       QUOTE + GET IN TOUCH (samen één scherm)
+       ========================================= */
+    .quote {
+      max-width: 36rem;
+      margin: 0 auto;
+      text-align: center;
+      font-weight: 800;
+      font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+      line-height: 1.5;
+    }
+    .touch__title {
+      position: relative;
+      display: inline-block;
+      font-weight: 400;
+      font-size: clamp(3.4rem, 10.5vw, 9.5rem);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      margin: clamp(2.5rem, 7vh, 4.5rem) 0 0 clamp(0rem, 3vw, 2.5rem);
+    }
+    .touch__stamp {
+      position: absolute;
+      right: -3%;
+      bottom: -14%;
+      border: 1px solid var(--pink-soft);
+      color: var(--pink-soft);
+      font-size: clamp(0.65rem, 1vw, 0.9rem);
+      padding: 0.4rem 1rem;
+      transform: rotate(-18deg);
+      white-space: nowrap;
+    }
+    .touch__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      margin-top: clamp(2rem, 6vh, 4rem);
+      padding-left: clamp(0rem, 3vw, 2.5rem);
+    }
+    .form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.8rem 1.4rem;
+      max-width: 30rem;
+      align-content: start;
+    }
+    .field { display: flex; flex-direction: column; }
+    .field--full { grid-column: 1 / -1; flex-direction: row; align-items: end; gap: 1rem; }
+    .field label { font-size: 0.88rem; }
+    .field input,
+    .field textarea {
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid var(--white);
+      color: var(--white);
+      font: inherit;
+      font-size: 0.95rem;
+      padding: 0.4rem 0;
+      resize: none;
+    }
+    .field input:focus,
+    .field textarea:focus { outline: none; border-color: var(--pink-soft); }
+    .field--full > div { flex: 1; display: flex; flex-direction: column; }
+    .form__send {
+      flex-shrink: 0;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 0;
+      background: var(--white);
+      color: #111;
+      display: grid;
+      place-items: center;
+      transition: background 0.3s, color 0.3s;
+    }
+    .form__send:hover { background: var(--pink-soft); color: var(--white); }
+    .form__send svg { width: 15px; height: 15px; }
+
+    .touch__side {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+    .contact-list { align-self: end; display: grid; gap: 0.5rem; font-size: 0.88rem; }
+    .contact-list li { display: flex; align-items: center; gap: 0.7rem; }
+    .contact-list svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .contact-list strong { font-weight: 800; }
+    .contact-list small { font-size: 0.68rem; }
+    .touch__blocks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      width: min(100%, 420px);
+      align-self: end;
+      padding: 0 1.5rem 2rem 0;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .touch__blocks div { aspect-ratio: 1; background: var(--pink); }
+
+    /* =========================================
+       RESPONSIVE
+       ========================================= */
+
+    /* laptop met laag scherm */
+    @media (max-height: 860px) and (min-width: 901px) {
+      .news__feature .crop { max-height: 36vh; }
+      .news__item { padding: 0.8rem 1.2rem; }
+      .news__item .crop { max-width: 130px; }
+      .touch__blocks { width: min(100%, 260px); }
+      .stage { --stage-h: clamp(380px, 65vh, 600px); margin-top: 1.2rem; }
+      .articles__intro { font-size: 1.05rem; }
+      .touch__title { font-size: clamp(3rem, 8.5vw, 7.5rem); margin-top: 2rem; }
+      .touch__grid { margin-top: 2rem; }
+      .touch__blocks { width: min(100%, 280px); padding-bottom: 1.4rem; }
+      .form { gap: 1.4rem 1.4rem; }
+    }
+
+    /* tablet */
+    @media (max-width: 900px) {
+      .chat { position: relative; top: auto; right: auto; margin-top: 2.5rem; width: min(100%, 380px); border-radius: 14px; }
+      .hero__rail { display: none; }
+      .news__grid { grid-template-columns: 1fr; max-width: 560px; }
+      .news__feature .crop { max-height: none; }
+      .touch__grid { grid-template-columns: 1fr; }
+      .touch__blocks { width: min(100%, 300px); }
+      .card { --w: min(50vw, calc((var(--stage-h) - 124px) / 1.15), 400px); }
+      /* op kleinere schermen hoeven secties niet exact één scherm te zijn */
+      .screen:not(.hero) { min-height: auto; padding-top: calc(var(--nav-h) + 3rem); padding-bottom: 3rem; }
+    }
+
+    /* mobiel */
+    @media (max-width: 640px) {
+      .nav__toggle { display: block; }
+      .nav__links {
+        position: fixed;
+        inset: 0;
+        flex-direction: column;
+        justify-content: center;
+        gap: 1.8rem;
+        font-size: 1.4rem;
+        background: var(--bg);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.35s var(--ease), visibility 0.35s;
+        z-index: -1;
+      }
+      .nav.is-open .nav__links { opacity: 1; visibility: visible; }
+      .nav__sub { font-size: 1rem; padding: 0.5rem 1.5rem; }
+
+      .hero { padding-left: var(--pad-x); }
+      .hero__social { display: none; }
+
+      .news__item { padding: 1rem; }
+      .news__item .crop { width: 38%; }
+
+      .articles__head, .articles__title { flex-direction: column; align-items: start; }
+      .articles__title { gap: 0.8rem; }
+      .arrows { display: none; }
+      .stage { --stage-h: 520px; }
+      .card { --w: min(78vw, 330px); }
+
+      .form { grid-template-columns: 1fr; }
+      .touch__stamp { bottom: -30%; }
+      .float a span { display: none; }
+      .float a { padding: 0.6rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation: none !important; }
+    }
+    /* =========================================
+       MIJN ROL / MY ROLE — NL + EN
+       ========================================= */
+    .myrole { position: relative; z-index: 2; padding: clamp(4rem, 9vw, 7rem) var(--pad-x, 5vw) 0; }
+    .myrole__in { max-width: 1100px; margin: 0 auto; padding-top: 2rem; border-top: 1px solid var(--role-line, currentColor); }
+    .myrole__kick { font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.7; margin-bottom: 0.8rem; }
+    .myrole__title { font-family: var(--role-head, inherit); font-weight: var(--role-weight, 400); font-size: clamp(1.8rem, 3.6vw, 3rem); line-height: 1.1; margin-bottom: 2rem; }
+    .myrole__cols { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 4vw, 3.5rem); }
+    .myrole__lang { display: inline-block; margin-bottom: 0.8rem; padding: 0.15rem 0.5rem; border: 1px solid currentColor; border-radius: var(--role-r, 999px); font-size: 0.7rem; letter-spacing: 0.14em; opacity: 0.75; }
+    .myrole__cols p + p { margin-top: 0.8rem; }
+    .myrole__list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1.1rem; list-style: none; padding: 0; }
+    .myrole__list li { padding: 0.3rem 0.75rem; border: 1px solid var(--role-line, currentColor); border-radius: var(--role-r, 999px); font-size: 0.82rem; }
+    .myrole__note { margin-top: 1.1rem; font-size: 0.88rem; font-style: italic; opacity: 0.75; }
+    @media (max-width: 760px) { .myrole__cols { grid-template-columns: 1fr; } }
+    .myrole { --role-line: var(--line); --role-r: 4px; }
+    .myrole__title { font-weight: 800; }
+    .myrole__lang { color: var(--pink-soft); }
+    /* taalknop NL / EN */
+    .pl-switch { --pl-on: #15161f; }
+  </style>
+</head>
+<body>
+
+  <!-- zwevende knoppen -->
+  <div class="float">
+    <a href="../index.html#projects" aria-label="Terug naar portfolio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      <span data-i18n="float.back">Terug naar portfolio</span>
+    </a>
+    <a href="https://www.figma.com/design/WA6yP66erFljcAQb48k9o9/TDP-Opdracht-Yasmine?node-id=304-1538&t=xsKK6GyWdD3uHKPL-1" target="_blank" rel="noopener" aria-label="Bekijk het design in Figma">
+      <svg viewBox="0 0 38 57" fill="none">
+        <path d="M19 28.5a9.5 9.5 0 1 1 19 0 9.5 9.5 0 0 1-19 0Z" fill="#1ABCFE"/>
+        <path d="M0 47.5A9.5 9.5 0 0 1 9.5 38H19v9.5a9.5 9.5 0 1 1-19 0Z" fill="#0ACF83"/>
+        <path d="M19 0v19h9.5a9.5 9.5 0 1 0 0-19H19Z" fill="#FF7262"/>
+        <path d="M0 9.5A9.5 9.5 0 0 0 9.5 19H19V0H9.5A9.5 9.5 0 0 0 0 9.5Z" fill="#F24E1E"/>
+        <path d="M0 28.5A9.5 9.5 0 0 0 9.5 38H19V19H9.5A9.5 9.5 0 0 0 0 28.5Z" fill="#A259FF"/>
+      </svg>
+      <span data-i18n="float.figma">Bekijk in Figma</span>
+    </a>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <a href="#home" class="nav__logo">TDP</a>
+    <button class="nav__toggle" id="navToggle" aria-expanded="false">Menu</button>
+    <ul class="nav__links" id="navLinks">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#intro">Intro</a></li>
+      <li><a href="#artikel">Artikel</a></li>
+      <li><a href="#bronnen">Bronnen</a></li>
+      <li><a href="#bronnen" class="nav__sub">Abonneer</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <header class="screen hero" id="home">
+    <div class="hero__social">
+      <a href="#" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-1.6 19.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.3v7A10 10 0 0 0 12 2Z"/></svg>
+      </a>
+      <a href="#" aria-label="X">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.8 3h3.1l-6.8 7.7 8 10.3h-6.2l-4.9-6.3L5.4 21H2.3l7.2-8.3L1.9 3h6.4l4.4 5.8L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z"/></svg>
+      </a>
+      <a href="#" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor"/></svg>
+      </a>
+    </div>
+
+    <div class="hero__text">
+      <h1 class="hero__title">Waar Technologie <strong>Creativiteit Raakt</strong></h1>
+      <p class="hero__sub">Verkenning van innovatie, ontwerp en digitale kunst</p>
+      <p class="hero__by">Door Yasmine Boucharib</p>
+      <div class="hero__btns">
+        <a href="#artikel" class="btn btn--pink">Lees Meer</a>
+        <a href="#bronnen" class="btn btn--outline">Contact us</a>
+      </div>
+    </div>
+
+    <!-- ChatGPT-veld in code -->
+    <div class="chat" aria-hidden="true">
+      <p class="chat__input"><span class="chat__caret"></span>Message ChatGPT</p>
+      <div class="chat__tools">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 11.5 12.4 20a5.5 5.5 0 0 1-7.8-7.8l8.9-8.9a3.7 3.7 0 0 1 5.2 5.2l-8.9 8.9a1.8 1.8 0 0 1-2.6-2.6l8.2-8.2"/></svg>
+        <span class="chat__search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+          Search
+        </span>
+      </div>
+    </div>
+
+    <div class="hero__rail">
+      <a href="#intro" class="hero__scroll" aria-label="Scroll naar beneden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- LATEST NEWS -->
+  <section class="screen news" id="intro">
+    <h2 class="h2">Latest News</h2>
+
+    <div class="news__grid">
+      <article class="news__feature">
+        <div class="crop">
+          <img src="../assets/TDP/TDP-image1.jpg" alt="Silhouet van een gezicht met rode stadslichten" />
+        </div>
+        <h3><strong>AI Voor de Ideeën</strong> Jij Voor de Richting</h3>
+        <p class="news__meta">16 oct 2025 <b>Yasmine</b></p>
+        <a href="#artikel" class="btn btn--cream">Lees Meer</a>
+      </article>
+
+      <div class="news__list">
+        <article class="news__item">
+          <div class="crop"><img src="../assets/TDP/TDP-image2.jpg" alt="" /></div>
+          <div>
+            <h3 class="cream-text">De Onzichtbare Ontwerper Hoe AI de <strong class="pink-text">Vormtaal van de Toekomst Bepaalt</strong></h3>
+            <p class="news__meta">16 oct 2025 <b>By Janice Foster <fieldset></fieldset></b></p>
+            <a href="#artikel" class="btn btn--peach">Lees Meer</a>
+          </div>
+        </article>
+
+        <article class="news__item">
+          <div class="crop"><img src="../assets/TDP/TDP-image3.jpg" alt="" /></div>
+          <div>
+            <h3 class="cream-text">Machine Melodies Wanneer AI de <strong>Creatieve Toon Aangeeft</strong></h3>
+            <p class="news__meta">16 oct 2025 <b>By Arnold John</b></p>
+            <a href="#artikel" class="btn btn--cream">Lees Meer</a>
+          </div>
+        </article>
+
+        <article class="news__item">
+          <div class="crop"><img src="../assets/TDP/TDP-image4.jpg" alt="" /></div>
+          <div>
+            <h3 class="pink-text">De Onzichtbare Ontwerper Hoe AI de <strong>Vormtaal van de Toekomst Bepaalt</strong></h3>
+            <p class="news__meta pink-text">16 oct 2025 <b>By Arnold John</b></p>
+            <a href="#artikel" class="btn btn--red">Lees Meer</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARTICLES -->
+  <section class="screen articles" id="artikel">
+    <div class="articles__head">
+      <div class="articles__title">
+        <h2 class="h2">Articles</h2>
+        <p class="articles__intro">
+          <span class="lead">The Design Papers is een creatief</span>
+          <b>designplatform.</b> We brengen ideeën tot leven in verhalen en visuele ervaringen die raken.
+        </p>
+      </div>
+      <div class="arrows">
+        <button id="prev" aria-label="Vorig artikel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+        </button>
+        <button id="next" aria-label="Volgend artikel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Kaart toevoegen? Kopieer een <article class="card"> en pas beeld + tekst aan -->
+    <div class="stage" id="stage" tabindex="0" aria-roledescription="carousel" aria-label="Artikelen">
+      <article class="card">
+        <div class="card__inner">
+          <div class="card__img"><img src="../assets/TDP/TDP-carousel-img3.jpg" alt="Twee silhouetten bij zonsondergang" /></div>
+          <div class="card__body">
+            <p class="card__tag">Essay · 16 oct 2025</p>
+            <h3>Twee Werelden, Eén Horizon</h3>
+            <a href="#" class="card__more">Lees artikel</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card__inner">
+          <div class="card__img"><img src="../assets/TDP/TDP-carousel-img1.jpg" alt="/prompt — wazig silhouet tegen rode achtergrond" /></div>
+          <div class="card__body">
+            <p class="card__tag">AI design · 16 oct 2025</p>
+            <h3>Achter de /prompt</h3>
+            <a href="#" class="card__more">Lees artikel</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card__inner">
+          <div class="card__img"><img src="../assets/TDP/TDP-carousel-img2.jpg" alt="Figuur in een groen veld" /></div>
+          <div class="card__body">
+            <p class="card__tag">Beeld · 16 oct 2025</p>
+            <h3>Ruimte om te Denken</h3>
+            <a href="#" class="card__more">Lees artikel</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card__inner">
+          <div class="card__img"><img src="../assets/TDP/TDP-image1.jpg" alt="Silhouet van een gezicht met rode stadslichten" /></div>
+          <div class="card__body">
+            <p class="card__tag">AI design · 16 oct 2025</p>
+            <h3>AI Voor de Ideeën, Jij Voor de Richting</h3>
+            <a href="#" class="card__more">Lees artikel</a>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="carousel__foot">
+      <span class="counter" id="counter"><b>01</b> / 04</span>
+      <div class="dots" id="dots"></div>
+    </div>
+  </section>
+
+
+    <!-- =========================================
+         MIJN ROL / MY ROLE (NL + EN)
+         ========================================= -->
+    <section class="myrole " id="mijn-rol">
+      <div class="myrole__in">
+        <p class="myrole__kick" data-en="My role">Mijn rol</p>
+        <h2 class="myrole__title" data-en="What I did">Wat ik deed</h2>
+        <div class="myrole__cols">
+          <div lang="nl">
+            <span class="myrole__lang">NL</span>
+            <p>TDP (The Design Papers) begon als opdracht binnen Multimedia Design: we moesten een artikel-website maken. Ik bedacht het concept en ontwierp deze website over design en AI.</p>
+            <ul class="myrole__list"><li>Schoolopdracht</li><li>Concept</li><li>Webdesign</li></ul>
+            <p class="myrole__note">Deze pagina is gemaakt in de stijl van het design van het project.</p>
+          </div>
+          <div lang="en">
+            <span class="myrole__lang">EN</span>
+            <p>TDP (The Design Papers) started as an assignment in Multimedia Design: we had to create an article website. I came up with the concept and designed this website about design and AI.</p>
+            <ul class="myrole__list"><li>School assignment</li><li>Concept</li><li>Web design</li></ul>
+            <p class="myrole__note">This page is built in the style of the project's own design.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  <!-- QUOTE + GET IN TOUCH -->
+  <section class="screen touch" id="bronnen">
+    <p class="quote">
+      Wij geloven dat <span class="pink-text">design</span> niet alleen iets is wat je ziet,
+      maar ook iets wat je voelt en begrijpt. Het vertelt wie we zijn en hoe we de wereld
+      om ons heen vormgeven.
+    </p>
+
+    <h2 class="touch__title">
+      Get in Touch
+      <span class="touch__stamp">Want To Know More?</span>
+    </h2>
+
+    <div class="touch__grid">
+      <form class="form" onsubmit="event.preventDefault(); this.reset();">
+        <div class="field">
+          <label for="fn">First-name</label>
+          <input id="fn" type="text" autocomplete="given-name" />
+        </div>
+        <div class="field">
+          <label for="ln">Last-name</label>
+          <input id="ln" type="text" autocomplete="family-name" />
+        </div>
+        <div class="field">
+          <label for="em">E-mail</label>
+          <input id="em" type="email" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="ph">Phone-number</label>
+          <input id="ph" type="tel" autocomplete="tel" />
+        </div>
+        <div class="field field--full">
+          <div>
+            <label for="msg">Message</label>
+            <textarea id="msg" rows="1"></textarea>
+          </div>
+          <button class="form__send" type="submit" aria-label="Verstuur bericht">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </form>
+
+      <div class="touch__side">
+        <ul class="contact-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.8 3h3.1l-6.8 7.7 8 10.3h-6.2l-4.9-6.3L5.4 21H2.3l7.2-8.3L1.9 3h6.4l4.4 5.8L17.8 3Z"/></svg>
+            Or Just Contact our
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>
+            <strong>Through mail</strong>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-1.6 19.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.3v7A10 10 0 0 0 12 2Z"/></svg>
+            <a href="mailto:thedesignpapers@gmail.com"><small>thedesignpapers@gmail.com</small></a>
+          </li>
+        </ul>
+        <div class="touch__blocks"><div></div><div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    /* Engelse teksten voor de taalknop (Nederlands → Engels) */
+    window.PL_EN = {
+  "Terug naar portfolio": "Back to portfolio",
+  "Bekijk in Figma": "View in Figma",
+  "Artikel": "Article",
+  "Bronnen": "Sources",
+  "Abonneer": "Subscribe",
+  "Waar Technologie Creativiteit Raakt": "Where Technology <strong>Meets Creativity<\/strong>",
+  "Verkenning van innovatie, ontwerp en digitale kunst": "Exploring innovation, design and digital art",
+  "Door Yasmine Boucharib": "By Yasmine Boucharib",
+  "Lees Meer": "Read More",
+  "AI Voor de Ideeën Jij Voor de Richting": "<strong>AI For the Ideas<\/strong> You For the Direction",
+  "De Onzichtbare Ontwerper Hoe AI de Vormtaal van de Toekomst Bepaalt": "The Invisible Designer How AI <strong class=\"pink-text\">Shapes the Visual Language of the Future<\/strong>",
+  "Machine Melodies Wanneer AI de Creatieve Toon Aangeeft": "Machine Melodies When AI <strong>Sets the Creative Tone<\/strong>",
+  "The Design Papers is een creatief designplatform. We brengen ideeën tot leven in verhalen en visuele ervaringen die raken.": "<span class=\"lead\">The Design Papers is a creative<\/span> <b>design platform.<\/b> We bring ideas to life through stories and visual experiences that move people.",
+  "Twee Werelden, Eén Horizon": "Two Worlds, One Horizon",
+  "Lees artikel": "Read article",
+  "Achter de /prompt": "Behind the /prompt",
+  "Beeld · 16 oct 2025": "Image · 16 oct 2025",
+  "Ruimte om te Denken": "Room to Think",
+  "AI Voor de Ideeën, Jij Voor de Richting": "AI For the Ideas, You For the Direction",
+  "Wij geloven dat design niet alleen iets is wat je ziet, maar ook iets wat je voelt en begrijpt. Het vertelt wie we zijn en hoe we de wereld om ons heen vormgeven.": "We believe <span class=\"pink-text\">design<\/span> isn't just something you see, but something you feel and understand. It tells us who we are and how we shape the world around us."
+};
+  </script>
+  <script src="page-lang.js"></script>
+  <script src="../lang.js"></script>
+  <script>
+    /* ---------- NAV ---------- */
+    const nav = document.getElementById("nav");
+    const navToggle = document.getElementById("navToggle");
+    const navLinks = document.getElementById("navLinks");
+
+    const onScroll = () => nav.classList.toggle("is-scrolled", window.scrollY > 40);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    navToggle.addEventListener("click", () => {
+      const open = nav.classList.toggle("is-open");
+      navToggle.setAttribute("aria-expanded", open);
+      navToggle.textContent = open ? "Sluiten" : "Menu";
+    });
+    navLinks.querySelectorAll("a").forEach((a) =>
+      a.addEventListener("click", () => {
+        nav.classList.remove("is-open");
+        navToggle.setAttribute("aria-expanded", false);
+        navToggle.textContent = "Menu";
+      })
+    );
+
+    // actieve link markeren
+    const links = navLinks.querySelectorAll("a:not(.nav__sub)");
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        links.forEach((a) => a.classList.toggle("is-active", a.getAttribute("href") === `#${e.target.id}`));
+      }),
+      { rootMargin: "-45% 0px -50% 0px" }
+    );
+    document.querySelectorAll(".screen").forEach((s) => io.observe(s));
+
+    /* ---------- 3D CAROUSEL ---------- */
+    const stage = document.getElementById("stage");
+    const cards = [...stage.querySelectorAll(".card")];
+    const dotsEl = document.getElementById("dots");
+    const counter = document.getElementById("counter");
+    const n = cards.length;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let pos = 1, target = 1, active = -1;
+
+    cards.forEach((_, i) => {
+      const b = document.createElement("button");
+      b.setAttribute("aria-label", `Artikel ${i + 1}`);
+      b.addEventListener("click", () => goTo(i));
+      dotsEl.appendChild(b);
+    });
+
+    const offset = (i, p) => {
+      let d = i - p;
+      d = ((d % n) + n) % n;
+      if (d > n / 2) d -= n;
+      return d;
+    };
+
+    function render() {
+      const spread = window.innerWidth < 640 ? 80 : 72;
+      cards.forEach((card, i) => {
+        const d = offset(i, pos);
+        const a = Math.abs(d);
+        const rot = -Math.max(-1.4, Math.min(1.4, d)) * 32;
+        const scale = 1 - Math.min(a, 1.5) * 0.12;
+        card.style.transform = `translateX(${d * spread}%) translateZ(${-a * 200}px) rotateY(${rot}deg) scale(${scale})`;
+        card.style.opacity = a > 1.6 ? 0 : 1 - Math.max(0, a - 1) * 0.9;
+        card.style.zIndex = Math.round(100 - a * 10);
+        card.style.filter = `brightness(${1 - Math.min(a, 1) * 0.45})`;
+        card.style.pointerEvents = a > 1.5 ? "none" : "auto";
+        card.querySelector(".card__img img").style.setProperty("--px", `${d * -12}px`);
+      });
+
+      const current = ((Math.round(pos) % n) + n) % n;
+      if (current !== active) {
+        active = current;
+        cards.forEach((c, i) => {
+          c.classList.toggle("is-active", i === active);
+          c.setAttribute("aria-hidden", i !== active);
+        });
+        [...dotsEl.children].forEach((d, i) => d.classList.toggle("is-active", i === active));
+        counter.innerHTML = `<b>${String(active + 1).padStart(2, "0")}</b> / ${String(n).padStart(2, "0")}`;
+      }
+    }
+
+    function loop() {
+      if (!dragging) {
+        pos += (target - pos) * (reduceMotion ? 1 : 0.1);
+        if (Math.abs(target - pos) < 0.0005) pos = target;
+      }
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    function goTo(i) { target = Math.round(target) + offset(i, Math.round(target)); }
+    const next = () => (target = Math.round(target) + 1);
+    const prev = () => (target = Math.round(target) - 1);
+
+    document.getElementById("next").addEventListener("click", next);
+    document.getElementById("prev").addEventListener("click", prev);
+    stage.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+    });
+
+    // slepen / swipen
+    let dragging = false, startX = 0, startPos = 0, lastX = 0, lastT = 0, velocity = 0, moved = 0;
+
+    stage.addEventListener("pointerdown", (e) => {
+      if (e.target.closest(".card__more")) return; // knop gewoon laten werken
+      dragging = true;
+      moved = 0;
+      startX = lastX = e.clientX;
+      startPos = pos;
+      lastT = performance.now();
+      velocity = 0;
+      stage.classList.add("is-dragging");
+      stage.setPointerCapture(e.pointerId);
+    });
+    stage.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      moved = Math.max(moved, Math.abs(dx));
+      pos = startPos - dx / (cards[0].offsetWidth * 0.9);
+      const now = performance.now();
+      velocity = (e.clientX - lastX) / Math.max(1, now - lastT);
+      lastX = e.clientX;
+      lastT = now;
+    });
+    const endDrag = (e) => {
+      if (!dragging) return;
+      dragging = false;
+      stage.classList.remove("is-dragging");
+      const flick = Math.abs(velocity) > 0.5 ? -Math.sign(velocity) * 0.5 : 0;
+      target = Math.round(pos + flick);
+      if (moved < 6) {
+        stage.releasePointerCapture?.(e.pointerId);
+        const card = document.elementFromPoint(e.clientX, e.clientY)?.closest(".card");
+        if (card) {
+          const i = cards.indexOf(card);
+          if (i !== active) goTo(i);
+        }
+      }
+    };
+    stage.addEventListener("pointerup", endDrag);
+    stage.addEventListener("pointercancel", endDrag);
+    stage.addEventListener("dragstart", (e) => e.preventDefault());
+    stage.addEventListener("click", (e) => { if (moved >= 6) e.preventDefault(); }, true);
+
+    // tilt + glans
+    if (!reduceMotion && window.matchMedia("(hover: hover)").matches) {
+      cards.forEach((card) => {
+        const inner = card.querySelector(".card__inner");
+        card.addEventListener("pointermove", (e) => {
+          if (!card.classList.contains("is-active") || dragging) return;
+          const r = inner.getBoundingClientRect();
+          const px = (e.clientX - r.left) / r.width;
+          const py = (e.clientY - r.top) / r.height;
+          inner.style.setProperty("--ry", `${(px - 0.5) * 14}deg`);
+          inner.style.setProperty("--rx", `${(0.5 - py) * 10}deg`);
+          inner.style.setProperty("--gx", `${px * 100}%`);
+          inner.style.setProperty("--gy", `${py * 100}%`);
+        });
+        card.addEventListener("pointerleave", () => {
+          inner.style.setProperty("--rx", "0deg");
+          inner.style.setProperty("--ry", "0deg");
+        });
+      });
+    }
+
+    loop();
+  </script>
+</body>
+</html>
