@@ -122,8 +122,7 @@
     <!-- ABOUT -->
     <section class="about" id="about">
       <figure class="about__photo">
-        <!-- PLACEHOLDER: vervang door je eigen foto (bijv. assets/yasmine.jpg) -->
-        <img src="https://picsum.photos/seed/yasmine-portrait/700/900" alt="Yasmine Boucharib" />
+        <img src="assets/images/me.jpg" alt="Yasmine Boucharib" />
       </figure>
 
       <div class="about__text">
@@ -134,10 +133,6 @@
         <p data-i18n="about.p3">I'm naturally curious, always looking to learn something new and open to exploring different creative directions.</p>
       </div>
 
-      <figure class="about__photo about__photo--small">
-        <!-- PLACEHOLDER: tweede foto -->
-        <img src="https://picsum.photos/seed/yasmine-detail/500/500" alt="" />
-      </figure>
     </section>
 
     <!-- SKILLS -->
@@ -205,7 +200,7 @@
           <a href="projects/yamelo.html" class="project">
             <span class="project__name">Yamelo</span>
             <span class="project__type" data-i18n="type.identity">Visual identity</span>
-            <span class="project__desc"><span class="d-nl" lang="nl">Mijn eigen app, gemaakt binnen mijn opleiding. UX en software met hulp van AI, hulp bij de stijl van Muhammad Wasim.</span><span class="d-en" lang="en">My own app, made during my studies. UX and software with help from AI, style help from Muhammad Wasim.</span></span>
+            <span class="project__desc"><span class="d-nl" lang="nl">Mijn eigen app, gemaakt binnen mijn opleiding. UX en software met hulp van AI, hulp bij de stijl van Muhammad Qasim.</span><span class="d-en" lang="en">My own app, made during my studies. UX and software with help from AI, style help from Muhammad Qasim.</span></span>
           </a>
         </li>
         <li>
@@ -273,15 +268,27 @@
         scrollTrigger: { trigger: document.body, start: "top top", end: "bottom bottom", scrub: 0.3 },
       });
 
-      // hero: naam zakt weg en vervaagt bij wegscrollen
-      gsap.to(".hero__content", {
-        y: 120, opacity: 0, ease: "none",
-        scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
-      });
-      gsap.to(".hero__video", {
-        scale: 1.15, ease: "none",
-        scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
-      });
+      // hero: naam zakt weg en vervaagt bij wegscrollen.
+      // Dit wacht tot de pagina klaar is, zodat het NA script.js komt.
+      // Eerst halen we oude scroll-animaties op de naam weg (die zorgden dat je naam verdween),
+      // daarna maken we er één met vaste begin- en eindwaarden.
+      const heroScroll = () => {
+        ScrollTrigger.getAll().forEach((st) => {
+          const a = st.animation;
+          if (!a || !a.targets) return;
+          const hit = a.targets().some((el) => el instanceof Element && (el.closest(".hero__content") || el.matches(".hero__video")));
+          if (!hit) return;
+          st.kill(); a.kill();
+          gsap.set(a.targets(), { clearProps: "opacity,transform" });
+        });
+        const st = { trigger: ".hero", start: "top top", end: "bottom top", scrub: true };
+        gsap.fromTo(".hero__content", { y: 0, opacity: 1 }, { y: 120, opacity: 0, ease: "none", immediateRender: false, scrollTrigger: st });
+        gsap.fromTo(".hero__video", { scale: 1 }, { scale: 1.15, ease: "none", immediateRender: false, scrollTrigger: { ...st } });
+        ScrollTrigger.refresh();
+      };
+      if (document.readyState === "complete") heroScroll(); else addEventListener("load", heroScroll);
+      // terugkomen met de terug-knop van de browser: alles opnieuw meten
+      addEventListener("pageshow", (e) => { if (e.persisted) ScrollTrigger.refresh(); });
 
       // about: foto's openen als een gordijn en bewegen mee (parallax)
       gsap.utils.toArray(".about__photo").forEach((fig, i) => {

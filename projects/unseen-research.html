@@ -24,7 +24,7 @@
       --sticky-pink: #f4a3a3;
       --line: rgba(236, 235, 228, 0.18);
       /* hoe donker de achtergrondfoto wordt: 0 = origineel, 1 = zwart */
-      --bg-dim: 0.78;
+      --bg-dim: 0.88;
 
       --type: "Special Elite", "Courier New", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Noto Sans Arabic", monospace;
       --mono: "Courier Prime", "Courier New", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Noto Sans Arabic", monospace;
@@ -218,8 +218,6 @@
       padding-bottom: 0.7rem;
       border-bottom: 1px dashed rgba(0, 0, 0, 0.35);
     }
-    .tape__rec { width: 10px; height: 10px; border-radius: 50%; background: var(--red); animation: rec 1.4s steps(1) infinite; flex-shrink: 0; }
-    @keyframes rec { 50% { opacity: 0.2; } }
     .tape__who { font-family: var(--type); font-size: 1.1rem; line-height: 1.3; }
     .tape__role { font-size: 0.85rem; opacity: 0.7; margin-top: -0.5rem; }
     .tape blockquote {
@@ -256,10 +254,6 @@
       width: min(100%, 72vh);
       justify-self: center;
       background: #6b5338;
-      background-image:
-        radial-gradient(rgba(0, 0, 0, 0.15) 1px, transparent 1.5px),
-        radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1.5px);
-      background-size: 7px 7px, 11px 11px;
       border: 12px solid #3d2c1b;
       box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(0, 0, 0, 0.35);
     }
@@ -299,13 +293,13 @@
     .pin::before {
       content: "";
       position: absolute;
-      top: -7px;
+      top: -8px;
       left: 50%;
-      width: 14px;
+      width: 44px;
       height: 14px;
-      margin-left: -7px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #ff6b5e, #8b130c);
+      margin-left: -22px;
+      background: rgba(230, 225, 200, 0.75);
+      transform: rotate(-3deg);
       box-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
     }
     .pin__name { display: block; font-family: var(--type); font-size: clamp(0.68rem, 1.2vw, 0.92rem); line-height: 1.2; overflow-wrap: anywhere; hyphens: auto; }
@@ -366,9 +360,11 @@
     }
     .sheet__nav button:hover { border-bottom-color: var(--ink); }
     .sheet__dots { display: flex; gap: 0.4rem; }
-    .sheet__dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(0, 0, 0, 0.2); }
+    .sheet__dots i { width: 16px; height: 3px; background: rgba(0, 0, 0, 0.2); }
     .sheet__dots i.on { background: var(--red); }
-    .cycle__hint { position: absolute; bottom: 1.2rem; left: 50%; transform: translateX(-50%); font-size: 0.8rem; color: var(--muted); }
+    .cycle__hint { position: absolute; bottom: 1.2rem; left: 50%; transform: translateX(-50%); font-size: 0.85rem; color: var(--chalk); text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9); }
+    /* extra donker achter de cyclus, zodat alles goed leesbaar blijft tot de laatste stap */
+    .cycle__sticky { background: radial-gradient(ellipse at center, rgba(12, 12, 10, 0.6), rgba(12, 12, 10, 0.85)); }
 
     .breakout {
       max-width: 820px;
@@ -379,6 +375,7 @@
       line-height: 1.35;
     }
     .breakout em { font-style: normal; color: #ff8a80; }
+    .breakout { text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9); }
 
     /* ---------- empathy map ---------- */
     .emap {
@@ -583,6 +580,9 @@
       *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
       .reveal { opacity: 1; transform: none; }
     }
+    /* taalknop NL / EN */
+    .pl-switch { --pl-r: 0; --pl-on: #1f1f1c; font-family: "Courier Prime", monospace; }
+
   </style>
 </head>
 <body>
@@ -599,7 +599,6 @@
 <li><a data-t="" href="#personas">Persona's</a></li>
 <li><a data-t="" href="#eisen">Ontwerpeisen</a></li>
 </ul>
-<div class="nav__lang" data-lang-switcher=""></div>
 </nav>
 <header class="hero">
 <p class="hero__file" data-t="">BIJLAGE A · TEAM 6 · OPDRACHTGEVER RIEC</p>
@@ -659,7 +658,7 @@
 <p class="lead" data-t="">We gingen in gesprek met professionals: hoe beoordelen zij gedrag, welke rol spelen aannames, en wat vinden ze lastig in het contact met jongeren?</p>
 <div class="tapes">
 <article class="tape reveal">
-<div class="tape__head" data-t=""><span class="tape__rec"></span>INTERVIEW · MONDRIAAN</div>
+<div class="tape__head" data-t="">INTERVIEW · MONDRIAAN</div>
 <p class="tape__who" data-t="">Medewerker Mondriaan</p>
 <blockquote data-t="">“Heel vaak wordt er gekeken naar het kind. Wat is er mis met het kind? Maar kijk eens naar de omgeving. Kijk eens naar de ouders.”</blockquote>
 <blockquote data-t="">“Ga het gesprek aan met het kind. Kijk wat hun vertellen. En daaruit haal je soms al heel veel.”</blockquote>
@@ -667,7 +666,7 @@
 <p class="tape__so" data-t=""><b>DUS</b>Kijk verder dan het zichtbare gedrag. Signalen blijven liggen als iedereen denkt dat een ander het oppakt.</p>
 </article>
 <article class="tape reveal">
-<div class="tape__head" data-t=""><span class="tape__rec"></span>INTERVIEW · MONDRIAAN</div>
+<div class="tape__head" data-t="">INTERVIEW · MONDRIAAN</div>
 <p class="tape__who" data-t="">Merel van Verbeek</p>
 <p class="tape__role" data-t="">Persoonlijk begeleider bij Mondriaan</p>
 <p data-t="">Advies: leg de focus op <b>gespreksvoering</b>. Hoe benader je de jongere? Professionals kunnen hier moeite mee hebben.</p>
@@ -675,7 +674,7 @@
 <p class="tape__so" data-t=""><b>DUS</b>Professionals laten reflecteren op hoe hun aannames en gesprekskeuzes het contact beïnvloeden.</p>
 </article>
 <article class="tape reveal">
-<div class="tape__head" data-t=""><span class="tape__rec"></span>INTERVIEW</div>
+<div class="tape__head" data-t="">INTERVIEW</div>
 <p class="tape__who" data-t="">Susan Hurenkamp</p>
 <p class="tape__role" data-t="">Eigenaarschap en verbinding met jongeren</p>
 <blockquote data-t="">“Ja, in ieder geval eigenaarschap gewoon bij de jongeren zelf neerleggen.”</blockquote>
@@ -869,15 +868,164 @@
 <li><a data-t="" href="https://longreads.cbs.nl/jeugdmonitor-2022/" rel="noopener" target="_blank">CBS. (2022, 9 november). Inleiding – Jaarrapport Landelijke Jeugdmonitor 2022.</a></li>
 <li><a data-t="" href="https://www.politieenwetenschap.nl/" rel="noopener" target="_blank">Van der Klok, J., Klopman, R., Spithoven, J., &amp; Jansen, S. W. N. (z.d.). Politie en Wetenschap | Wetenschappelijk onderzoek.</a></li>
 </ul>
-<div class="downloads">
-<a data-t="" href="../assets/Unseen/team6-onderzoek.pdf" rel="noopener" target="_blank">↓ Onderzoeksverslag (PDF)</a>
-<a data-t="" href="../assets/Unseen/team6-synthese.pdf" rel="noopener" target="_blank">↓ Synthese: cyclus, empathy map, persona's, eisen (PDF)</a>
-</div>
 </section>
 </main>
 <footer class="footer">UNSEEN · Research-analyse · Team 6 · in opdracht van het RIEC · Communication &amp; Multimedia Design, Zuyd</footer>
 <script src="../lang.js"></script>
-<script src="unseen-i18n.js"></script>
+<script>
+    /* Engelse teksten voor de taalknop (Nederlands → Engels) */
+    window.PL_EN = {
+  "Terug naar UNSEEN": "Back to UNSEEN",
+  "Vraag": "Question",
+  "Cyclus": "Cycle",
+  "Persona's": "Personas",
+  "Ontwerpeisen": "Design requirements",
+  "BIJLAGE A · TEAM 6 · OPDRACHTGEVER RIEC": "APPENDIX A · TEAM 6 · CLIENT RIEC",
+  "Research-analyse": "Research analysis",
+  "Van een vraag over risicovol gedrag naar een docu over labels en gespreksvoering. Dit is hoe ons onderzoek liep, en wat we onderweg ontdekten.": "From a question about risky behaviour to a documentary about labels and conversation skills. This is how our research went, and what we discovered along the way.",
+  "DOSSIER GEOPEND": "FILE OPENED",
+  "Start van het onderzoek": "Where the research started",
+  "Na de presentatie over ondermijning wilden we eerst de bredere situatie begrijpen: welke knelpunten spelen bij jongeren, politie, gemeenten en jeugdzorg?": "After the presentation on organised crime and undermining, we first wanted to understand the bigger picture: what problems do young people, police, municipalities and youth care run into?",
+  "HOOFDVRAAG": "MAIN QUESTION",
+  "Hoe kunnen we professionals bewustmaken van online risicovol gedrag van jongeren en hen helpen onderscheid te maken tussen normaal en onveilig gedrag?": "How can we make professionals aware of risky online behaviour among young people, and help them tell the difference between normal and unsafe behaviour?",
+  "VAN PATROONHERKENNING NAAR STIGMATISERING": "FROM PATTERN RECOGNITION TO STIGMATISATION",
+  "Wanneer helpt patroonherkenning om jongeren op tijd te ondersteunen, en wanneer leidt het tot aannames of labels waardoor de persoonlijke context uit beeld raakt? Onze aandacht verschoof van alleen het herkennen van risicovol gedrag naar de manier waarop professionals jongeren beoordelen en benaderen.": "When does pattern recognition help to support young people in time, and when does it lead to assumptions or labels that push the personal context out of view? Our focus shifted from only recognising risky behaviour to the way professionals judge and approach young people.",
+  "↳ hier begon UNSEEN": "↳ this is where UNSEEN began",
+  "Literatuuronderzoek": "Literature research",
+  "Drie bronnen die onze richting bepaalden.": "Three sources that shaped our direction.",
+  "BEWIJSSTUK 1": "EXHIBIT 1",
+  "Integrale Jeugd Aanpak Parkstad": "Integrated Youth Approach Parkstad",
+  "Problemen van jongeren zijn vaak complex. Persoonlijke aandacht, samenwerking en het samen beoordelen van signalen zijn belangrijk om passende steun te bieden.": "Young people's problems are often complex. Personal attention, collaboration and assessing signals together are important to offer the right support.",
+  "Min. van Justitie en Veiligheid ▸": "Ministry of Justice and Security ▸",
+  "BEWIJSSTUK 2": "EXHIBIT 2",
+  "Jeugdmonitor 2022": "Youth Monitor 2022",
+  "Steeds meer jeugdhulp en een tekort aan personeel. Dat liet ons zien onder welke omstandigheden professionals werken.": "More and more youth care and a shortage of staff. It showed us the conditions professionals work in.",
+  "BEWIJSSTUK 3": "EXHIBIT 3",
+  "Jongeren met vergelijkbaar crimineel gedrag hebben niet dezelfde kans om als verdachte geregistreerd te worden. Etnisch profileren werd als mogelijke verklaring genoemd. Reden om de beoordeling van jongeren verder te onderzoeken.": "Young people with similar criminal behaviour do not have the same chance of being registered as a suspect. Ethnic profiling was mentioned as a possible explanation. A reason to look further into how young people are judged.",
+  "Politie en Wetenschap ▸": "Police and Science ▸",
+  "Verdieping door interviews": "Going deeper with interviews",
+  "We gingen in gesprek met professionals: hoe beoordelen zij gedrag, welke rol spelen aannames, en wat vinden ze lastig in het contact met jongeren?": "We talked to professionals: how do they judge behaviour, what role do assumptions play, and what do they find difficult in their contact with young people?",
+  "Medewerker Mondriaan": "Mondriaan employee",
+  "“Heel vaak wordt er gekeken naar het kind. Wat is er mis met het kind? Maar kijk eens naar de omgeving. Kijk eens naar de ouders.”": "“Very often people look at the child. What's wrong with the child? But look at the environment. Look at the parents.”",
+  "“Ga het gesprek aan met het kind. Kijk wat hun vertellen. En daaruit haal je soms al heel veel.”": "“Start the conversation with the child. See what they tell you. That alone often gives you a lot.”",
+  "“Dit is wat wij zien. Wat gaan we hiermee doen? En het niet laten wachten.”": "“This is what we see. What are we going to do with it? And don't let it wait.”",
+  "DUSKijk verder dan het zichtbare gedrag. Signalen blijven liggen als iedereen denkt dat een ander het oppakt.": "<b>SO<\/b>Look beyond the visible behaviour. Signals get left behind when everyone thinks someone else will pick them up.",
+  "Persoonlijk begeleider bij Mondriaan": "Personal counsellor at Mondriaan",
+  "Advies: leg de focus op gespreksvoering. Hoe benader je de jongere? Professionals kunnen hier moeite mee hebben.": "Advice: focus on <b>conversation skills<\/b>. How do you approach the young person? Professionals can struggle with this.",
+  "Hier kwam het begrip zelfvervullende voorspelling naar voren: een verwachting over een jongere stuurt de vragen van de professional. Sluit de jongere zich af, dan lijkt de verwachting bevestigd.": "This is where the idea of a <b>self-fulfilling prophecy<\/b> came up: an expectation about a young person steers the professional's questions. If the young person shuts down, the expectation seems confirmed.",
+  "DUSProfessionals laten reflecteren op hoe hun aannames en gesprekskeuzes het contact beïnvloeden.": "<b>SO<\/b>Let professionals reflect on how their assumptions and conversation choices affect the contact.",
+  "Eigenaarschap en verbinding met jongeren": "Ownership and connection with young people",
+  "“Ja, in ieder geval eigenaarschap gewoon bij de jongeren zelf neerleggen.”": "“Yes, in any case, just put the ownership with the young people themselves.”",
+  "Toch werd een plek die jongeren zelf hadden gekozen kort daarna beklad. Het gesprek daarover aangaan vond ze lastig.": "Still, a spot the young people had chosen themselves was vandalised soon after. She found it hard to start that conversation.",
+  "“We proberen in ieder geval altijd die connectie te behouden.”": "“We always try to keep that connection, in any case.”",
+  "DUSHoe spreek je jongeren aan en stel je grenzen, zonder het contact te verliezen?": "<b>SO<\/b>How do you address young people and set boundaries, without losing the contact?",
+  "De cyclus": "The cycle",
+  "Uit onze inzichten maakten we deze cyclus. Aannames en labels beïnvloeden hoe een jongere benaderd wordt. Voelt de jongere zich minder gehoord, dan deelt hij minder, en dat lijkt de aanname weer te bevestigen. Scroll door de cyclus.": "From our insights we created this cycle. Assumptions and labels affect how a young person is approached. If the young person feels less heard, they share less, and that seems to confirm the assumption again. Scroll through the cycle.",
+  "Onderzoeks­verzameling": "Research collection",
+  "en weer rond ↻": "and round again ↻",
+  "scroll ↓ · klik op een kaartje · of gebruik ◂ ▸": "scroll ↓ · click a card · or use ◂ ▸",
+  "Daarom onderzoeken we hoe bewuste gespreksvoering deze cyclus kan helpen doorbreken. In UNSEEN is elke keuze een gespreksvraag: een gesloten vraag houdt de cyclus draaiende, een open vraag breekt hem open.": "That's why we explore how <em>conscious conversation<\/em> can help break this cycle. In UNSEEN every choice is a conversation question: a closed question keeps the cycle going, an open question breaks it open.",
+  "Wat we weten over de gebruiker: de professional. Gebaseerd op literatuur, vier interviews en de aannames die we tegenkwamen.": "What we know about the user: the professional. Based on literature, four interviews and the assumptions we came across.",
+  "De professionals geven aan dat zij moeite hebben om goed aan te sluiten bij de leefwereld van jongeren.": "Professionals say they find it hard to connect with the world young people live in.",
+  "Ervaart dat er veel verschillende factoren meespelen in het gedrag van jongeren.": "Feels that many different factors play a part in young people's behaviour.",
+  "Kan moeite hebben om voldoende inzicht te krijgen in de leefwereld van jongeren.": "May struggle to get enough insight into young people's world.",
+  "Het profileren gaat vaak onbewust": "Profiling often happens unconsciously",
+  "Weinig vertrouwen": "Little trust",
+  "Verschillende interpretaties van hetzelfde gedrag.": "Different interpretations of the same behaviour.",
+  "Jongeren hebben vaak weinig vertrouwen in politie, ambtenaren en andere professionals.": "Young people often have little trust in police, civil servants and other professionals.",
+  "Verhalen over jongeren die mogelijk risico's vormen.": "Stories about young people who might be a risk.",
+  "Aannames hebben over bepaalde niveaus/rassen": "Having assumptions about certain education levels/races",
+  "Jongeren die verschillend reageren op politie, gemeenten en andere professionals.": "Young people who react differently to police, municipalities and other professionals.",
+  "Het rekruteringsproces verschuift steeds vaker naar besloten online kanalen zoals Telegram, waardoor criminelen onder de radar van de politie blijven.": "Recruitment is shifting more and more to closed online channels like Telegram, which keeps criminals under the police's radar.",
+  "Dat bepaalde jongeren vaker gecontroleerd of geregistreerd worden.": "That certain young people are checked or registered more often.",
+  "Bespreekt jongeren en mogelijke risico's met collega's.": "Discusses young people and possible risks with colleagues.",
+  "Wil onderbouwde beslissingen nemen in plaats van alleen op aannames af te gaan.": "Wants to make well-founded decisions instead of relying only on assumptions.",
+  "Jongeren rollen de georganiseerde misdaad in via vijf hoofdroutes: sociale relaties, werk en hobby's, levensloopgebeurtenissen of bewuste rekrutering.": "Young people get drawn into organised crime through five main routes: social relationships, work and hobbies, life events or deliberate recruitment.",
+  "Vindt het lastig om vertrouwen op te bouwen bij een jongere die weinig vertelt.": "Finds it hard to build trust with a young person who says little.",
+  "Heeft onvoldoende zicht op de achtergrond van de jongere.": "Doesn't have enough insight into the young person's background.",
+  "Moet risico's inschatten met onvolledige informatie.": "Has to assess risks with incomplete information.",
+  "Ervaart spanning tussen vertrouwen opbouwen en grenzen stellen.": "Feels tension between building trust and setting boundaries.",
+  "Merkt dat signalen tussen instanties blijven liggen.": "Notices that signals get stuck between organisations.",
+  "Herkent eigen aannames niet altijd.": "Doesn't always recognise their own assumptions.",
+  "Wil dat de jongere zich veilig genoeg voelt om te vertellen.": "Wants the young person to feel safe enough to talk.",
+  "Wil beter begrijpen wat achter het gedrag zit.": "Wants to better understand what lies behind the behaviour.",
+  "Wil signalen serieus nemen en eigen aannames controleren.": "Wants to take signals seriously and check their own assumptions.",
+  "Voor wie we UNSEEN ontwerpen.": "Who we design UNSEEN for.",
+  "Persoonlijk begeleider · Mondriaan": "Personal counsellor · Mondriaan",
+  "Leeftijd": "Age",
+  "Ervaring": "Experience",
+  "3 werkjaren": "3 years of work",
+  "Woont met haar partner en twee jonge kinderen in Zuid-Limburg. Ze ziet dagelijks hoe belangrijk de vroege hechtingsjaren zijn, en zet zich in voor jongeren bij wie het daar misging. Ze wil een betekenisvolle, steunende derde zijn.": "Lives with her partner and two young children in South Limburg. Every day she sees how important the early attachment years are, and she works for young people for whom things went wrong there. She wants to be a meaningful, supportive third party.",
+  "OBSTAKELS": "OBSTACLES",
+  "Verhalen over verwaarlozing en mishandeling raken haar persoonlijk.": "Stories about neglect and abuse affect her personally.",
+  "Een drukke baan combineren met haar gezin.": "Combining a busy job with her family.",
+  "Mist soms concrete handvatten om gedrag vanuit trauma en vroege hechting te begrijpen.": "Sometimes misses concrete tools to understand behaviour from trauma and early attachment.",
+  "WAT ZE NODIG HEEFT": "WHAT SHE NEEDS",
+  "Een veilige plek om moeilijke ervaringen te bespreken.": "A safe place to talk about difficult experiences.",
+  "Concrete voorbeelden en technieken om jongeren met een moeilijke achtergrond te begeleiden.": "Concrete examples and techniques to guide young people with a difficult background.",
+  "Meer inzicht in de invloed van hechting, trauma en emotionele pijn op gedrag.": "More insight into how attachment, trauma and emotional pain affect behaviour.",
+  "Beleidsmaker jeugd en veiligheid · Gemeente": "Youth and safety policy maker · Municipality",
+  "12 jaar, waarvan 5 bij de gemeente": "12 years, 5 of them at the municipality",
+  "Werkt met": "Works with",
+  "Beleidsoverleg, RIEC en samenwerkingspartners": "Policy meetings, RIEC and partner organisations",
+  "Ze wil voorkomen dat jongeren in de criminaliteit terechtkomen, en vindt het belangrijk dat beleid aansluit bij de werkelijkheid van jongeren. Professionals mogen hen niet te snel beoordelen op uiterlijk, achtergrond of omgeving.": "She wants to prevent young people from ending up in crime, and finds it important that policy matches young people's reality. Professionals shouldn't judge them too quickly on appearance, background or environment.",
+  "Jongeren en ondermijning: complex en steeds in verandering.": "Young people and undermining: complex and always changing.",
+  "Weinig zicht op de dagelijkse en online leefwereld van jongeren.": "Little insight into young people's daily and online lives.",
+  "Organisaties hebben verschillende belangen en werkwijzen.": "Organisations have different interests and ways of working.",
+  "Tijd, budget en politieke druk.": "Time, budget and political pressure.",
+  "Betrouwbare, actuele inzichten uit de praktijk.": "Reliable, up-to-date insights from practice.",
+  "Inzicht in hoe profilering en vooroordelen het beeld van jongeren beïnvloeden.": "Insight into how profiling and prejudice shape the image of young people.",
+  "Handvatten voor preventief beleid dat jongeren niet onterecht als risico bestempelt.": "Tools for preventive policy that doesn't wrongly label young people as a risk.",
+  "Per eis staat aan welk aspect hij gekoppeld is. Het groene vinkje laat zien waar de eis terugkomt in de speelbare casus.": "Each requirement shows which aspect it is linked to. The green tick shows where the requirement comes back in the playable case.",
+  "Ontwerpeis": "Design requirement",
+  "Stijl/Vorm": "Style/Form",
+  "Interactie": "Interaction",
+  "Beide kanten, de jongere en de professional, kunnen elkaars leefwereld ervaren voor meer begrip en medeleven.": "Both sides, the young person and the professional, can experience each other's world for more understanding and empathy.",
+  "Rekrutering vindt steeds vaker plaats via social media en onzichtbare kanalen. Het ontwerp helpt professionals kleine, subtiele (digitale) signalen te herkennen.": "Recruitment increasingly happens through social media and hidden channels. The design helps professionals recognise small, subtle (digital) signals.",
+  "De gegevens geven inzicht in het ontwikkelingsproces van de jongere: profilering, vroegkinderlijke hechtingsjaren, trauma en onderliggende emotionele pijn.": "The information gives insight into the young person's development: profiling, early childhood attachment, trauma and underlying emotional pain.",
+  "De interactie combineert theorie met realistische situaties en emoties vanuit het perspectief van jongeren, zodat professionals zich beter verplaatsen in hun leefwereld.": "The interaction combines theory with realistic situations and emotions from young people's perspective, so professionals can better put themselves in their world.",
+  "De professional maakt keuzes in realistische situaties. De gevolgen worden zichtbaar, en duidelijk wordt hoe aannames en profilering de beoordeling beïnvloeden.": "The professional makes choices in realistic situations. The consequences become visible, and it becomes clear how assumptions and profiling affect judgement.",
+  "De ervaring neemt de professional stap voor stap mee in een realistische casus, met beeld, geluid en persoonlijke verhalen.": "The experience takes the professional step by step through a realistic case, with images, sound and personal stories.",
+  "De professional ontdekt verschillende perspectieven op dezelfde situatie, zodat duidelijk wordt dat gedrag meerdere oorzaken kan hebben en niet direct op criminaliteit hoeft te wijzen.": "The professional discovers different perspectives on the same situation, making clear that behaviour can have several causes and doesn't have to point to crime.",
+  "Bronvermelding": "References",
+  "UNSEEN · Research-analyse · Team 6 · in opdracht van het RIEC · Communication & Multimedia Design, Zuyd": "UNSEEN · Research analysis · Team 6 · commissioned by the RIEC · Communication & Multimedia Design, Zuyd",
+  "STAP {i} VAN {n}": "STEP {i} OF {n}",
+  "UIT ONS ONDERZOEK": "FROM OUR RESEARCH",
+  "◂ vorige": "◂ previous",
+  "volgende ▸": "next ▸",
+  "opnieuw ↻": "again ↻",
+  "Aannames en risicobeelden": "Assumptions and risk images",
+  "Professionals moeten voortdurend kiezen welke jongeren extra aandacht nodig hebben, wie als risico wordt gezien en wanneer er wordt ingegrepen. Die keuzes zijn niet altijd volledig objectief. Bestaande registraties, eerdere ervaringen, risicoprofielen en beeldvorming kleuren hoe jongeren worden bekeken.": "Professionals constantly have to choose which young people need extra attention, who is seen as a risk and when to step in. Those choices aren't always fully objective. Existing records, past experiences, risk profiles and public image colour how young people are seen.",
+  "Het profileren gaat vaak onbewust. — empathy map": "Profiling often happens unconsciously. — empathy map",
+  "Die beelden worden een label.": "Those images become a label.",
+  "Stigmatisering / labels": "Stigmatisation / labels",
+  "Een jongere krijgt sneller het stempel ‘risicojongere’. Patroonherkenning kan helpen om op tijd te ondersteunen, maar kan ook leiden tot aannames waardoor de persoonlijke context uit beeld raakt.": "A young person gets labelled ‘at-risk youth’ more quickly. Pattern recognition can help to offer support in time, but it can also lead to assumptions that push the personal context out of view.",
+  "Jongeren met vergelijkbaar gedrag hebben niet dezelfde kans om geregistreerd te worden. — Bezemer & Leerkes, 2021": "Young people with similar behaviour don't have the same chance of being registered. — Bezemer & Leerkes, 2021",
+  "Wie een label krijgt, gaat wantrouwen.": "Whoever gets a label starts to distrust.",
+  "Wantrouwen": "Distrust",
+  "Door wantrouwen ontstaat steeds meer afstand tussen jongeren en professionals. Jongeren voelen zich minder begrepen en delen minder snel wat er echt speelt. Professionals krijgen minder zicht op hun situatie, en aannames gaan een grotere rol spelen.": "Distrust creates more and more distance between young people and professionals. Young people feel less understood and are slower to share what's really going on. Professionals get less insight into their situation, and assumptions start to play a bigger role.",
+  "“Ga het gesprek aan met het kind. Kijk wat hun vertellen.” — medewerker Mondriaan": "“Start the conversation with the child. See what they tell you.” — Mondriaan employee",
+  "Wantrouwen wordt structureel.": "Distrust becomes structural.",
+  "Gebrek aan vertrouwen": "Lack of trust",
+  "Wanneer bepaalde groepen jongeren vaker als ‘risicogroep’ worden gezien, worden zij ook vaker gecontroleerd en geregistreerd. Dat versterkt bestaande beelden en beschadigt het vertrouwen verder.": "When certain groups of young people are seen as a ‘risk group’ more often, they are also checked and registered more often. That reinforces existing images and damages trust even further.",
+  "Dat bepaalde jongeren vaker gecontroleerd of geregistreerd worden. — empathy map": "That certain young people are checked or registered more often. — empathy map",
+  "En dan raakt ook de samenwerking beschadigd.": "And then the collaboration gets damaged too.",
+  "Gebrek aan samenwerking": "Lack of collaboration",
+  "Jongeren hebben vaak weinig vertrouwen in politie, ambtenaren en andere professionals. Tegelijk geven professionals aan dat ze moeite hebben om aan te sluiten bij de leefwereld van jongeren. Signalen blijven liggen.": "Young people often have little trust in police, civil servants and other professionals. At the same time, professionals say they find it hard to connect with young people's world. Signals get left behind.",
+  "“Iemand anders ziet dat wel. Die pakt dat wel op.” — medewerker Mondriaan": "“Someone else will see it. They'll pick it up.” — Mondriaan employee",
+  "Met minder informatie blijven alleen de aannames over… en de cyclus begint opnieuw.": "With less information, only the assumptions remain… and the cycle starts again."
+};
+</script>
+<script src="page-lang.js"></script>
+<script>
+    /* tr(): geeft de tekst in de gekozen taal (gebruikt door de cyclus) */
+    window.tr = (s, o) => {
+      const t = window.PL && PL.lang === "en" && PL_EN[s] ? PL_EN[s] : s;
+      return o ? t.replace(/\{(\w+)\}/g, (m, k) => (k in o ? o[k] : m)) : t;
+    };
+    // taal gewisseld: de cyclus luistert naar "langchange"
+    document.addEventListener("pl-change", () => document.dispatchEvent(new Event("langchange")));
+</script>
 <script>
     /* ---------- achtergrond (zelfde als UNSEEN pagina) ---------- */
     (() => {

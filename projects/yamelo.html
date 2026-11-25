@@ -52,6 +52,7 @@
       display: inline-block;
       padding: 0.85rem 1.6rem;
       background: var(--white);
+      color: var(--ink);
       border: 1.5px solid var(--ink);
       font-family: var(--big);
       font-size: 1.15rem;
@@ -184,6 +185,9 @@
     .text p { margin-top: 1rem; max-width: 34rem; font-size: 0.98rem; }
     .text p:first-of-type { margin-top: 1.4rem; }
     .text .btn { margin-top: 2rem; }
+    .btns { display: flex; flex-wrap: wrap; gap: 0 1.2rem; }
+    .btn--ghost { background: transparent; box-shadow: none; }
+    .btn--ghost:hover { box-shadow: none; transform: none; background: var(--white); }
     .hl { background: var(--white); padding: 0 0.2em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
     .panel:nth-child(5) .hl { background: var(--cream); color: var(--ink); }
     .note { font-style: italic; font-size: 0.85rem !important; opacity: 0.7; }
@@ -218,7 +222,7 @@
     .phones figure { flex: 1; max-width: 190px; transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
     .phones figure:nth-child(2) { transform: translateY(-1.4rem); }
     .phones figure:hover { transform: translateY(-2.2rem) rotate(-2deg); }
-    .phones img { width: 100%; border: 1.5px solid var(--ink); border-radius: 14px; }
+    .phones svg { width: 100%; height: auto; }
     .phones figcaption { margin-top: 0.5rem; font-family: var(--big); font-size: 1.05rem; letter-spacing: 0.05em; text-align: center; }
 
     .list { margin-top: 1.4rem; display: grid; gap: 0.7rem; max-width: 34rem; }
@@ -232,6 +236,16 @@
     .credits { margin-top: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 34rem; border-top: 1.5px solid currentColor; padding-top: 1rem; }
     .credits span { display: block; font-size: 0.75rem; opacity: 0.7; }
     .credits strong { font-family: var(--big); font-weight: 400; font-size: 1.4rem; letter-spacing: 0.04em; }
+
+
+    /* promovideo */
+    .promo { margin: 0; display: grid; justify-items: center; gap: 0.6rem; }
+    .promo video { display: block; max-width: 100%; max-height: min(68vh, 620px); border: 1.5px solid var(--ink); background: var(--ink); box-shadow: 6px 6px 0 -1.5px var(--white), 6px 6px 0 0 var(--ink); }
+    .promo figcaption { font-family: var(--big); font-size: 1.05rem; letter-spacing: 0.05em; }
+    .phones[hidden] { display: none; }
+    /* melding: app even offline */
+    .status { display: inline-block; margin-top: 1.4rem !important; padding: 0.55rem 0.8rem; border: 1.5px dashed var(--ink); background: var(--white); font-size: 0.85rem !important; max-width: 30rem; }
+    .status b { font-family: var(--big); font-weight: 400; font-size: 1.05rem; letter-spacing: 0.05em; margin-right: 0.4rem; }
 
     /* animaties in de tekeningen */
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -280,9 +294,6 @@
     <!-- NAV -->
     <nav class="nav">
       <a href="#" class="logo" data-go="0" aria-label="Yamelo">
-        <span class="logo__mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round"><path d="M16.5 4.5a8 8 0 1 0 3 11 6.5 6.5 0 1 1-3-11Z"/></svg>
-        </span>
         <span class="logo__txt">YAMELO<br />APP</span>
       </a>
       <div class="nav__links" id="navLinks">
@@ -316,6 +327,7 @@
             <h1 class="title">Yamelo</h1>
             <p>Track your dhikr with ease.<span class="caret">_</span></p>
             <p>Een simpele app die je helpt om je dhikr bij te houden, vaste gewoontes op te bouwen en je zakat te berekenen.</p>
+            <p class="status" data-en="&lt;b&gt;Offline for now&lt;/b&gt; The app is temporarily not active, because I’m making changes to it."><b>Even offline</b> De app is nu tijdelijk niet actief, omdat ik er veranderingen aan doe.</p>
             <button class="btn" data-go="1">Waarom ik dit maakte →</button>
           </div>
           <div class="art" aria-hidden="true">
@@ -345,8 +357,7 @@
           <div class="text">
             <p class="kicker">Het begin</p>
             <h2 class="title title--md">Eerst voor mezelf</h2>
-            <!-- PAS AAN: maak dit nog meer jouw verhaal -->
-            <p>Dhikr doe ik elke dag. Ik wilde een makkelijke manier om dat bij te houden en <span class="hl">te zien hoe ik groei</span>. Wat ik zocht, bestond niet zoals ik het wilde.</p>
+                        <p>Dhikr doe ik elke dag. Ik wilde een makkelijke manier om dat bij te houden en <span class="hl">te zien hoe ik groei</span>. Wat ik zocht, bestond niet zoals ik het wilde.</p>
             <p>Dus maakte ik mijn eigen app. Eerst gewoon voor mezelf.</p>
             <p>Tijdens het gebruiken merkte ik iets: een score, een streak en je voortgang zien maken het leuker om vol te houden. Toen dacht ik: <span class="hl">als dit mij helpt, kan het anderen ook helpen.</span></p>
             <button class="btn" data-go="2">Bekijk de app →</button>
@@ -386,13 +397,22 @@
               <li><b>2</b><span><strong>Progress.</strong> Je streak, je totale dhikr, actieve dagen en je activiteit per week, maand of jaar.</span></li>
               <li><b>3</b><span><strong>Zakat calculator.</strong> In vier stappen: valuta, bezittingen, schulden en resultaat.</span></li>
             </ul>
-            <button class="btn" data-go="3">Waarom gamification →</button>
+            <div class="btns">
+              <a class="btn" href="https://www.figma.com/design/DUsz2OSgEpfgjsvhWfMBh3/Yamelo_Mobile_UI?node-id=0-1&amp;t=wqEDG8BUZoWFNZJx-1" target="_blank" rel="noopener" data-en="See the design in Figma ↗">Bekijk het design in Figma ↗</a>
+              <button class="btn btn--ghost" data-go="3">Waarom gamification →</button>
+            </div>
           </div>
-          <div class="phones">
-            <figure><img src="../assets/images/yamelo/habit-tracker.png" alt="Habit tracker scherm" loading="lazy" /><figcaption>Habits</figcaption></figure>
-            <figure><img src="../assets/images/yamelo/progress.png" alt="Progress analytics scherm" loading="lazy" /><figcaption>Progress</figcaption></figure>
-            <figure><img src="../assets/images/yamelo/zakat.png" alt="Zakat calculator scherm" loading="lazy" /><figcaption>Zakat</figcaption></figure>
-          </div>
+          <figure class="promo" id="promo">
+              <video id="promoVid" controls muted loop playsinline preload="metadata">
+                <source src="../assets/yamelo.mp4" type="video/mp4" />
+              </video>
+              <figcaption class="" data-en="Promo video">Promovideo</figcaption>
+            </figure>
+            <div class="phones" id="phones" hidden aria-hidden="true">
+              <figure><svg viewBox="0 0 120 230" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="4" width="112" height="222" rx="16" fill="#fff"/><path d="M45 16h30"/><rect x="16" y="40" width="88" height="30" rx="5" fill="#ebe6da"/><path d="M24 55l5 5 9-10M46 52h48M46 60h30"/><rect x="16" y="78" width="88" height="30" rx="5" fill="#ebe6da"/><path d="M24 93l5 5 9-10M46 90h48M46 98h24"/><rect x="16" y="116" width="88" height="30" rx="5" fill="#fff"/><rect x="23" y="124" width="14" height="14" rx="2"/><path d="M46 128h48M46 136h34"/></svg><figcaption>Habits</figcaption></figure>
+              <figure><svg viewBox="0 0 120 230" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="4" width="112" height="222" rx="16" fill="#fff"/><path d="M45 16h30"/><rect x="16" y="40" width="40" height="40" rx="5" fill="#ebe6da"/><rect x="64" y="40" width="40" height="40" rx="5" fill="#fff"/><path d="M24 160v-20M38 160v-36M52 160v-28M66 160v-48M80 160v-30M94 160v-40" stroke-width="7"/><path d="M16 176h88"/></svg><figcaption>Progress</figcaption></figure>
+              <figure><svg viewBox="0 0 120 230" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="4" width="112" height="222" rx="16" fill="#fff"/><path d="M45 16h30"/><path d="M16 48h88"/><path d="M16 48h44" stroke-width="5"/><rect x="16" y="64" width="88" height="22" rx="4"/><rect x="16" y="94" width="88" height="22" rx="4"/><rect x="16" y="124" width="88" height="22" rx="4"/><rect x="16" y="176" width="88" height="28" rx="4" fill="#111"/></svg><figcaption>Zakat</figcaption></figure>
+            </div>
         </div>
       </section>
 
@@ -405,9 +425,9 @@
             <h2 class="title title--md">Volhouden mag leuk zijn</h2>
             <p>Een goede gewoonte begint makkelijk, maar volhouden is lastig. Daarom zitten er kleine game-elementen in Yamelo:</p>
             <ul class="list">
-              <li><b>🔥</b><span><strong>Streak.</strong> Hoeveel dagen op rij je het volhoudt.</span></li>
-              <li><b>★</b><span><strong>Score.</strong> Elke dhikr telt mee, zodat je ziet dat het optelt.</span></li>
-              <li><b>☺</b><span><strong>Friends.</strong> Samen motiveren werkt beter dan alleen.</span></li>
+              <li><b>1</b><span><strong>Streak.</strong> Hoeveel dagen op rij je het volhoudt.</span></li>
+              <li><b>2</b><span><strong>Score.</strong> Elke dhikr telt mee, zodat je ziet dat het optelt.</span></li>
+              <li><b>3</b><span><strong>Friends.</strong> Samen motiveren werkt beter dan alleen.</span></li>
             </ul>
             <p class="note">Kleine stappen, grote beloning.</p>
             <button class="btn" data-go="4">Mijn rol →</button>
@@ -442,20 +462,23 @@
               <div lang="nl">
                 <span class="bi__lang">NL</span>
                 <p>Yamelo is <span class="hl">mijn eigen app</span>, die ik binnen mijn opleiding wilde maken. Ik werkte aan de user experience en bouwde de app zelf, met behulp van AI.</p>
-                <p>Voor de stijl kreeg ik hulp van Muhammad Wasim.</p>
+                <p>Voor de stijl kreeg ik hulp van Muhammad Qasim.</p>
               </div>
               <div lang="en">
                 <span class="bi__lang">EN</span>
                 <p>Yamelo is <span class="hl">my own app</span>, which I wanted to build during my studies. I worked on the user experience and built the app myself, with the help of AI.</p>
-                <p>Muhammad Wasim helped me with the visual style.</p>
+                <p>Muhammad Qasim helped me with the visual style.</p>
               </div>
             </div>
             <p class="note" data-en="This page is built in the style of the Yamelo design.">Deze pagina is gemaakt in de stijl van het Yamelo-design.</p>
             <div class="credits">
               <div><span data-en="UX &amp;amp; software · own project">UX &amp; software · eigen project</span><strong>Yasmine Boucharib</strong></div>
-              <div><span data-en="Style help">Hulp bij de stijl</span><strong>Muhammad Wasim</strong></div>
+              <div><span data-en="Style help">Hulp bij de stijl</span><strong>Muhammad Qasim</strong></div>
             </div>
-            <a href="../index.html#projects" class="btn btn--dark" style="margin-top:2rem">← Terug naar portfolio</a>
+            <div class="btns">
+              <a class="btn" href="https://www.figma.com/design/DUsz2OSgEpfgjsvhWfMBh3/Yamelo_Mobile_UI?node-id=0-1&amp;t=wqEDG8BUZoWFNZJx-1" target="_blank" rel="noopener" style="margin-top:2rem" data-en="Figma ↗">Figma ↗</a>
+              <a href="../index.html#projects" class="btn btn--dark" style="margin-top:2rem">← Terug naar portfolio</a>
+            </div>
           </div>
           <div class="art" aria-hidden="true">
             <!-- laptop met code + AI-sterretjes -->
@@ -531,6 +554,22 @@
         html += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${big ? 13 : 9}" fill="${big ? "#111" : "#fff"}"/>`;
       }
       g.innerHTML = html;
+    })();
+
+
+    /* ---------- promovideo: geen video gevonden? dan de tekeningen ---------- */
+    (() => {
+      const v = document.getElementById("promoVid");
+      const srcs = v.querySelectorAll("source");
+      const fallback = () => { document.getElementById("promo").remove(); document.getElementById("phones").hidden = false; };
+      srcs[srcs.length - 1].addEventListener("error", fallback);
+      v.addEventListener("error", fallback);
+      // video speelt alleen als het paneel open is
+      const panel = v.closest(".panel");
+      new MutationObserver(() => {
+        if (!v.isConnected) return;
+        if (panel.classList.contains("is-active")) v.play().catch(() => {}); else v.pause();
+      }).observe(panel, { attributes: true, attributeFilter: ["class"] });
     })();
 
     /* =========================================

@@ -125,21 +125,6 @@
       padding: 6rem var(--pad-x) 4rem;
       overflow: hidden;
     }
-    /* schuine filmstrip */
-    .filmstrip {
-      position: absolute;
-      left: -10%;
-      right: -10%;
-      top: 9%;
-      height: 74px;
-      transform: rotate(-8deg);
-      background:
-        repeating-linear-gradient(90deg, transparent 0 18px, #fff 18px 32px) top / 100% 12px no-repeat,
-        repeating-linear-gradient(90deg, transparent 0 18px, #fff 18px 32px) bottom / 100% 12px no-repeat,
-        #000;
-      opacity: 1;
-      border-block: 6px solid #000;
-    }
     .hero__left { position: relative; z-index: 2; }
     .hero__title {
       font-family: var(--type);
@@ -613,7 +598,14 @@
 
 
     /* ---------- achtergrond uit assets/Unseen ---------- */
-    body { background: var(--bg) var(--bg-img, none) center / cover fixed; }
+    /* donkere laag over de achtergrondfoto. 0 = origineel, 1 = zwart */
+    :root { --bg-dim: 0.82; }
+    body {
+      background:
+        linear-gradient(rgba(12, 12, 10, var(--bg-dim)), rgba(12, 12, 10, var(--bg-dim))) fixed,
+        var(--bg-img, none) center / cover fixed,
+        var(--bg);
+    }
 
     /* ---------- video in de speler ---------- */
     .player__video {
@@ -864,7 +856,6 @@
        HERO
        ========================================= -->
   <header class="hero" id="top">
-    <div class="filmstrip" aria-hidden="true"></div>
 
     <div class="hero__left">
       <h1 class="hero__title" id="heroTitle">UNSEEN</h1>
@@ -1016,7 +1007,7 @@
           <span class="docfile__open">Open dossier ▸</span>
         </a>
         <!-- PLACEHOLDER: zet jullie documentatie als PDF in assets/Unseen/documentatie.pdf -->
-        <a class="docfile docfile--b" href="../assets/Unseen/documentatie.pdf" target="_blank" rel="noopener">
+        <a class="docfile docfile--b" href="../assets/team6-onderzoek.pdf" target="_blank" rel="noopener">
           <span class="docfile__tab">BIJLAGE B</span>
           <span class="docfile__title">Documentatie</span>
           <span class="docfile__text">Het volledige verslag van Team 6, met script, keuzes en testresultaten.</span>
@@ -1753,12 +1744,7 @@
       if (!window.gsap || !window.ScrollTrigger || reduce) return;
       gsap.registerPlugin(ScrollTrigger);
 
-      /* ---------- hero: filmstrip en polaroids bij wegscrollen ---------- */
-      gsap.to(".filmstrip", {
-        xPercent: -12,
-        ease: "none",
-        scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
-      });
+      /* ---------- hero: polaroids bij wegscrollen ---------- */
       gsap.utils.toArray(".hero__pile .polaroid").forEach((p, i) => {
         gsap.to(p, {
           y: -120 - i * 40,
